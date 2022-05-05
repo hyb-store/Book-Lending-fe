@@ -8635,9 +8635,9 @@ function resolveLocaleChain(locale) {
 
 /***/ }),
 /* 5 */
-/*!*******************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/pages.json ***!
-  \*******************************************************/
+/*!********************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/pages.json ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -8647,20 +8647,9 @@ function resolveLocaleChain(locale) {
 /* 6 */,
 /* 7 */,
 /* 8 */,
-/* 9 */
-/*!***************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/common/constant.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
-
-/***/ }),
+/* 9 */,
 /* 10 */,
-/* 11 */,
-/* 12 */
+/* 11 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -8788,462 +8777,428 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 13 */
-/*!*************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/index.js ***!
-  \*************************************************************************/
-/*! exports provided: Emitter, Storage, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 12 */
+/*!**************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/index.js ***!
+  \**************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(uni) {/* harmony import */ var _utils_storage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/storage */ 14);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Storage", function() { return _utils_storage__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });Object.defineProperty(exports, "Storage", { enumerable: true, get: function get() {return _storage.default;} });Object.defineProperty(exports, "Emitter", { enumerable: true, get: function get() {return _emitter.default;} });exports.default = void 0;var _storage = _interopRequireDefault(__webpack_require__(/*! ./utils/storage */ 13));
+var _emitter = _interopRequireDefault(__webpack_require__(/*! ./mixins/emitter */ 14));
+var _utils = __webpack_require__(/*! ./utils */ 15);
 
-/* harmony import */ var _mixins_emitter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mixins/emitter */ 15);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Emitter", function() { return _mixins_emitter__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+__webpack_require__(/*! ./common */ 16);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
 
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils */ 16);
-/* harmony import */ var _common__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./common */ 17);
-/* harmony import */ var _common__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_common__WEBPACK_IMPORTED_MODULE_3__);
-
-
-
+var install = function install(Vue) {var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  // 默认配置数据
+  var data = {
+    // 首页页面路径
+    homePage: "/" };
 
 
+  var $cl = _objectSpread(_objectSpread({},
+  (0, _utils.deepMerge)(data, options)), {}, {
+    Storage: _storage.default,
+    author: "cool",
+    version: "1.8.16" });
 
-const install = (Vue, options = {}) => {
-	// 默认配置数据
-	let data = {
-		// 首页页面路径
-		homePage: "/",
-	};
 
-	let $cl = {
-		...Object(_utils__WEBPACK_IMPORTED_MODULE_2__["deepMerge"])(data, options),
-		Storage: _utils_storage__WEBPACK_IMPORTED_MODULE_0__["default"],
-		author: "cool",
-		version: "1.8.16",
-	};
-
-	Vue.prototype.$cl = uni.$cl = $cl;
-};
+  Vue.prototype.$cl = uni.$cl = $cl;
+};var _default =
 
 
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-	install,
-});
+{
+  install: install };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
+/***/ }),
+/* 13 */
+/*!**********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/utils/storage.js ***!
+  \**********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+  // 后缀标识
+  suffix: "_deadtime",
+
+  /**
+                        * 获取
+                        * @param {*} key 关键字
+                        */
+  get: function get(key) {
+    return uni.getStorageSync(key);
+  },
+
+  /**
+      * 获取全部
+      */
+  info: function info() {
+    return uni.getStorageInfoSync();
+  },
+
+  /**
+      * 设置
+      * @param {*} key 关键字
+      * @param {*} value 值
+      * @param {*} expires 过期时间
+      */
+  set: function set(key, value, expires) {
+    uni.setStorageSync(key, value);
+
+    if (expires) {
+      uni.setStorageSync("".concat(key).concat(this.suffix), Date.parse(new Date()) + expires * 1000);
+    }
+  },
+
+  /**
+      * 是否过期
+      * @param {*} key 关键字
+      */
+  isExpired: function isExpired(key) {
+    return uni.getStorageSync("".concat(key).concat(this.suffix)) - Date.parse(new Date()) <= 0;
+  },
+
+  /**
+      * 移除
+      * @param {*} key 关键字
+      */
+  remove: function remove(key) {
+    return uni.removeStorageSync(key);
+  },
+
+  /**
+      * 清理
+      */
+  clear: function clear() {
+    uni.clearStorageSync();
+  } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
 /* 14 */
-/*!*********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/utils/storage.js ***!
-  \*********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!***********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/emitter.js ***!
+  \***********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(uni) {/* harmony default export */ __webpack_exports__["default"] = ({
-	// 后缀标识
-	suffix: "_deadtime",
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function _broadcast(componentName, eventName, params) {
+  this.$children.forEach(function (child) {
+    var name = child.$options.componentName;
 
-	/**
-	 * 获取
-	 * @param {*} key 关键字
-	 */
-	get(key) {
-		return uni.getStorageSync(key)
-	},
+    if (name === componentName) {
+      child.$emit.apply(child, [eventName].concat(params));
+    } else {
+      _broadcast.apply(child, [componentName, eventName].concat(params));
+    }
+  });
+}var _default =
 
-	/**
-	 * 获取全部
-	 */
-	info() {
-		return uni.getStorageInfoSync()
-	},
+{
+  methods: {
+    dispatch: function dispatch(componentName, eventName, params) {
+      var parent = this.$parent || this.$root;
+      var name = parent.$options.componentName;
 
-	/**
-	 * 设置
-	 * @param {*} key 关键字
-	 * @param {*} value 值
-	 * @param {*} expires 过期时间
-	 */
-	set(key, value, expires) {
-		uni.setStorageSync(key, value);
+      while (parent && (!name || name !== componentName)) {
+        parent = parent.$parent;
 
-		if (expires) {
-			uni.setStorageSync(`${key}${this.suffix}`, Date.parse(new Date()) + expires * 1000);
-		}
-	},
-
-	/**
-	 * 是否过期
-	 * @param {*} key 关键字
-	 */
-	isExpired(key) {
-		return uni.getStorageSync(`${key}${this.suffix}`) - Date.parse(new Date()) <= 0;
-	},
-
-	/**
-	 * 移除
-	 * @param {*} key 关键字
-	 */
-	remove(key) {
-		return uni.removeStorageSync(key)
-	},
-
-	/**
-	 * 清理
-	 */
-	clear() {
-		uni.clearStorageSync()
-	}
-});
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
+        if (parent) {
+          name = parent.$options.componentName;
+        }
+      }
+      if (parent) {
+        parent.$emit.apply(parent, [eventName].concat(params));
+      }
+    },
+    broadcast: function broadcast(componentName, eventName, params) {
+      _broadcast.call(this, componentName, eventName, params);
+    } } };exports.default = _default;
 
 /***/ }),
 /* 15 */
-/*!**********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/mixins/emitter.js ***!
-  \**********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/utils/index.js ***!
+  \********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-function broadcast(componentName, eventName, params) {
-	this.$children.forEach(child => {
-		var name = child.$options.componentName;
-
-		if (name === componentName) {
-			child.$emit.apply(child, [eventName].concat(params));
-		} else {
-			broadcast.apply(child, [componentName, eventName].concat(params));
-		}
-	});
-}
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-	methods: {
-		dispatch(componentName, eventName, params) {
-			var parent = this.$parent || this.$root;
-			var name = parent.$options.componentName;
-
-			while (parent && (!name || name !== componentName)) {
-				parent = parent.$parent;
-
-				if (parent) {
-					name = parent.$options.componentName;
-				}
-			}
-			if (parent) {
-				parent.$emit.apply(parent, [eventName].concat(params));
-			}
-		},
-		broadcast(componentName, eventName, params) {
-			broadcast.call(this, componentName, eventName, params);
-		}
-	}
-});
-
-
-/***/ }),
-/* 16 */
-/*!*******************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/utils/index.js ***!
-  \*******************************************************************************/
-/*! exports provided: isDev, isArray, isObject, isFunction, isString, isNull, isBoolean, isNumber, isDecimal, isPromise, isEmpty, last, firstUpperCase, debounce, compareValue, cloneDeep, deepMerge, getCurrentPage, parseRpx, getParent, getCurrentColor, getUrlParam, orderBy */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDev", function() { return isDev; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isArray", function() { return isArray; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isObject", function() { return isObject; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFunction", function() { return isFunction; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isString", function() { return isString; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isNull", function() { return isNull; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isBoolean", function() { return isBoolean; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isNumber", function() { return isNumber; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDecimal", function() { return isDecimal; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isPromise", function() { return isPromise; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return isEmpty; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "last", function() { return last; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "firstUpperCase", function() { return firstUpperCase; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return debounce; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "compareValue", function() { return compareValue; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cloneDeep", function() { return cloneDeep; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deepMerge", function() { return deepMerge; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCurrentPage", function() { return getCurrentPage; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseRpx", function() { return parseRpx; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getParent", function() { return getParent; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCurrentColor", function() { return getCurrentColor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getUrlParam", function() { return getUrlParam; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "orderBy", function() { return orderBy; });
-// 是否开发模式
-const isDev = "development" == "development";
+Object.defineProperty(exports, "__esModule", { value: true });exports.isArray = isArray;exports.isObject = isObject;exports.isFunction = isFunction;exports.isString = isString;exports.isNull = isNull;exports.isBoolean = isBoolean;exports.isNumber = isNumber;exports.isDecimal = isDecimal;exports.isPromise = isPromise;exports.isEmpty = isEmpty;exports.last = last;exports.firstUpperCase = firstUpperCase;exports.debounce = debounce;exports.compareValue = compareValue;exports.cloneDeep = cloneDeep;exports.deepMerge = deepMerge;exports.getCurrentPage = getCurrentPage;exports.parseRpx = parseRpx;exports.getParent = getParent;exports.getCurrentColor = getCurrentColor;exports.getUrlParam = getUrlParam;exports.orderBy = orderBy;exports.isDev = void 0; // 是否开发模式
+var isDev = "development" == "development";
 
 // 是否Array类型
-function isArray(value) {
-	if (typeof Array.isArray === "function") {
-		return Array.isArray(value);
-	} else {
-		return Object.prototype.toString.call(value) === "[object Array]";
-	}
+exports.isDev = isDev;function isArray(value) {
+  if (typeof Array.isArray === "function") {
+    return Array.isArray(value);
+  } else {
+    return Object.prototype.toString.call(value) === "[object Array]";
+  }
 }
 
 // 是否Object类型
 function isObject(value) {
-	return Object.prototype.toString.call(value) === "[object Object]";
+  return Object.prototype.toString.call(value) === "[object Object]";
 }
 
 // 是否Function类型
 function isFunction(value) {
-	return typeof value === "function";
+  return typeof value === "function";
 }
 
 // 是否String类型
 function isString(value) {
-	return typeof value === "string";
+  return typeof value === "string";
 }
 
 // 是否null类型
 function isNull(value) {
-	return !value && value !== 0;
+  return !value && value !== 0;
 }
 
 // 是否Boolean类型
 function isBoolean(value) {
-	return typeof value === "boolean";
+  return typeof value === "boolean";
 }
 
 // 是否数字类型
 function isNumber(value) {
-	return typeof value === "number" && !isNaN(value);
+  return typeof value === "number" && !isNaN(value);
 }
 
 // 是否小数
 function isDecimal(value) {
-	return String(value).length - String(value).indexOf(".") + 1;
+  return String(value).length - String(value).indexOf(".") + 1;
 }
 
 // 是否Promise类型
 function isPromise(obj) {
-	obj !== null &&
-		(typeof obj === "object" || typeof obj === "function") &&
-		typeof obj.then === "function";
+  obj !== null && (
+  typeof obj === "object" || typeof obj === "function") &&
+  typeof obj.then === "function";
 }
 
 // 是否为空
 function isEmpty(value) {
-	if (isArray(value)) {
-		return value.length === 0;
-	}
+  if (isArray(value)) {
+    return value.length === 0;
+  }
 
-	if (isObject(value)) {
-		return Object.keys(value).length === 0;
-	}
+  if (isObject(value)) {
+    return Object.keys(value).length === 0;
+  }
 
-	return value === "" || value === undefined || value === null;
+  return value === "" || value === undefined || value === null;
 }
 
 // 取最后一个值
 function last(data) {
-	if (isArray(data) || isString(data)) {
-		return data[data.length - 1];
-	}
+  if (isArray(data) || isString(data)) {
+    return data[data.length - 1];
+  }
 }
 
 // 首字母大写
 function firstUpperCase(value) {
-	return value.replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
-		return $1.toUpperCase() + $2.toLowerCase();
-	});
+  return value.replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
+    return $1.toUpperCase() + $2.toLowerCase();
+  });
 }
 
 // 防抖
 function debounce(fn, wait, immediate) {
-	let timer;
-	return function () {
-		if (timer) clearTimeout(timer);
-		if (immediate) {
-			var callNow = !timer;
-			timer = setTimeout(() => {
-				timer = null;
-			}, wait);
-			if (callNow) {
-				fn.apply(this, arguments);
-			}
-		} else {
-			timer = setTimeout(() => {
-				fn.apply(this, arguments);
-			}, wait);
-		}
-	};
+  var timer;
+  return function () {var _arguments = arguments,_this = this;
+    if (timer) clearTimeout(timer);
+    if (immediate) {
+      var callNow = !timer;
+      timer = setTimeout(function () {
+        timer = null;
+      }, wait);
+      if (callNow) {
+        fn.apply(this, arguments);
+      }
+    } else {
+      timer = setTimeout(function () {
+        fn.apply(_this, _arguments);
+      }, wait);
+    }
+  };
 }
 
 // 比较值
 function compareValue(a, b) {
-	return String(a) === String(b);
+  return String(a) === String(b);
 }
 
 // 深拷贝
 function cloneDeep(v) {
-	if (isObject(v)) {
-		let d = {};
+  if (isObject(v)) {
+    var d = {};
 
-		for (let k in v) {
-			if (v.hasOwnProperty && v.hasOwnProperty(k)) {
-				if (v[k] && typeof v[k] === "object") {
-					d[k] = cloneDeep(v[k]);
-				} else {
-					d[k] = v[k];
-				}
-			}
-		}
+    for (var k in v) {
+      if (v.hasOwnProperty && v.hasOwnProperty(k)) {
+        if (v[k] && typeof v[k] === "object") {
+          d[k] = cloneDeep(v[k]);
+        } else {
+          d[k] = v[k];
+        }
+      }
+    }
 
-		return d;
-	} else if (isArray(v)) {
-		return v.map(cloneDeep);
-	} else {
-		return v;
-	}
+    return d;
+  } else if (isArray(v)) {
+    return v.map(cloneDeep);
+  } else {
+    return v;
+  }
 }
 
 // 深度合并
 function deepMerge(a, b) {
-	let k;
-	for (k in b) {
-		a[k] =
-			a[k] && a[k].toString() === "[object Object]" ? deepMerge(a[k], b[k]) : (a[k] = b[k]);
-	}
-	return a;
+  var k;
+  for (k in b) {
+    a[k] =
+    a[k] && a[k].toString() === "[object Object]" ? deepMerge(a[k], b[k]) : a[k] = b[k];
+  }
+  return a;
 }
 
 // 获取当前页面信息
-function getCurrentPage() {
-	const { route, $page, options, $route } = last(getCurrentPages());
+function getCurrentPage() {var _last =
+  last(getCurrentPages()),route = _last.route,$page = _last.$page,options = _last.options,$route = _last.$route;
 
-	return {
-		path: `/${route}`,
-		fullPath: $page.fullPath,
-		// #ifdef MP
-		query: options,
-		// #endif
-		// #ifdef H5
-		query: $route.params,
-		// #endif
-	};
+  return {
+    path: "/".concat(route),
+    fullPath: $page.fullPath,
+
+    query: options };
+
+
+
+
+
 }
 
 /**
- * 解析rpx
- * @param {*} val
- */
+   * 解析rpx
+   * @param {*} val
+   */
 function parseRpx(val) {
-	return isArray(val) ? val.map(parseRpx).join(" ") : isNumber(val) ? val + "rpx" : val;
+  return isArray(val) ? val.map(parseRpx).join(" ") : isNumber(val) ? val + "rpx" : val;
 }
 
 /**
- * 获取父级节点
- * @param {*} name componentName
- * @param {*} keys 保留的参数，避免 computed 非 H5 解析失败
- */
+   * 获取父级节点
+   * @param {*} name componentName
+   * @param {*} keys 保留的参数，避免 computed 非 H5 解析失败
+   */
 function getParent(name, keys) {
-	let parent = this.$parent;
+  var parent = this.$parent;
 
-	while (parent) {
-		if (parent.$options.componentName !== name) {
-			parent = parent.$parent;
-		} else {
-			return keys.reduce((result, key) => {
-				result[key] = parent[key];
-				return result;
-			}, {});
-		}
-	}
+  while (parent) {
+    if (parent.$options.componentName !== name) {
+      parent = parent.$parent;
+    } else {
+      return keys.reduce(function (result, key) {
+        result[key] = parent[key];
+        return result;
+      }, {});
+    }
+  }
 
-	return null;
+  return null;
 }
 
 /**
- * 获取当前颜色
- *
- * @param {*} { color, max, value }
- */
-function getCurrentColor({ color, max, value }) {
-	if (isString(color)) {
-		return color;
-	} else {
-		const colorArray = color
-			.map((item, index) => {
-				if (isString(item)) {
-					return {
-						color: item,
-						value: (index + 1) * (max / color.length),
-					};
-				}
-				return item;
-			})
-			.sort((a, b) => a.value - b.value);
+   * 获取当前颜色
+   *
+   * @param {*} { color, max, value }
+   */
+function getCurrentColor(_ref) {var color = _ref.color,max = _ref.max,value = _ref.value;
+  if (isString(color)) {
+    return color;
+  } else {
+    var colorArray = color.
+    map(function (item, index) {
+      if (isString(item)) {
+        return {
+          color: item,
+          value: (index + 1) * (max / color.length) };
 
-		for (let i = 0; i < colorArray.length; i++) {
-			if (colorArray[i].value >= value) {
-				return colorArray[i].color;
-			}
-		}
+      }
+      return item;
+    }).
+    sort(function (a, b) {return a.value - b.value;});
 
-		return colorArray[colorArray.length - 1].color;
-	}
+    for (var i = 0; i < colorArray.length; i++) {
+      if (colorArray[i].value >= value) {
+        return colorArray[i].color;
+      }
+    }
+
+    return colorArray[colorArray.length - 1].color;
+  }
 }
 
 // 获取地址栏参数
 function getUrlParam(name) {
-	let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-	let r = window.location.search.substr(1).match(reg);
-	if (r != null) return decodeURIComponent(r[2]);
-	return null;
+  var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+  var r = window.location.search.substr(1).match(reg);
+  if (r != null) return decodeURIComponent(r[2]);
+  return null;
 }
 
 // 根据某个字段排序
 function orderBy(list, key) {
-	return list.sort((a, b) => a[key] - b[key]);
+  return list.sort(function (a, b) {return a[key] - b[key];});
 }
 
-
 /***/ }),
-/* 17 */
-/*!**************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/common.js ***!
-  \**************************************************************************/
+/* 16 */
+/*!***************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/common.js ***!
+  \***************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-Promise.prototype.done = function(cb) {
-	let P = this.constructor;
+Promise.prototype.done = function (cb) {
+  var P = this.constructor;
 
-	return this.then(
-		value => P.resolve(cb()).then(() => value),
-		reason =>
-			P.resolve(cb()).then(() => {
-				throw reason;
-			})
-	);
+  return this.then(
+  function (value) {return P.resolve(cb()).then(function () {return value;});},
+  function (reason) {return (
+      P.resolve(cb()).then(function () {
+        throw reason;
+      }));});
+
 };
 
-
 /***/ }),
+/* 17 */,
 /* 18 */,
 /* 19 */,
 /* 20 */,
 /* 21 */,
 /* 22 */,
-/* 23 */,
+/* 23 */
+/*!****************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/common/constant.js ***!
+  \****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
+
+/***/ }),
 /* 24 */,
 /* 25 */,
 /* 26 */,
@@ -10053,9 +10008,9 @@ if (hadRuntime) {
 
 /***/ }),
 /* 36 */
-/*!***********************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/pages.json?{"type":"stat"} ***!
-  \***********************************************************************/
+/*!************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/pages.json?{"type":"stat"} ***!
+  \************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10064,9 +10019,9 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
 /***/ }),
 /* 37 */
-/*!*****************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/common/timeFormat.js ***!
-  \*****************************************************************/
+/*!******************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/common/timeFormat.js ***!
+  \******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10165,9 +10120,9 @@ timeFormat;exports.default = _default;
 /* 76 */,
 /* 77 */,
 /* 78 */
-/*!************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/index.js ***!
-  \************************************************************************/
+/*!*************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/index.js ***!
+  \*************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10175,9 +10130,9 @@ module.exports = __webpack_require__(/*! ./lib/axios */ 79);
 
 /***/ }),
 /* 79 */
-/*!****************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/axios.js ***!
-  \****************************************************************************/
+/*!*****************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/axios.js ***!
+  \*****************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10191,11 +10146,11 @@ var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ 104);
 var defaults = __webpack_require__(/*! ./defaults */ 87);
 
 /**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */
+                                       * Create an instance of Axios
+                                       *
+                                       * @param {Object} defaultConfig The default config for the instance
+                                       * @return {Axios} A new instance of Axios
+                                       */
 function createInstance(defaultConfig) {
   var context = new Axios(defaultConfig);
   var instance = bind(Axios.prototype.request, context);
@@ -10240,12 +10195,11 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-
 /***/ }),
 /* 80 */
-/*!****************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/utils.js ***!
-  \****************************************************************************/
+/*!*****************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/utils.js ***!
+  \*****************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10259,108 +10213,108 @@ var bind = __webpack_require__(/*! ./helpers/bind */ 81);
 var toString = Object.prototype.toString;
 
 /**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
+                                           * Determine if a value is an Array
+                                           *
+                                           * @param {Object} val The value to test
+                                           * @returns {boolean} True if value is an Array, otherwise false
+                                           */
 function isArray(val) {
   return Array.isArray(val);
 }
 
 /**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */
+   * Determine if a value is undefined
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if the value is undefined, otherwise false
+   */
 function isUndefined(val) {
   return typeof val === 'undefined';
 }
 
 /**
- * Determine if a value is a Buffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Buffer, otherwise false
- */
+   * Determine if a value is a Buffer
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Buffer, otherwise false
+   */
 function isBuffer(val) {
-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
-    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) &&
+  typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
 }
 
 /**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */
+   * Determine if a value is an ArrayBuffer
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+   */
 function isArrayBuffer(val) {
   return toString.call(val) === '[object ArrayBuffer]';
 }
 
 /**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */
+   * Determine if a value is a FormData
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is an FormData, otherwise false
+   */
 function isFormData(val) {
   return toString.call(val) === '[object FormData]';
 }
 
 /**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */
+   * Determine if a value is a view on an ArrayBuffer
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+   */
 function isArrayBufferView(val) {
   var result;
-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+  if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) {
     result = ArrayBuffer.isView(val);
   } else {
-    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));
+    result = val && val.buffer && isArrayBuffer(val.buffer);
   }
   return result;
 }
 
 /**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
+   * Determine if a value is a String
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a String, otherwise false
+   */
 function isString(val) {
   return typeof val === 'string';
 }
 
 /**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
+   * Determine if a value is a Number
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Number, otherwise false
+   */
 function isNumber(val) {
   return typeof val === 'number';
 }
 
 /**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
+   * Determine if a value is an Object
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is an Object, otherwise false
+   */
 function isObject(val) {
   return val !== null && typeof val === 'object';
 }
 
 /**
- * Determine if a value is a plain Object
- *
- * @param {Object} val The value to test
- * @return {boolean} True if value is a plain Object, otherwise false
- */
+   * Determine if a value is a plain Object
+   *
+   * @param {Object} val The value to test
+   * @return {boolean} True if value is a plain Object, otherwise false
+   */
 function isPlainObject(val) {
   if (toString.call(val) !== '[object Object]') {
     return false;
@@ -10371,114 +10325,114 @@ function isPlainObject(val) {
 }
 
 /**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
+   * Determine if a value is a Date
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Date, otherwise false
+   */
 function isDate(val) {
   return toString.call(val) === '[object Date]';
 }
 
 /**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
+   * Determine if a value is a File
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a File, otherwise false
+   */
 function isFile(val) {
   return toString.call(val) === '[object File]';
 }
 
 /**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
+   * Determine if a value is a Blob
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Blob, otherwise false
+   */
 function isBlob(val) {
   return toString.call(val) === '[object Blob]';
 }
 
 /**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */
+   * Determine if a value is a Function
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Function, otherwise false
+   */
 function isFunction(val) {
   return toString.call(val) === '[object Function]';
 }
 
 /**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */
+   * Determine if a value is a Stream
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Stream, otherwise false
+   */
 function isStream(val) {
   return isObject(val) && isFunction(val.pipe);
 }
 
 /**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */
+   * Determine if a value is a URLSearchParams object
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+   */
 function isURLSearchParams(val) {
   return toString.call(val) === '[object URLSearchParams]';
 }
 
 /**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
+   * Trim excess whitespace off the beginning and end of a string
+   *
+   * @param {String} str The String to trim
+   * @returns {String} The String freed of excess whitespace
+   */
 function trim(str) {
   return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- * nativescript
- *  navigator.product -> 'NativeScript' or 'NS'
- */
+   * Determine if we're running in a standard browser environment
+   *
+   * This allows axios to run in a web worker, and react-native.
+   * Both environments support XMLHttpRequest, but not fully standard globals.
+   *
+   * web workers:
+   *  typeof window -> undefined
+   *  typeof document -> undefined
+   *
+   * react-native:
+   *  navigator.product -> 'ReactNative'
+   * nativescript
+   *  navigator.product -> 'NativeScript' or 'NS'
+   */
 function isStandardBrowserEnv() {
   if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
-                                           navigator.product === 'NativeScript' ||
-                                           navigator.product === 'NS')) {
+  navigator.product === 'NativeScript' ||
+  navigator.product === 'NS')) {
     return false;
   }
   return (
     typeof window !== 'undefined' &&
-    typeof document !== 'undefined'
-  );
+    typeof document !== 'undefined');
+
 }
 
 /**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
+   * Iterate over an Array or an Object invoking a function for each item.
+   *
+   * If `obj` is an Array callback will be called passing
+   * the value, index, and complete array for each item.
+   *
+   * If 'obj' is an Object callback will be called passing
+   * the value, key, and complete object for each property.
+   *
+   * @param {Object|Array} obj The object to iterate
+   * @param {Function} fn The callback to invoke for each item
+   */
 function forEach(obj, fn) {
   // Don't bother if no value provided
   if (obj === null || typeof obj === 'undefined') {
@@ -10507,23 +10461,23 @@ function forEach(obj, fn) {
 }
 
 /**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge(/* obj1, obj2, obj3, ... */) {
+   * Accepts varargs expecting each argument to be an object, then
+   * immutably merges the properties of each object and returns result.
+   *
+   * When multiple objects contain the same key the later object in
+   * the arguments list will take precedence.
+   *
+   * Example:
+   *
+   * ```js
+   * var result = merge({foo: 123}, {foo: 456});
+   * console.log(result.foo); // outputs 456
+   * ```
+   *
+   * @param {Object} obj1 Object to merge
+   * @returns {Object} Result of all merge properties
+   */
+function merge() /* obj1, obj2, obj3, ... */{
   var result = {};
   function assignValue(val, key) {
     if (isPlainObject(result[key]) && isPlainObject(val)) {
@@ -10544,13 +10498,13 @@ function merge(/* obj1, obj2, obj3, ... */) {
 }
 
 /**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */
+   * Extends object a by mutably adding to it the properties of object b.
+   *
+   * @param {Object} a The object to be extended
+   * @param {Object} b The object to copy properties from
+   * @param {Object} thisArg The object to bind function to
+   * @return {Object} The resulting value of object a
+   */
 function extend(a, b, thisArg) {
   forEach(b, function assignValue(val, key) {
     if (thisArg && typeof val === 'function') {
@@ -10563,11 +10517,11 @@ function extend(a, b, thisArg) {
 }
 
 /**
- * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
- *
- * @param {string} content with BOM
- * @return {string} content value without BOM
- */
+   * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+   *
+   * @param {string} content with BOM
+   * @return {string} content value without BOM
+   */
 function stripBOM(content) {
   if (content.charCodeAt(0) === 0xFEFF) {
     content = content.slice(1);
@@ -10597,15 +10551,13 @@ module.exports = {
   merge: merge,
   extend: extend,
   trim: trim,
-  stripBOM: stripBOM
-};
-
+  stripBOM: stripBOM };
 
 /***/ }),
 /* 81 */
-/*!***********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/bind.js ***!
-  \***********************************************************************************/
+/*!************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/bind.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10622,12 +10574,11 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-
 /***/ }),
 /* 82 */
-/*!*********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/Axios.js ***!
-  \*********************************************************************************/
+/*!**********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/Axios.js ***!
+  \**********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10643,23 +10594,23 @@ var validator = __webpack_require__(/*! ../helpers/validator */ 105);
 
 var validators = validator.validators;
 /**
- * Create a new instance of Axios
- *
- * @param {Object} instanceConfig The default config for the instance
- */
+                                        * Create a new instance of Axios
+                                        *
+                                        * @param {Object} instanceConfig The default config for the instance
+                                        */
 function Axios(instanceConfig) {
   this.defaults = instanceConfig;
   this.interceptors = {
     request: new InterceptorManager(),
-    response: new InterceptorManager()
-  };
+    response: new InterceptorManager() };
+
 }
 
 /**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */
+   * Dispatch a request
+   *
+   * @param {Object} config The config specific for this request (merged with this.defaults)
+   */
 Axios.prototype.request = function request(configOrUrl, config) {
   /*eslint no-param-reassign:0*/
   // Allow for axios('example/url'[, config]) a la fetch API
@@ -10687,8 +10638,8 @@ Axios.prototype.request = function request(configOrUrl, config) {
     validator.assertOptions(transitional, {
       silentJSONParsing: validators.transitional(validators.boolean),
       forcedJSONParsing: validators.transitional(validators.boolean),
-      clarifyTimeoutError: validators.transitional(validators.boolean)
-    }, false);
+      clarifyTimeoutError: validators.transitional(validators.boolean) },
+    false);
   }
 
   // filter out skipped interceptors
@@ -10759,34 +10710,33 @@ Axios.prototype.getUri = function getUri(config) {
 // Provide aliases for supported request methods
 utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
   /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, config) {
+  Axios.prototype[method] = function (url, config) {
     return this.request(mergeConfig(config || {}, {
       method: method,
       url: url,
-      data: (config || {}).data
-    }));
+      data: (config || {}).data }));
+
   };
 });
 
 utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
   /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, data, config) {
+  Axios.prototype[method] = function (url, data, config) {
     return this.request(mergeConfig(config || {}, {
       method: method,
       url: url,
-      data: data
-    }));
+      data: data }));
+
   };
 });
 
 module.exports = Axios;
 
-
 /***/ }),
 /* 83 */
-/*!***************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/buildURL.js ***!
-  \***************************************************************************************/
+/*!****************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/buildURL.js ***!
+  \****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10797,21 +10747,21 @@ var utils = __webpack_require__(/*! ./../utils */ 80);
 
 function encode(val) {
   return encodeURIComponent(val).
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
+  replace(/%3A/gi, ':').
+  replace(/%24/g, '$').
+  replace(/%2C/gi, ',').
+  replace(/%20/g, '+').
+  replace(/%5B/gi, '[').
+  replace(/%5D/gi, ']');
 }
 
 /**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */
+   * Build a URL by appending params to the end
+   *
+   * @param {string} url The base of the url (e.g., http://www.google.com)
+   * @param {object} [params] The params to be appended
+   * @returns {string} The formatted url
+   */
 module.exports = function buildURL(url, params, paramsSerializer) {
   /*eslint no-param-reassign:0*/
   if (!params) {
@@ -10862,12 +10812,11 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-
 /***/ }),
 /* 84 */
-/*!**********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/InterceptorManager.js ***!
-  \**********************************************************************************************/
+/*!***********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/InterceptorManager.js ***!
+  \***********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10881,28 +10830,28 @@ function InterceptorManager() {
 }
 
 /**
- * Add a new interceptor to the stack
- *
- * @param {Function} fulfilled The function to handle `then` for a `Promise`
- * @param {Function} rejected The function to handle `reject` for a `Promise`
- *
- * @return {Number} An ID used to remove interceptor later
- */
+   * Add a new interceptor to the stack
+   *
+   * @param {Function} fulfilled The function to handle `then` for a `Promise`
+   * @param {Function} rejected The function to handle `reject` for a `Promise`
+   *
+   * @return {Number} An ID used to remove interceptor later
+   */
 InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
   this.handlers.push({
     fulfilled: fulfilled,
     rejected: rejected,
     synchronous: options ? options.synchronous : false,
-    runWhen: options ? options.runWhen : null
-  });
+    runWhen: options ? options.runWhen : null });
+
   return this.handlers.length - 1;
 };
 
 /**
- * Remove an interceptor from the stack
- *
- * @param {Number} id The ID that was returned by `use`
- */
+    * Remove an interceptor from the stack
+    *
+    * @param {Number} id The ID that was returned by `use`
+    */
 InterceptorManager.prototype.eject = function eject(id) {
   if (this.handlers[id]) {
     this.handlers[id] = null;
@@ -10910,13 +10859,13 @@ InterceptorManager.prototype.eject = function eject(id) {
 };
 
 /**
- * Iterate over all the registered interceptors
- *
- * This method is particularly useful for skipping over any
- * interceptors that may have become `null` calling `eject`.
- *
- * @param {Function} fn The function to call for each interceptor
- */
+    * Iterate over all the registered interceptors
+    *
+    * This method is particularly useful for skipping over any
+    * interceptors that may have become `null` calling `eject`.
+    *
+    * @param {Function} fn The function to call for each interceptor
+    */
 InterceptorManager.prototype.forEach = function forEach(fn) {
   utils.forEach(this.handlers, function forEachHandler(h) {
     if (h !== null) {
@@ -10927,12 +10876,11 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-
 /***/ }),
 /* 85 */
-/*!*******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/dispatchRequest.js ***!
-  \*******************************************************************************************/
+/*!********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/dispatchRequest.js ***!
+  \********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10946,8 +10894,8 @@ var defaults = __webpack_require__(/*! ../defaults */ 87);
 var Cancel = __webpack_require__(/*! ../cancel/Cancel */ 102);
 
 /**
- * Throws a `Cancel` if cancellation has been requested.
- */
+                                           * Throws a `Cancel` if cancellation has been requested.
+                                           */
 function throwIfCancellationRequested(config) {
   if (config.cancelToken) {
     config.cancelToken.throwIfRequested();
@@ -10959,11 +10907,11 @@ function throwIfCancellationRequested(config) {
 }
 
 /**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */
+   * Dispatch a request to the server using the configured adapter.
+   *
+   * @param {object} config The config that is to be used for the request
+   * @returns {Promise} The Promise to be fulfilled
+   */
 module.exports = function dispatchRequest(config) {
   throwIfCancellationRequested(config);
 
@@ -10972,25 +10920,25 @@ module.exports = function dispatchRequest(config) {
 
   // Transform request data
   config.data = transformData.call(
-    config,
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
+  config,
+  config.data,
+  config.headers,
+  config.transformRequest);
+
 
   // Flatten headers
   config.headers = utils.merge(
-    config.headers.common || {},
-    config.headers[config.method] || {},
-    config.headers
-  );
+  config.headers.common || {},
+  config.headers[config.method] || {},
+  config.headers);
+
 
   utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
+  ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+  function cleanHeaderConfig(method) {
+    delete config.headers[method];
+  });
+
 
   var adapter = config.adapter || defaults.adapter;
 
@@ -10999,11 +10947,11 @@ module.exports = function dispatchRequest(config) {
 
     // Transform response data
     response.data = transformData.call(
-      config,
-      response.data,
-      response.headers,
-      config.transformResponse
-    );
+    config,
+    response.data,
+    response.headers,
+    config.transformResponse);
+
 
     return response;
   }, function onAdapterRejection(reason) {
@@ -11013,11 +10961,11 @@ module.exports = function dispatchRequest(config) {
       // Transform response data
       if (reason && reason.response) {
         reason.response.data = transformData.call(
-          config,
-          reason.response.data,
-          reason.response.headers,
-          config.transformResponse
-        );
+        config,
+        reason.response.data,
+        reason.response.headers,
+        config.transformResponse);
+
       }
     }
 
@@ -11025,12 +10973,11 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-
 /***/ }),
 /* 86 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/transformData.js ***!
-  \*****************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/transformData.js ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11041,13 +10988,13 @@ var utils = __webpack_require__(/*! ./../utils */ 80);
 var defaults = __webpack_require__(/*! ../defaults */ 87);
 
 /**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
+                                        * Transform the data for a request or a response
+                                        *
+                                        * @param {Object|String} data The data to be transformed
+                                        * @param {Array} headers The headers for the request or response
+                                        * @param {Array|Function} fns A single function or Array of functions
+                                        * @returns {*} The resulting transformed data
+                                        */
 module.exports = function transformData(data, headers, fns) {
   var context = this || defaults;
   /*eslint no-param-reassign:0*/
@@ -11058,12 +11005,11 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-
 /***/ }),
 /* 87 */
-/*!*************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/defaults/index.js ***!
-  \*************************************************************************************/
+/*!**************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/defaults/index.js ***!
+  \**************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11076,8 +11022,8 @@ var enhanceError = __webpack_require__(/*! ../core/enhanceError */ 91);
 var transitionalDefaults = __webpack_require__(/*! ./transitional */ 92);
 
 var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
+  'Content-Type': 'application/x-www-form-urlencoded' };
+
 
 function setContentTypeIfUnset(headers, value) {
   if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
@@ -11123,12 +11069,12 @@ var defaults = {
     normalizeHeaderName(headers, 'Content-Type');
 
     if (utils.isFormData(data) ||
-      utils.isArrayBuffer(data) ||
-      utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
-    ) {
+    utils.isArrayBuffer(data) ||
+    utils.isBuffer(data) ||
+    utils.isStream(data) ||
+    utils.isFile(data) ||
+    utils.isBlob(data))
+    {
       return data;
     }
     if (utils.isArrayBufferView(data)) {
@@ -11138,7 +11084,7 @@ var defaults = {
       setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
       return data.toString();
     }
-    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+    if (utils.isObject(data) || headers && headers['Content-Type'] === 'application/json') {
       setContentTypeIfUnset(headers, 'application/json');
       return stringifySafely(data);
     }
@@ -11151,7 +11097,7 @@ var defaults = {
     var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
     var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
 
-    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
+    if (strictJSONParsing || forcedJSONParsing && utils.isString(data) && data.length) {
       try {
         return JSON.parse(data);
       } catch (e) {
@@ -11168,9 +11114,9 @@ var defaults = {
   }],
 
   /**
-   * A timeout in milliseconds to abort a request. If set to 0 (default) a
-   * timeout is not created.
-   */
+       * A timeout in milliseconds to abort a request. If set to 0 (default) a
+       * timeout is not created.
+       */
   timeout: 0,
 
   xsrfCookieName: 'XSRF-TOKEN',
@@ -11185,10 +11131,10 @@ var defaults = {
 
   headers: {
     common: {
-      'Accept': 'application/json, text/plain, */*'
-    }
-  }
-};
+      'Accept': 'application/json, text/plain, */*' } } };
+
+
+
 
 utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
   defaults.headers[method] = {};
@@ -11199,8 +11145,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 });
 
 module.exports = defaults;
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
 
 /***/ }),
 /* 88 */
@@ -11561,9 +11506,9 @@ var substr = 'ab'.substr(-1) === 'b'
 
 /***/ }),
 /* 90 */
-/*!**************************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
-  \**************************************************************************************************/
+/*!***************************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \***************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11581,12 +11526,11 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-
 /***/ }),
 /* 91 */
-/*!****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/enhanceError.js ***!
-  \****************************************************************************************/
+/*!*****************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/enhanceError.js ***!
+  \*****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11594,15 +11538,15 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */
+               * Update an Error with the specified config, error code, and response.
+               *
+               * @param {Error} error The error to update.
+               * @param {Object} config The config.
+               * @param {string} [code] The error code (for example, 'ECONNABORTED').
+               * @param {Object} [request] The request.
+               * @param {Object} [response] The response.
+               * @returns {Error} The error.
+               */
 module.exports = function enhanceError(error, config, code, request, response) {
   error.config = config;
   if (code) {
@@ -11629,18 +11573,17 @@ module.exports = function enhanceError(error, config, code, request, response) {
       // Axios
       config: this.config,
       code: this.code,
-      status: this.response && this.response.status ? this.response.status : null
-    };
+      status: this.response && this.response.status ? this.response.status : null };
+
   };
   return error;
 };
 
-
 /***/ }),
 /* 92 */
-/*!********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/defaults/transitional.js ***!
-  \********************************************************************************************/
+/*!*********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/defaults/transitional.js ***!
+  \*********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11650,15 +11593,13 @@ module.exports = function enhanceError(error, config, code, request, response) {
 module.exports = {
   silentJSONParsing: true,
   forcedJSONParsing: true,
-  clarifyTimeoutError: false
-};
-
+  clarifyTimeoutError: false };
 
 /***/ }),
 /* 93 */
-/*!***********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/adapters/xhr.js ***!
-  \***********************************************************************************/
+/*!************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/adapters/xhr.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11717,16 +11658,16 @@ module.exports = function xhrAdapter(config) {
       }
       // Prepare the response
       var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
-        request.responseText : request.response;
+      var responseData = !responseType || responseType === 'text' || responseType === 'json' ?
+      request.responseText : request.response;
       var response = {
         data: responseData,
         status: request.status,
         statusText: request.statusText,
         headers: responseHeaders,
         config: config,
-        request: request
-      };
+        request: request };
+
 
       settle(function _resolve(value) {
         resolve(value);
@@ -11793,10 +11734,10 @@ module.exports = function xhrAdapter(config) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
       reject(createError(
-        timeoutErrorMessage,
-        config,
-        transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
-        request));
+      timeoutErrorMessage,
+      config,
+      transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
+      request));
 
       // Clean up request
       request = null;
@@ -11808,8 +11749,8 @@ module.exports = function xhrAdapter(config) {
     if (utils.isStandardBrowserEnv()) {
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
-        cookies.read(config.xsrfCookieName) :
-        undefined;
+      cookies.read(config.xsrfCookieName) :
+      undefined;
 
       if (xsrfValue) {
         requestHeaders[config.xsrfHeaderName] = xsrfValue;
@@ -11852,11 +11793,11 @@ module.exports = function xhrAdapter(config) {
     if (config.cancelToken || config.signal) {
       // Handle cancellation
       // eslint-disable-next-line func-names
-      onCanceled = function(cancel) {
+      onCanceled = function onCanceled(cancel) {
         if (!request) {
           return;
         }
-        reject(!cancel || (cancel && cancel.type) ? new Cancel('canceled') : cancel);
+        reject(!cancel || cancel && cancel.type ? new Cancel('canceled') : cancel);
         request.abort();
         request = null;
       };
@@ -11876,12 +11817,11 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-
 /***/ }),
 /* 94 */
-/*!**********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/settle.js ***!
-  \**********************************************************************************/
+/*!***********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/settle.js ***!
+  \***********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11891,33 +11831,32 @@ module.exports = function xhrAdapter(config) {
 var createError = __webpack_require__(/*! ./createError */ 95);
 
 /**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
+                                             * Resolve or reject a Promise based on response status.
+                                             *
+                                             * @param {Function} resolve A function that resolves the promise.
+                                             * @param {Function} reject A function that rejects the promise.
+                                             * @param {object} response The response.
+                                             */
 module.exports = function settle(resolve, reject, response) {
   var validateStatus = response.config.validateStatus;
   if (!response.status || !validateStatus || validateStatus(response.status)) {
     resolve(response);
   } else {
     reject(createError(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
+    'Request failed with status code ' + response.status,
+    response.config,
+    null,
+    response.request,
+    response));
+
   }
 };
 
-
 /***/ }),
 /* 95 */
-/*!***************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/createError.js ***!
-  \***************************************************************************************/
+/*!****************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/createError.js ***!
+  \****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11927,26 +11866,25 @@ module.exports = function settle(resolve, reject, response) {
 var enhanceError = __webpack_require__(/*! ./enhanceError */ 91);
 
 /**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
- */
+                                               * Create an Error with the specified message, config, error code, request and response.
+                                               *
+                                               * @param {string} message The error message.
+                                               * @param {Object} config The config.
+                                               * @param {string} [code] The error code (for example, 'ECONNABORTED').
+                                               * @param {Object} [request] The request.
+                                               * @param {Object} [response] The response.
+                                               * @returns {Error} The created error.
+                                               */
 module.exports = function createError(message, config, code, request, response) {
   var error = new Error(message);
   return enhanceError(error, config, code, request, response);
 };
 
-
 /***/ }),
 /* 96 */
-/*!**************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/cookies.js ***!
-  \**************************************************************************************/
+/*!***************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/cookies.js ***!
+  \***************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11955,62 +11893,60 @@ module.exports = function createError(message, config, code, request, response) 
 
 var utils = __webpack_require__(/*! ./../utils */ 80);
 
-module.exports = (
-  utils.isStandardBrowserEnv() ?
+module.exports =
+utils.isStandardBrowserEnv() ?
 
-  // Standard browser envs support document.cookie
-    (function standardBrowserEnv() {
-      return {
-        write: function write(name, value, expires, path, domain, secure) {
-          var cookie = [];
-          cookie.push(name + '=' + encodeURIComponent(value));
+// Standard browser envs support document.cookie
+function standardBrowserEnv() {
+  return {
+    write: function write(name, value, expires, path, domain, secure) {
+      var cookie = [];
+      cookie.push(name + '=' + encodeURIComponent(value));
 
-          if (utils.isNumber(expires)) {
-            cookie.push('expires=' + new Date(expires).toGMTString());
-          }
+      if (utils.isNumber(expires)) {
+        cookie.push('expires=' + new Date(expires).toGMTString());
+      }
 
-          if (utils.isString(path)) {
-            cookie.push('path=' + path);
-          }
+      if (utils.isString(path)) {
+        cookie.push('path=' + path);
+      }
 
-          if (utils.isString(domain)) {
-            cookie.push('domain=' + domain);
-          }
+      if (utils.isString(domain)) {
+        cookie.push('domain=' + domain);
+      }
 
-          if (secure === true) {
-            cookie.push('secure');
-          }
+      if (secure === true) {
+        cookie.push('secure');
+      }
 
-          document.cookie = cookie.join('; ');
-        },
+      document.cookie = cookie.join('; ');
+    },
 
-        read: function read(name) {
-          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-          return (match ? decodeURIComponent(match[3]) : null);
-        },
+    read: function read(name) {
+      var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+      return match ? decodeURIComponent(match[3]) : null;
+    },
 
-        remove: function remove(name) {
-          this.write(name, '', Date.now() - 86400000);
-        }
-      };
-    })() :
+    remove: function remove(name) {
+      this.write(name, '', Date.now() - 86400000);
+    } };
 
-  // Non standard browser env (web workers, react-native) lack needed support.
-    (function nonStandardBrowserEnv() {
-      return {
-        write: function write() {},
-        read: function read() { return null; },
-        remove: function remove() {}
-      };
-    })()
-);
+}() :
 
+// Non standard browser env (web workers, react-native) lack needed support.
+function nonStandardBrowserEnv() {
+  return {
+    write: function write() {},
+    read: function read() {return null;},
+    remove: function remove() {} };
+
+}();
 
 /***/ }),
 /* 97 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/buildFullPath.js ***!
-  \*****************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/buildFullPath.js ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12021,14 +11957,14 @@ var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ 98);
 var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ 99);
 
 /**
- * Creates a new URL by combining the baseURL with the requestedURL,
- * only when the requestedURL is not already an absolute URL.
- * If the requestURL is absolute, this function returns the requestedURL untouched.
- *
- * @param {string} baseURL The base URL
- * @param {string} requestedURL Absolute or relative URL to combine
- * @returns {string} The combined full path
- */
+                                                      * Creates a new URL by combining the baseURL with the requestedURL,
+                                                      * only when the requestedURL is not already an absolute URL.
+                                                      * If the requestURL is absolute, this function returns the requestedURL untouched.
+                                                      *
+                                                      * @param {string} baseURL The base URL
+                                                      * @param {string} requestedURL Absolute or relative URL to combine
+                                                      * @returns {string} The combined full path
+                                                      */
 module.exports = function buildFullPath(baseURL, requestedURL) {
   if (baseURL && !isAbsoluteURL(requestedURL)) {
     return combineURLs(baseURL, requestedURL);
@@ -12036,12 +11972,11 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-
 /***/ }),
 /* 98 */
-/*!********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
-  \********************************************************************************************/
+/*!*********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \*********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12049,11 +11984,11 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 
 
 /**
- * Determines whether the specified URL is absolute
- *
- * @param {string} url The URL to test
- * @returns {boolean} True if the specified URL is absolute, otherwise false
- */
+               * Determines whether the specified URL is absolute
+               *
+               * @param {string} url The URL to test
+               * @returns {boolean} True if the specified URL is absolute, otherwise false
+               */
 module.exports = function isAbsoluteURL(url) {
   // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
   // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
@@ -12061,12 +11996,11 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 };
 
-
 /***/ }),
 /* 99 */
-/*!******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/combineURLs.js ***!
-  \******************************************************************************************/
+/*!*******************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/combineURLs.js ***!
+  \*******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12074,24 +12008,23 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
+               * Creates a new URL by combining the specified URLs
+               *
+               * @param {string} baseURL The base URL
+               * @param {string} relativeURL The relative URL
+               * @returns {string} The combined URL
+               */
 module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
+  return relativeURL ?
+  baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') :
+  baseURL;
 };
-
 
 /***/ }),
 /* 100 */
-/*!*******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/parseHeaders.js ***!
-  \*******************************************************************************************/
+/*!********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12103,32 +12036,32 @@ var utils = __webpack_require__(/*! ./../utils */ 80);
 // Headers whose duplicates are ignored by node
 // c.f. https://nodejs.org/api/http.html#http_message_headers
 var ignoreDuplicateOf = [
-  'age', 'authorization', 'content-length', 'content-type', 'etag',
-  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
-  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
-  'referer', 'retry-after', 'user-agent'
-];
+'age', 'authorization', 'content-length', 'content-type', 'etag',
+'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+'referer', 'retry-after', 'user-agent'];
+
 
 /**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */
+                                          * Parse headers into an object
+                                          *
+                                          * ```
+                                          * Date: Wed, 27 Aug 2014 08:58:49 GMT
+                                          * Content-Type: application/json
+                                          * Connection: keep-alive
+                                          * Transfer-Encoding: chunked
+                                          * ```
+                                          *
+                                          * @param {String} headers Headers needing to be parsed
+                                          * @returns {Object} Headers parsed into an object
+                                          */
 module.exports = function parseHeaders(headers) {
   var parsed = {};
   var key;
   var val;
   var i;
 
-  if (!headers) { return parsed; }
+  if (!headers) {return parsed;}
 
   utils.forEach(headers.split('\n'), function parser(line) {
     i = line.indexOf(':');
@@ -12150,12 +12083,11 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-
 /***/ }),
 /* 101 */
-/*!**********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
-  \**********************************************************************************************/
+/*!***********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \***********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12164,77 +12096,75 @@ module.exports = function parseHeaders(headers) {
 
 var utils = __webpack_require__(/*! ./../utils */ 80);
 
-module.exports = (
-  utils.isStandardBrowserEnv() ?
+module.exports =
+utils.isStandardBrowserEnv() ?
 
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-    (function standardBrowserEnv() {
-      var msie = /(msie|trident)/i.test(navigator.userAgent);
-      var urlParsingNode = document.createElement('a');
-      var originURL;
+// Standard browser envs have full support of the APIs needed to test
+// whether the request URL is of the same origin as current location.
+function standardBrowserEnv() {
+  var msie = /(msie|trident)/i.test(navigator.userAgent);
+  var urlParsingNode = document.createElement('a');
+  var originURL;
 
-      /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-      function resolveURL(url) {
-        var href = url;
+  /**
+                 * Parse a URL to discover it's components
+                 *
+                 * @param {String} url The URL to be parsed
+                 * @returns {Object}
+                 */
+  function resolveURL(url) {
+    var href = url;
 
-        if (msie) {
-        // IE needs attribute set twice to normalize properties
-          urlParsingNode.setAttribute('href', href);
-          href = urlParsingNode.href;
-        }
+    if (msie) {
+      // IE needs attribute set twice to normalize properties
+      urlParsingNode.setAttribute('href', href);
+      href = urlParsingNode.href;
+    }
 
-        urlParsingNode.setAttribute('href', href);
+    urlParsingNode.setAttribute('href', href);
 
-        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-        return {
-          href: urlParsingNode.href,
-          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-          host: urlParsingNode.host,
-          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-          hostname: urlParsingNode.hostname,
-          port: urlParsingNode.port,
-          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
-            urlParsingNode.pathname :
-            '/' + urlParsingNode.pathname
-        };
-      }
+    // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+    return {
+      href: urlParsingNode.href,
+      protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+      host: urlParsingNode.host,
+      search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+      hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+      hostname: urlParsingNode.hostname,
+      port: urlParsingNode.port,
+      pathname: urlParsingNode.pathname.charAt(0) === '/' ?
+      urlParsingNode.pathname :
+      '/' + urlParsingNode.pathname };
 
-      originURL = resolveURL(window.location.href);
+  }
 
-      /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */
-      return function isURLSameOrigin(requestURL) {
-        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
-        return (parsed.protocol === originURL.protocol &&
-            parsed.host === originURL.host);
-      };
-    })() :
+  originURL = resolveURL(window.location.href);
 
-  // Non standard browser envs (web workers, react-native) lack needed support.
-    (function nonStandardBrowserEnv() {
-      return function isURLSameOrigin() {
-        return true;
-      };
-    })()
-);
+  /**
+                                                * Determine if a URL shares the same origin as the current location
+                                                *
+                                                * @param {String} requestURL The URL to test
+                                                * @returns {boolean} True if URL shares the same origin, otherwise false
+                                                */
+  return function isURLSameOrigin(requestURL) {
+    var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+    return parsed.protocol === originURL.protocol &&
+    parsed.host === originURL.host;
+  };
+}() :
 
+// Non standard browser envs (web workers, react-native) lack needed support.
+function nonStandardBrowserEnv() {
+  return function isURLSameOrigin() {
+    return true;
+  };
+}();
 
 /***/ }),
 /* 102 */
-/*!************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/cancel/Cancel.js ***!
-  \************************************************************************************/
+/*!*************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/cancel/Cancel.js ***!
+  \*************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12242,11 +12172,11 @@ module.exports = (
 
 
 /**
- * A `Cancel` is an object that is thrown when an operation is canceled.
- *
- * @class
- * @param {string=} message The message.
- */
+               * A `Cancel` is an object that is thrown when an operation is canceled.
+               *
+               * @class
+               * @param {string=} message The message.
+               */
 function Cancel(message) {
   this.message = message;
 }
@@ -12259,12 +12189,11 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-
 /***/ }),
 /* 103 */
-/*!**************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/cancel/isCancel.js ***!
-  \**************************************************************************************/
+/*!***************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/cancel/isCancel.js ***!
+  \***************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12275,12 +12204,11 @@ module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-
 /***/ }),
 /* 104 */
-/*!***************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/mergeConfig.js ***!
-  \***************************************************************************************/
+/*!****************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/core/mergeConfig.js ***!
+  \****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12290,13 +12218,13 @@ module.exports = function isCancel(value) {
 var utils = __webpack_require__(/*! ../utils */ 80);
 
 /**
- * Config-specific merge-function which creates a new config-object
- * by merging two configuration objects together.
- *
- * @param {Object} config1
- * @param {Object} config2
- * @returns {Object} New object resulting from merging config2 to config1
- */
+                                  * Config-specific merge-function which creates a new config-object
+                                  * by merging two configuration objects together.
+                                  *
+                                  * @param {Object} config1
+                                  * @param {Object} config2
+                                  * @returns {Object} New object resulting from merging config2 to config1
+                                  */
 module.exports = function mergeConfig(config1, config2) {
   // eslint-disable-next-line no-param-reassign
   config2 = config2 || {};
@@ -12373,24 +12301,23 @@ module.exports = function mergeConfig(config1, config2) {
     'cancelToken': defaultToConfig2,
     'socketPath': defaultToConfig2,
     'responseEncoding': defaultToConfig2,
-    'validateStatus': mergeDirectKeys
-  };
+    'validateStatus': mergeDirectKeys };
+
 
   utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
     var merge = mergeMap[prop] || mergeDeepProperties;
     var configValue = merge(prop);
-    (utils.isUndefined(configValue) && merge !== mergeDirectKeys) || (config[prop] = configValue);
+    utils.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
   });
 
   return config;
 };
 
-
 /***/ }),
 /* 105 */
-/*!****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/validator.js ***!
-  \****************************************************************************************/
+/*!*****************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/validator.js ***!
+  \*****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12402,7 +12329,7 @@ var VERSION = __webpack_require__(/*! ../env/data */ 106).version;
 var validators = {};
 
 // eslint-disable-next-line func-names
-['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function (type, i) {
   validators[type] = function validator(thing) {
     return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
   };
@@ -12411,19 +12338,19 @@ var validators = {};
 var deprecatedWarnings = {};
 
 /**
- * Transitional option validator
- * @param {function|boolean?} validator - set to false if the transitional option has been removed
- * @param {string?} version - deprecated version / removed since version
- * @param {string?} message - some message with additional info
- * @returns {function}
- */
+                              * Transitional option validator
+                              * @param {function|boolean?} validator - set to false if the transitional option has been removed
+                              * @param {string?} version - deprecated version / removed since version
+                              * @param {string?} message - some message with additional info
+                              * @returns {function}
+                              */
 validators.transitional = function transitional(validator, version, message) {
   function formatMessage(opt, desc) {
     return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
   }
 
   // eslint-disable-next-line func-names
-  return function(value, opt, opts) {
+  return function (value, opt, opts) {
     if (validator === false) {
       throw new Error(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')));
     }
@@ -12432,11 +12359,11 @@ validators.transitional = function transitional(validator, version, message) {
       deprecatedWarnings[opt] = true;
       // eslint-disable-next-line no-console
       console.warn(
-        formatMessage(
-          opt,
-          ' has been deprecated since v' + version + ' and will be removed in the near future'
-        )
-      );
+      formatMessage(
+      opt,
+      ' has been deprecated since v' + version + ' and will be removed in the near future'));
+
+
     }
 
     return validator ? validator(value, opt, opts) : true;
@@ -12444,11 +12371,11 @@ validators.transitional = function transitional(validator, version, message) {
 };
 
 /**
- * Assert object's properties type
- * @param {object} options
- * @param {object} schema
- * @param {boolean?} allowUnknown
- */
+    * Assert object's properties type
+    * @param {object} options
+    * @param {object} schema
+    * @param {boolean?} allowUnknown
+    */
 
 function assertOptions(options, schema, allowUnknown) {
   if (typeof options !== 'object') {
@@ -12475,27 +12402,24 @@ function assertOptions(options, schema, allowUnknown) {
 
 module.exports = {
   assertOptions: assertOptions,
-  validators: validators
-};
-
+  validators: validators };
 
 /***/ }),
 /* 106 */
-/*!*******************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/env/data.js ***!
-  \*******************************************************************************/
+/*!********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/env/data.js ***!
+  \********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
 module.exports = {
-  "version": "0.26.1"
-};
+  "version": "0.26.1" };
 
 /***/ }),
 /* 107 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/cancel/CancelToken.js ***!
-  \*****************************************************************************************/
+/*!******************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/cancel/CancelToken.js ***!
+  \******************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12505,11 +12429,11 @@ module.exports = {
 var Cancel = __webpack_require__(/*! ./Cancel */ 102);
 
 /**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */
+                                   * A `CancelToken` is an object that can be used to request cancellation of an operation.
+                                   *
+                                   * @class
+                                   * @param {Function} executor The executor function.
+                                   */
 function CancelToken(executor) {
   if (typeof executor !== 'function') {
     throw new TypeError('executor must be a function.');
@@ -12524,7 +12448,7 @@ function CancelToken(executor) {
   var token = this;
 
   // eslint-disable-next-line func-names
-  this.promise.then(function(cancel) {
+  this.promise.then(function (cancel) {
     if (!token._listeners) return;
 
     var i;
@@ -12537,10 +12461,10 @@ function CancelToken(executor) {
   });
 
   // eslint-disable-next-line func-names
-  this.promise.then = function(onfulfilled) {
+  this.promise.then = function (onfulfilled) {
     var _resolve;
     // eslint-disable-next-line func-names
-    var promise = new Promise(function(resolve) {
+    var promise = new Promise(function (resolve) {
       token.subscribe(resolve);
       _resolve = resolve;
     }).then(onfulfilled);
@@ -12564,8 +12488,8 @@ function CancelToken(executor) {
 }
 
 /**
- * Throws a `Cancel` if cancellation has been requested.
- */
+   * Throws a `Cancel` if cancellation has been requested.
+   */
 CancelToken.prototype.throwIfRequested = function throwIfRequested() {
   if (this.reason) {
     throw this.reason;
@@ -12573,8 +12497,8 @@ CancelToken.prototype.throwIfRequested = function throwIfRequested() {
 };
 
 /**
- * Subscribe to the cancel signal
- */
+    * Subscribe to the cancel signal
+    */
 
 CancelToken.prototype.subscribe = function subscribe(listener) {
   if (this.reason) {
@@ -12590,8 +12514,8 @@ CancelToken.prototype.subscribe = function subscribe(listener) {
 };
 
 /**
- * Unsubscribe from the cancel signal
- */
+    * Unsubscribe from the cancel signal
+    */
 
 CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
   if (!this._listeners) {
@@ -12604,9 +12528,9 @@ CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
 };
 
 /**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */
+    * Returns an object that contains a new `CancelToken` and a function that, when called,
+    * cancels the `CancelToken`.
+    */
 CancelToken.source = function source() {
   var cancel;
   var token = new CancelToken(function executor(c) {
@@ -12614,18 +12538,17 @@ CancelToken.source = function source() {
   });
   return {
     token: token,
-    cancel: cancel
-  };
+    cancel: cancel };
+
 };
 
 module.exports = CancelToken;
 
-
 /***/ }),
 /* 108 */
-/*!*************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/spread.js ***!
-  \*************************************************************************************/
+/*!**************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/spread.js ***!
+  \**************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12633,37 +12556,36 @@ module.exports = CancelToken;
 
 
 /**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */
+               * Syntactic sugar for invoking a function and expanding an array for arguments.
+               *
+               * Common use case would be to use `Function.prototype.apply`.
+               *
+               *  ```js
+               *  function f(x, y, z) {}
+               *  var args = [1, 2, 3];
+               *  f.apply(null, args);
+               *  ```
+               *
+               * With `spread` this example can be re-written.
+               *
+               *  ```js
+               *  spread(function(x, y, z) {})([1, 2, 3]);
+               *  ```
+               *
+               * @param {Function} callback
+               * @returns {Function}
+               */
 module.exports = function spread(callback) {
   return function wrap(arr) {
     return callback.apply(null, arr);
   };
 };
 
-
 /***/ }),
 /* 109 */
-/*!*******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/isAxiosError.js ***!
-  \*******************************************************************************************/
+/*!********************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \********************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12673,15 +12595,14 @@ module.exports = function spread(callback) {
 var utils = __webpack_require__(/*! ./../utils */ 80);
 
 /**
- * Determines whether the payload is an error thrown by Axios
- *
- * @param {*} payload The value to test
- * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
- */
+                                    * Determines whether the payload is an error thrown by Axios
+                                    *
+                                    * @param {*} payload The value to test
+                                    * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+                                    */
 module.exports = function isAxiosError(payload) {
-  return utils.isObject(payload) && (payload.isAxiosError === true);
+  return utils.isObject(payload) && payload.isAxiosError === true;
 };
-
 
 /***/ }),
 /* 110 */,
@@ -12730,9 +12651,9 @@ module.exports = function isAxiosError(payload) {
 /* 153 */,
 /* 154 */,
 /* 155 */
-/*!************************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/uni_modules/uni-icons/components/uni-icons/icons.js ***!
-  \************************************************************************************************/
+/*!*************************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/uni_modules/uni-icons/components/uni-icons/icons.js ***!
+  \*************************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12885,35 +12806,31 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 /* 168 */,
 /* 169 */,
 /* 170 */
-/*!*******************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/mixins/form.js ***!
-  \*******************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/form.js ***!
+  \********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ 16);
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 15);var _default =
 
+{
+  computed: {
+    $form: function $form() {
+      return _utils.getParent.call(this, "ClForm", [
+      "labelWidth",
+      "labelPosition",
+      "showMessage",
+      "model",
+      "validateOnValueChange",
+      "disabled"]);
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-    computed: {
-        $form() {
-            return _utils__WEBPACK_IMPORTED_MODULE_0__["getParent"].call(this, "ClForm", [
-                "labelWidth",
-                "labelPosition",
-                "showMessage",
-                "model",
-                "validateOnValueChange",
-                "disabled"
-            ]);
-        },
+    },
 
-        isDisabled() {
-            return this.$form ? (this.$form.disabled || this.disabled) : this.disabled
-        }
-    }
-});
+    isDisabled: function isDisabled() {
+      return this.$form ? this.$form.disabled || this.disabled : this.disabled;
+    } } };exports.default = _default;
 
 /***/ }),
 /* 171 */,
@@ -12934,32 +12851,31 @@ __webpack_require__.r(__webpack_exports__);
 /* 186 */,
 /* 187 */,
 /* 188 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/utils/async-validator.js ***!
-  \*****************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!******************************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/utils/async-validator.js ***!
+  \******************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(process) {function _extends() {
-	_extends =
-		Object.assign ||
-		function(target) {
-			for (var i = 1; i < arguments.length; i++) {
-				var source = arguments[i];
+/* WEBPACK VAR INJECTION */(function(process) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function _extends() {
+  _extends =
+  Object.assign ||
+  function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
 
-				for (var key in source) {
-					if (Object.prototype.hasOwnProperty.call(source, key)) {
-						target[key] = source[key];
-					}
-				}
-			}
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
 
-			return target;
-		};
+    return target;
+  };
 
-	return _extends.apply(this, arguments);
+  return _extends.apply(this, arguments);
 }
 
 /* eslint no-console:0 */
@@ -12967,1391 +12883,1389 @@ var formatRegExp = /%[sdj%]/g;
 var warning = function warning() {}; // don't print warning message when in production env or node runtime
 
 if (
-	typeof process !== 'undefined' &&
-	Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}) &&
-	"development" !== 'production' &&
-	typeof window !== 'undefined' &&
-	typeof document !== 'undefined'
-) {
-	warning = function warning(type, errors) {
-		if (typeof console !== 'undefined' && console.warn) {
-			if (
-				errors.every(function(e) {
-					return typeof e === 'string';
-				})
-			) {
-				console.warn(type, errors);
-			}
-		}
-	};
+typeof process !== 'undefined' &&
+Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}) &&
+"development" !== 'production' &&
+typeof window !== 'undefined' &&
+typeof document !== 'undefined')
+{
+  warning = function warning(type, errors) {
+    if (typeof console !== 'undefined' && console.warn) {
+      if (
+      errors.every(function (e) {
+        return typeof e === 'string';
+      }))
+      {
+        console.warn(type, errors);
+      }
+    }
+  };
 }
 
 function convertFieldsError(errors) {
-	if (!errors || !errors.length) return null;
-	var fields = {};
-	errors.forEach(function(error) {
-		var field = error.field;
-		fields[field] = fields[field] || [];
-		fields[field].push(error);
-	});
-	return fields;
+  if (!errors || !errors.length) return null;
+  var fields = {};
+  errors.forEach(function (error) {
+    var field = error.field;
+    fields[field] = fields[field] || [];
+    fields[field].push(error);
+  });
+  return fields;
 }
 function format() {
-	for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-		args[_key] = arguments[_key];
-	}
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
 
-	var i = 1;
-	var f = args[0];
-	var len = args.length;
+  var i = 1;
+  var f = args[0];
+  var len = args.length;
 
-	if (typeof f === 'function') {
-		return f.apply(null, args.slice(1));
-	}
+  if (typeof f === 'function') {
+    return f.apply(null, args.slice(1));
+  }
 
-	if (typeof f === 'string') {
-		var str = String(f).replace(formatRegExp, function(x) {
-			if (x === '%%') {
-				return '%';
-			}
+  if (typeof f === 'string') {
+    var str = String(f).replace(formatRegExp, function (x) {
+      if (x === '%%') {
+        return '%';
+      }
 
-			if (i >= len) {
-				return x;
-			}
+      if (i >= len) {
+        return x;
+      }
 
-			switch (x) {
-				case '%s':
-					return String(args[i++]);
+      switch (x) {
+        case '%s':
+          return String(args[i++]);
 
-				case '%d':
-					return Number(args[i++]);
+        case '%d':
+          return Number(args[i++]);
 
-				case '%j':
-					try {
-						return JSON.stringify(args[i++]);
-					} catch (_) {
-						return '[Circular]';
-					}
+        case '%j':
+          try {
+            return JSON.stringify(args[i++]);
+          } catch (_) {
+            return '[Circular]';
+          }
 
-					break;
+          break;
 
-				default:
-					return x;
-			}
-		});
+        default:
+          return x;}
 
-		for (var arg = args[i]; i < len; arg = args[++i]) {
-			str += ' ' + arg;
-		}
+    });
 
-		return str;
-	}
+    for (var arg = args[i]; i < len; arg = args[++i]) {
+      str += ' ' + arg;
+    }
 
-	return f;
+    return str;
+  }
+
+  return f;
 }
 
 function isNativeStringType(type) {
-	return (
-		type === 'string' ||
-		type === 'url' ||
-		type === 'hex' ||
-		type === 'email' ||
-		type === 'pattern'
-	);
+  return (
+    type === 'string' ||
+    type === 'url' ||
+    type === 'hex' ||
+    type === 'email' ||
+    type === 'pattern');
+
 }
 
 function isEmptyValue(value, type) {
-	if (value === undefined || value === null) {
-		return true;
-	}
+  if (value === undefined || value === null) {
+    return true;
+  }
 
-	if (type === 'array' && Array.isArray(value) && !value.length) {
-		return true;
-	}
+  if (type === 'array' && Array.isArray(value) && !value.length) {
+    return true;
+  }
 
-	if (isNativeStringType(type) && typeof value === 'string' && !value) {
-		return true;
-	}
+  if (isNativeStringType(type) && typeof value === 'string' && !value) {
+    return true;
+  }
 
-	return false;
+  return false;
 }
 
 function asyncParallelArray(arr, func, callback) {
-	var results = [];
-	var total = 0;
-	var arrLength = arr.length;
+  var results = [];
+  var total = 0;
+  var arrLength = arr.length;
 
-	function count(errors) {
-		results.push.apply(results, errors);
-		total++;
+  function count(errors) {
+    results.push.apply(results, errors);
+    total++;
 
-		if (total === arrLength) {
-			callback(results);
-		}
-	}
+    if (total === arrLength) {
+      callback(results);
+    }
+  }
 
-	arr.forEach(function(a) {
-		func(a, count);
-	});
+  arr.forEach(function (a) {
+    func(a, count);
+  });
 }
 
 function asyncSerialArray(arr, func, callback) {
-	var index = 0;
-	var arrLength = arr.length;
+  var index = 0;
+  var arrLength = arr.length;
 
-	function next(errors) {
-		if (errors && errors.length) {
-			callback(errors);
-			return;
-		}
+  function next(errors) {
+    if (errors && errors.length) {
+      callback(errors);
+      return;
+    }
 
-		var original = index;
-		index = index + 1;
+    var original = index;
+    index = index + 1;
 
-		if (original < arrLength) {
-			func(arr[original], next);
-		} else {
-			callback([]);
-		}
-	}
+    if (original < arrLength) {
+      func(arr[original], next);
+    } else {
+      callback([]);
+    }
+  }
 
-	next([]);
+  next([]);
 }
 
 function flattenObjArr(objArr) {
-	var ret = [];
-	Object.keys(objArr).forEach(function(k) {
-		ret.push.apply(ret, objArr[k]);
-	});
-	return ret;
+  var ret = [];
+  Object.keys(objArr).forEach(function (k) {
+    ret.push.apply(ret, objArr[k]);
+  });
+  return ret;
 }
 
 function asyncMap(objArr, option, func, callback) {
-	if (option.first) {
-		var _pending = new Promise(function(resolve, reject) {
-			var next = function next(errors) {
-				callback(errors);
-				return errors.length
-					? reject({
-							errors: errors,
-							fields: convertFieldsError(errors)
-					  })
-					: resolve();
-			};
+  if (option.first) {
+    var _pending = new Promise(function (resolve, reject) {
+      var next = function next(errors) {
+        callback(errors);
+        return errors.length ?
+        reject({
+          errors: errors,
+          fields: convertFieldsError(errors) }) :
 
-			var flattenArr = flattenObjArr(objArr);
-			asyncSerialArray(flattenArr, func, next);
-		});
+        resolve();
+      };
 
-		_pending['catch'](function(e) {
-			return e;
-		});
+      var flattenArr = flattenObjArr(objArr);
+      asyncSerialArray(flattenArr, func, next);
+    });
 
-		return _pending;
-	}
+    _pending['catch'](function (e) {
+      return e;
+    });
 
-	var firstFields = option.firstFields || [];
+    return _pending;
+  }
 
-	if (firstFields === true) {
-		firstFields = Object.keys(objArr);
-	}
+  var firstFields = option.firstFields || [];
 
-	var objArrKeys = Object.keys(objArr);
-	var objArrLength = objArrKeys.length;
-	var total = 0;
-	var results = [];
-	var pending = new Promise(function(resolve, reject) {
-		var next = function next(errors) {
-			results.push.apply(results, errors);
-			total++;
+  if (firstFields === true) {
+    firstFields = Object.keys(objArr);
+  }
 
-			if (total === objArrLength) {
-				callback(results);
-				return results.length
-					? reject({
-							errors: results,
-							fields: convertFieldsError(results)
-					  })
-					: resolve();
-			}
-		};
+  var objArrKeys = Object.keys(objArr);
+  var objArrLength = objArrKeys.length;
+  var total = 0;
+  var results = [];
+  var pending = new Promise(function (resolve, reject) {
+    var next = function next(errors) {
+      results.push.apply(results, errors);
+      total++;
 
-		objArrKeys.forEach(function(key) {
-			var arr = objArr[key];
+      if (total === objArrLength) {
+        callback(results);
+        return results.length ?
+        reject({
+          errors: results,
+          fields: convertFieldsError(results) }) :
 
-			if (firstFields.indexOf(key) !== -1) {
-				asyncSerialArray(arr, func, next);
-			} else {
-				asyncParallelArray(arr, func, next);
-			}
-		});
-	});
-	pending['catch'](function(e) {
-		return e;
-	});
-	return pending;
+        resolve();
+      }
+    };
+
+    objArrKeys.forEach(function (key) {
+      var arr = objArr[key];
+
+      if (firstFields.indexOf(key) !== -1) {
+        asyncSerialArray(arr, func, next);
+      } else {
+        asyncParallelArray(arr, func, next);
+      }
+    });
+  });
+  pending['catch'](function (e) {
+    return e;
+  });
+  return pending;
 }
 function complementError(rule) {
-	return function(oe) {
-		if (oe && oe.message) {
-			oe.field = oe.field || rule.fullField;
-			return oe;
-		}
+  return function (oe) {
+    if (oe && oe.message) {
+      oe.field = oe.field || rule.fullField;
+      return oe;
+    }
 
-		return {
-			message: typeof oe === 'function' ? oe() : oe,
-			field: oe.field || rule.fullField
-		};
-	};
+    return {
+      message: typeof oe === 'function' ? oe() : oe,
+      field: oe.field || rule.fullField };
+
+  };
 }
 function deepMerge(target, source) {
-	if (source) {
-		for (var s in source) {
-			if (source.hasOwnProperty(s)) {
-				var value = source[s];
+  if (source) {
+    for (var s in source) {
+      if (source.hasOwnProperty(s)) {
+        var value = source[s];
 
-				if (typeof value === 'object' && typeof target[s] === 'object') {
-					target[s] = _extends({}, target[s], {}, value);
-				} else {
-					target[s] = value;
-				}
-			}
-		}
-	}
+        if (typeof value === 'object' && typeof target[s] === 'object') {
+          target[s] = _extends({}, target[s], {}, value);
+        } else {
+          target[s] = value;
+        }
+      }
+    }
+  }
 
-	return target;
+  return target;
 }
 
 /**
- *  Rule for validating required fields.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating required fields.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function required(rule, value, source, errors, options, type) {
-	if (
-		rule.required &&
-		(!source.hasOwnProperty(rule.field) || isEmptyValue(value, type || rule.type))
-	) {
-		errors.push(format(options.messages.required, rule.fullField));
-	}
+  if (
+  rule.required && (
+  !source.hasOwnProperty(rule.field) || isEmptyValue(value, type || rule.type)))
+  {
+    errors.push(format(options.messages.required, rule.fullField));
+  }
 }
 
 /**
- *  Rule for validating whitespace.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating whitespace.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function whitespace(rule, value, source, errors, options) {
-	if (/^\s+$/.test(value) || value === '') {
-		errors.push(format(options.messages.whitespace, rule.fullField));
-	}
+  if (/^\s+$/.test(value) || value === '') {
+    errors.push(format(options.messages.whitespace, rule.fullField));
+  }
 }
 
 /* eslint max-len:0 */
 
 var pattern = {
-	// http://emailregex.com/
-	email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-	url: new RegExp(
-		'^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$',
-		'i'
-	),
-	hex: /^#?([a-f0-9]{6}|[a-f0-9]{3})$/i
-};
+  // http://emailregex.com/
+  email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+  url: new RegExp(
+  "^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$",
+  'i'),
+
+  hex: /^#?([a-f0-9]{6}|[a-f0-9]{3})$/i };
+
 var types = {
-	integer: function integer(value) {
-		return types.number(value) && parseInt(value, 10) === value;
-	},
-	float: function float(value) {
-		return types.number(value) && !types.integer(value);
-	},
-	array: function array(value) {
-		return Array.isArray(value);
-	},
-	regexp: function regexp(value) {
-		if (value instanceof RegExp) {
-			return true;
-		}
+  integer: function integer(value) {
+    return types.number(value) && parseInt(value, 10) === value;
+  },
+  float: function float(value) {
+    return types.number(value) && !types.integer(value);
+  },
+  array: function array(value) {
+    return Array.isArray(value);
+  },
+  regexp: function regexp(value) {
+    if (value instanceof RegExp) {
+      return true;
+    }
 
-		try {
-			return !!new RegExp(value);
-		} catch (e) {
-			return false;
-		}
-	},
-	date: function date(value) {
-		return (
-			typeof value.getTime === 'function' &&
-			typeof value.getMonth === 'function' &&
-			typeof value.getYear === 'function'
-		);
-	},
-	number: function number(value) {
-		if (isNaN(value)) {
-			return false;
-		}
+    try {
+      return !!new RegExp(value);
+    } catch (e) {
+      return false;
+    }
+  },
+  date: function date(value) {
+    return (
+      typeof value.getTime === 'function' &&
+      typeof value.getMonth === 'function' &&
+      typeof value.getYear === 'function');
 
-		return typeof value === 'number';
-	},
-	object: function object(value) {
-		return typeof value === 'object' && !types.array(value);
-	},
-	method: function method(value) {
-		return typeof value === 'function';
-	},
-	email: function email(value) {
-		return typeof value === 'string' && !!value.match(pattern.email) && value.length < 255;
-	},
-	url: function url(value) {
-		return typeof value === 'string' && !!value.match(pattern.url);
-	},
-	hex: function hex(value) {
-		return typeof value === 'string' && !!value.match(pattern.hex);
-	}
-};
+  },
+  number: function number(value) {
+    if (isNaN(value)) {
+      return false;
+    }
+
+    return typeof value === 'number';
+  },
+  object: function object(value) {
+    return typeof value === 'object' && !types.array(value);
+  },
+  method: function method(value) {
+    return typeof value === 'function';
+  },
+  email: function email(value) {
+    return typeof value === 'string' && !!value.match(pattern.email) && value.length < 255;
+  },
+  url: function url(value) {
+    return typeof value === 'string' && !!value.match(pattern.url);
+  },
+  hex: function hex(value) {
+    return typeof value === 'string' && !!value.match(pattern.hex);
+  } };
+
 /**
- *  Rule for validating the type of a value.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+        *  Rule for validating the type of a value.
+        *
+        *  @param rule The validation rule.
+        *  @param value The value of the field on the source object.
+        *  @param source The source object being validated.
+        *  @param errors An array of errors that this rule may add
+        *  validation errors to.
+        *  @param options The validation options.
+        *  @param options.messages The validation messages.
+        */
 
 function type(rule, value, source, errors, options) {
-	if (rule.required && value === undefined) {
-		required(rule, value, source, errors, options);
-		return;
-	}
+  if (rule.required && value === undefined) {
+    required(rule, value, source, errors, options);
+    return;
+  }
 
-	var custom = [
-		'integer',
-		'float',
-		'array',
-		'regexp',
-		'object',
-		'method',
-		'email',
-		'number',
-		'date',
-		'url',
-		'hex'
-	];
-	var ruleType = rule.type;
+  var custom = [
+  'integer',
+  'float',
+  'array',
+  'regexp',
+  'object',
+  'method',
+  'email',
+  'number',
+  'date',
+  'url',
+  'hex'];
 
-	if (custom.indexOf(ruleType) > -1) {
-		if (!types[ruleType](value)) {
-			errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
-		} // straight typeof check
-	} else if (ruleType && typeof value !== rule.type) {
-		errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
-	}
+  var ruleType = rule.type;
+
+  if (custom.indexOf(ruleType) > -1) {
+    if (!types[ruleType](value)) {
+      errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
+    } // straight typeof check
+  } else if (ruleType && typeof value !== rule.type) {
+    errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
+  }
 }
 
 /**
- *  Rule for validating minimum and maximum allowed values.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating minimum and maximum allowed values.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function range(rule, value, source, errors, options) {
-	var len = typeof rule.len === 'number';
-	var min = typeof rule.min === 'number';
-	var max = typeof rule.max === 'number'; // 正则匹配码点范围从U+010000一直到U+10FFFF的文字（补充平面Supplementary Plane）
+  var len = typeof rule.len === 'number';
+  var min = typeof rule.min === 'number';
+  var max = typeof rule.max === 'number'; // 正则匹配码点范围从U+010000一直到U+10FFFF的文字（补充平面Supplementary Plane）
 
-	var spRegexp = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-	var val = value;
-	var key = null;
-	var num = typeof value === 'number';
-	var str = typeof value === 'string';
-	var arr = Array.isArray(value);
+  var spRegexp = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+  var val = value;
+  var key = null;
+  var num = typeof value === 'number';
+  var str = typeof value === 'string';
+  var arr = Array.isArray(value);
 
-	if (num) {
-		key = 'number';
-	} else if (str) {
-		key = 'string';
-	} else if (arr) {
-		key = 'array';
-	} // if the value is not of a supported type for range validation
-	// the validation rule rule should use the
-	// type property to also test for a particular type
+  if (num) {
+    key = 'number';
+  } else if (str) {
+    key = 'string';
+  } else if (arr) {
+    key = 'array';
+  } // if the value is not of a supported type for range validation
+  // the validation rule rule should use the
+  // type property to also test for a particular type
 
-	if (!key) {
-		return false;
-	}
+  if (!key) {
+    return false;
+  }
 
-	if (arr) {
-		val = value.length;
-	}
+  if (arr) {
+    val = value.length;
+  }
 
-	if (str) {
-		// 处理码点大于U+010000的文字length属性不准确的bug，如"𠮷𠮷𠮷".lenght !== 3
-		val = value.replace(spRegexp, '_').length;
-	}
+  if (str) {
+    // 处理码点大于U+010000的文字length属性不准确的bug，如"𠮷𠮷𠮷".lenght !== 3
+    val = value.replace(spRegexp, '_').length;
+  }
 
-	if (len) {
-		if (val !== rule.len) {
-			errors.push(format(options.messages[key].len, rule.fullField, rule.len));
-		}
-	} else if (min && !max && val < rule.min) {
-		errors.push(format(options.messages[key].min, rule.fullField, rule.min));
-	} else if (max && !min && val > rule.max) {
-		errors.push(format(options.messages[key].max, rule.fullField, rule.max));
-	} else if (min && max && (val < rule.min || val > rule.max)) {
-		errors.push(format(options.messages[key].range, rule.fullField, rule.min, rule.max));
-	}
+  if (len) {
+    if (val !== rule.len) {
+      errors.push(format(options.messages[key].len, rule.fullField, rule.len));
+    }
+  } else if (min && !max && val < rule.min) {
+    errors.push(format(options.messages[key].min, rule.fullField, rule.min));
+  } else if (max && !min && val > rule.max) {
+    errors.push(format(options.messages[key].max, rule.fullField, rule.max));
+  } else if (min && max && (val < rule.min || val > rule.max)) {
+    errors.push(format(options.messages[key].range, rule.fullField, rule.min, rule.max));
+  }
 }
 
 var ENUM = 'enum';
 /**
- *  Rule for validating a value exists in an enumerable list.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+                    *  Rule for validating a value exists in an enumerable list.
+                    *
+                    *  @param rule The validation rule.
+                    *  @param value The value of the field on the source object.
+                    *  @param source The source object being validated.
+                    *  @param errors An array of errors that this rule may add
+                    *  validation errors to.
+                    *  @param options The validation options.
+                    *  @param options.messages The validation messages.
+                    */
 
 function enumerable(rule, value, source, errors, options) {
-	rule[ENUM] = Array.isArray(rule[ENUM]) ? rule[ENUM] : [];
+  rule[ENUM] = Array.isArray(rule[ENUM]) ? rule[ENUM] : [];
 
-	if (rule[ENUM].indexOf(value) === -1) {
-		errors.push(format(options.messages[ENUM], rule.fullField, rule[ENUM].join(', ')));
-	}
+  if (rule[ENUM].indexOf(value) === -1) {
+    errors.push(format(options.messages[ENUM], rule.fullField, rule[ENUM].join(', ')));
+  }
 }
 
 /**
- *  Rule for validating a regular expression pattern.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating a regular expression pattern.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function pattern$1(rule, value, source, errors, options) {
-	if (rule.pattern) {
-		if (rule.pattern instanceof RegExp) {
-			// if a RegExp instance is passed, reset `lastIndex` in case its `global`
-			// flag is accidentally set to `true`, which in a validation scenario
-			// is not necessary and the result might be misleading
-			rule.pattern.lastIndex = 0;
+  if (rule.pattern) {
+    if (rule.pattern instanceof RegExp) {
+      // if a RegExp instance is passed, reset `lastIndex` in case its `global`
+      // flag is accidentally set to `true`, which in a validation scenario
+      // is not necessary and the result might be misleading
+      rule.pattern.lastIndex = 0;
 
-			if (!rule.pattern.test(value)) {
-				errors.push(
-					format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern)
-				);
-			}
-		} else if (typeof rule.pattern === 'string') {
-			var _pattern = new RegExp(rule.pattern);
+      if (!rule.pattern.test(value)) {
+        errors.push(
+        format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern));
 
-			if (!_pattern.test(value)) {
-				errors.push(
-					format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern)
-				);
-			}
-		}
-	}
+      }
+    } else if (typeof rule.pattern === 'string') {
+      var _pattern = new RegExp(rule.pattern);
+
+      if (!_pattern.test(value)) {
+        errors.push(
+        format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern));
+
+      }
+    }
+  }
 }
 
 var rules = {
-	required: required,
-	whitespace: whitespace,
-	type: type,
-	range: range,
-	enum: enumerable,
-	pattern: pattern$1
-};
+  required: required,
+  whitespace: whitespace,
+  type: type,
+  range: range,
+  enum: enumerable,
+  pattern: pattern$1 };
+
 
 /**
- *  Performs validation for string types.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+                         *  Performs validation for string types.
+                         *
+                         *  @param rule The validation rule.
+                         *  @param value The value of the field on the source object.
+                         *  @param callback The callback function.
+                         *  @param source The source object being validated.
+                         *  @param options The validation options.
+                         *  @param options.messages The validation messages.
+                         */
 
 function string(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, 'string') && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, 'string') && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options, 'string');
+    rules.required(rule, value, source, errors, options, 'string');
 
-		if (!isEmptyValue(value, 'string')) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-			rules.pattern(rule, value, source, errors, options);
+    if (!isEmptyValue(value, 'string')) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+      rules.pattern(rule, value, source, errors, options);
 
-			if (rule.whitespace === true) {
-				rules.whitespace(rule, value, source, errors, options);
-			}
-		}
-	}
+      if (rule.whitespace === true) {
+        rules.whitespace(rule, value, source, errors, options);
+      }
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a function.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a function.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function method(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a number.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a number.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function number(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (value === '') {
-			value = undefined;
-		}
+  if (validate) {
+    if (value === '') {
+      value = undefined;
+    }
 
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a boolean.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a boolean.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function _boolean(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates the regular expression type.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates the regular expression type.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function regexp(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (!isEmptyValue(value)) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value)) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a number is an integer.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a number is an integer.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function integer(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a number is a floating point number.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a number is a floating point number.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function floatFn(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates an array.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates an array.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function array(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, 'array') && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, 'array') && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options, 'array');
+    rules.required(rule, value, source, errors, options, 'array');
 
-		if (!isEmptyValue(value, 'array')) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value, 'array')) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates an object.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates an object.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function object(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 var ENUM$1 = 'enum';
 /**
- *  Validates an enumerable list.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+                      *  Validates an enumerable list.
+                      *
+                      *  @param rule The validation rule.
+                      *  @param value The value of the field on the source object.
+                      *  @param callback The callback function.
+                      *  @param source The source object being validated.
+                      *  @param options The validation options.
+                      *  @param options.messages The validation messages.
+                      */
 
 function enumerable$1(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules[ENUM$1](rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules[ENUM$1](rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a regular expression pattern.
- *
- *  Performs validation when a rule only contains
- *  a pattern property but is not declared as a string type.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a regular expression pattern.
+   *
+   *  Performs validation when a rule only contains
+   *  a pattern property but is not declared as a string type.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function pattern$2(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, 'string') && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, 'string') && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (!isEmptyValue(value, 'string')) {
-			rules.pattern(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value, 'string')) {
+      rules.pattern(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 function date(rule, value, callback, source, options) {
-	// console.log('integer rule called %j', rule);
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field)); // console.log('validate on %s value', value);
+  // console.log('integer rule called %j', rule);
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field); // console.log('validate on %s value', value);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (!isEmptyValue(value)) {
-			var dateObject;
+    if (!isEmptyValue(value)) {
+      var dateObject;
 
-			if (typeof value === 'number') {
-				dateObject = new Date(value);
-			} else {
-				dateObject = value;
-			}
+      if (typeof value === 'number') {
+        dateObject = new Date(value);
+      } else {
+        dateObject = value;
+      }
 
-			rules.type(rule, dateObject, source, errors, options);
+      rules.type(rule, dateObject, source, errors, options);
 
-			if (dateObject) {
-				rules.range(rule, dateObject.getTime(), source, errors, options);
-			}
-		}
-	}
+      if (dateObject) {
+        rules.range(rule, dateObject.getTime(), source, errors, options);
+      }
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 function required$1(rule, value, callback, source, options) {
-	var errors = [];
-	var type = Array.isArray(value) ? 'array' : typeof value;
-	rules.required(rule, value, source, errors, options, type);
-	callback(errors);
+  var errors = [];
+  var type = Array.isArray(value) ? 'array' : typeof value;
+  rules.required(rule, value, source, errors, options, type);
+  callback(errors);
 }
 
 function type$1(rule, value, callback, source, options) {
-	var ruleType = rule.type;
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var ruleType = rule.type;
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, ruleType) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, ruleType) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options, ruleType);
+    rules.required(rule, value, source, errors, options, ruleType);
 
-		if (!isEmptyValue(value, ruleType)) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value, ruleType)) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Performs validation for any type.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Performs validation for any type.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function any(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
-	}
+    rules.required(rule, value, source, errors, options);
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 var validators = {
-	string: string,
-	method: method,
-	number: number,
-	boolean: _boolean,
-	regexp: regexp,
-	integer: integer,
-	float: floatFn,
-	array: array,
-	object: object,
-	enum: enumerable$1,
-	pattern: pattern$2,
-	date: date,
-	url: type$1,
-	hex: type$1,
-	email: type$1,
-	required: required$1,
-	any: any
-};
+  string: string,
+  method: method,
+  number: number,
+  boolean: _boolean,
+  regexp: regexp,
+  integer: integer,
+  float: floatFn,
+  array: array,
+  object: object,
+  enum: enumerable$1,
+  pattern: pattern$2,
+  date: date,
+  url: type$1,
+  hex: type$1,
+  email: type$1,
+  required: required$1,
+  any: any };
+
 
 function newMessages() {
-	return {
-		default: 'Validation error on field %s',
-		required: '%s is required',
-		enum: '%s must be one of %s',
-		whitespace: '%s cannot be empty',
-		date: {
-			format: '%s date %s is invalid for format %s',
-			parse: '%s date could not be parsed, %s is invalid ',
-			invalid: '%s date %s is invalid'
-		},
-		types: {
-			string: '%s is not a %s',
-			method: '%s is not a %s (function)',
-			array: '%s is not an %s',
-			object: '%s is not an %s',
-			number: '%s is not a %s',
-			date: '%s is not a %s',
-			boolean: '%s is not a %s',
-			integer: '%s is not an %s',
-			float: '%s is not a %s',
-			regexp: '%s is not a valid %s',
-			email: '%s is not a valid %s',
-			url: '%s is not a valid %s',
-			hex: '%s is not a valid %s'
-		},
-		string: {
-			len: '%s must be exactly %s characters',
-			min: '%s must be at least %s characters',
-			max: '%s cannot be longer than %s characters',
-			range: '%s must be between %s and %s characters'
-		},
-		number: {
-			len: '%s must equal %s',
-			min: '%s cannot be less than %s',
-			max: '%s cannot be greater than %s',
-			range: '%s must be between %s and %s'
-		},
-		array: {
-			len: '%s must be exactly %s in length',
-			min: '%s cannot be less than %s in length',
-			max: '%s cannot be greater than %s in length',
-			range: '%s must be between %s and %s in length'
-		},
-		pattern: {
-			mismatch: '%s value %s does not match pattern %s'
-		},
-		clone: function clone() {
-			var cloned = JSON.parse(JSON.stringify(this));
-			cloned.clone = this.clone;
-			return cloned;
-		}
-	};
+  return {
+    default: 'Validation error on field %s',
+    required: '%s is required',
+    enum: '%s must be one of %s',
+    whitespace: '%s cannot be empty',
+    date: {
+      format: '%s date %s is invalid for format %s',
+      parse: '%s date could not be parsed, %s is invalid ',
+      invalid: '%s date %s is invalid' },
+
+    types: {
+      string: '%s is not a %s',
+      method: '%s is not a %s (function)',
+      array: '%s is not an %s',
+      object: '%s is not an %s',
+      number: '%s is not a %s',
+      date: '%s is not a %s',
+      boolean: '%s is not a %s',
+      integer: '%s is not an %s',
+      float: '%s is not a %s',
+      regexp: '%s is not a valid %s',
+      email: '%s is not a valid %s',
+      url: '%s is not a valid %s',
+      hex: '%s is not a valid %s' },
+
+    string: {
+      len: '%s must be exactly %s characters',
+      min: '%s must be at least %s characters',
+      max: '%s cannot be longer than %s characters',
+      range: '%s must be between %s and %s characters' },
+
+    number: {
+      len: '%s must equal %s',
+      min: '%s cannot be less than %s',
+      max: '%s cannot be greater than %s',
+      range: '%s must be between %s and %s' },
+
+    array: {
+      len: '%s must be exactly %s in length',
+      min: '%s cannot be less than %s in length',
+      max: '%s cannot be greater than %s in length',
+      range: '%s must be between %s and %s in length' },
+
+    pattern: {
+      mismatch: '%s value %s does not match pattern %s' },
+
+    clone: function clone() {
+      var cloned = JSON.parse(JSON.stringify(this));
+      cloned.clone = this.clone;
+      return cloned;
+    } };
+
 }
 var messages = newMessages();
 
 /**
- *  Encapsulates a validation schema.
- *
- *  @param descriptor An object declaring validation rules
- *  for this schema.
- */
+                               *  Encapsulates a validation schema.
+                               *
+                               *  @param descriptor An object declaring validation rules
+                               *  for this schema.
+                               */
 
 function Schema(descriptor) {
-	this.rules = null;
-	this._messages = messages;
-	this.define(descriptor);
+  this.rules = null;
+  this._messages = messages;
+  this.define(descriptor);
 }
 
 Schema.prototype = {
-	messages: function messages(_messages) {
-		if (_messages) {
-			this._messages = deepMerge(newMessages(), _messages);
-		}
+  messages: function messages(_messages) {
+    if (_messages) {
+      this._messages = deepMerge(newMessages(), _messages);
+    }
 
-		return this._messages;
-	},
-	define: function define(rules) {
-		if (!rules) {
-			throw new Error('Cannot configure a schema with no rules');
-		}
+    return this._messages;
+  },
+  define: function define(rules) {
+    if (!rules) {
+      throw new Error('Cannot configure a schema with no rules');
+    }
 
-		if (typeof rules !== 'object' || Array.isArray(rules)) {
-			throw new Error('Rules must be an object');
-		}
+    if (typeof rules !== 'object' || Array.isArray(rules)) {
+      throw new Error('Rules must be an object');
+    }
 
-		this.rules = {};
-		var z;
-		var item;
+    this.rules = {};
+    var z;
+    var item;
 
-		for (z in rules) {
-			if (rules.hasOwnProperty(z)) {
-				item = rules[z];
-				this.rules[z] = Array.isArray(item) ? item : [item];
-			}
-		}
-	},
-	validate: function validate(source_, o, oc) {
-		var _this = this;
+    for (z in rules) {
+      if (rules.hasOwnProperty(z)) {
+        item = rules[z];
+        this.rules[z] = Array.isArray(item) ? item : [item];
+      }
+    }
+  },
+  validate: function validate(source_, o, oc) {
+    var _this = this;
 
-		if (o === void 0) {
-			o = {};
-		}
+    if (o === void 0) {
+      o = {};
+    }
 
-		if (oc === void 0) {
-			oc = function oc() {};
-		}
+    if (oc === void 0) {
+      oc = function oc() {};
+    }
 
-		var source = source_;
-		var options = o;
-		var callback = oc;
+    var source = source_;
+    var options = o;
+    var callback = oc;
 
-		if (typeof options === 'function') {
-			callback = options;
-			options = {};
-		}
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
 
-		if (!this.rules || Object.keys(this.rules).length === 0) {
-			if (callback) {
-				callback();
-			}
+    if (!this.rules || Object.keys(this.rules).length === 0) {
+      if (callback) {
+        callback();
+      }
 
-			return Promise.resolve();
-		}
+      return Promise.resolve();
+    }
 
-		function complete(results) {
-			var i;
-			var errors = [];
-			var fields = {};
+    function complete(results) {
+      var i;
+      var errors = [];
+      var fields = {};
 
-			function add(e) {
-				if (Array.isArray(e)) {
-					var _errors;
+      function add(e) {
+        if (Array.isArray(e)) {
+          var _errors;
 
-					errors = (_errors = errors).concat.apply(_errors, e);
-				} else {
-					errors.push(e);
-				}
-			}
+          errors = (_errors = errors).concat.apply(_errors, e);
+        } else {
+          errors.push(e);
+        }
+      }
 
-			for (i = 0; i < results.length; i++) {
-				add(results[i]);
-			}
+      for (i = 0; i < results.length; i++) {
+        add(results[i]);
+      }
 
-			if (!errors.length) {
-				errors = null;
-				fields = null;
-			} else {
-				fields = convertFieldsError(errors);
-			}
+      if (!errors.length) {
+        errors = null;
+        fields = null;
+      } else {
+        fields = convertFieldsError(errors);
+      }
 
-			callback(errors, fields);
-		}
+      callback(errors, fields);
+    }
 
-		if (options.messages) {
-			var messages$1 = this.messages();
+    if (options.messages) {
+      var messages$1 = this.messages();
 
-			if (messages$1 === messages) {
-				messages$1 = newMessages();
-			}
+      if (messages$1 === messages) {
+        messages$1 = newMessages();
+      }
 
-			deepMerge(messages$1, options.messages);
-			options.messages = messages$1;
-		} else {
-			options.messages = this.messages();
-		}
+      deepMerge(messages$1, options.messages);
+      options.messages = messages$1;
+    } else {
+      options.messages = this.messages();
+    }
 
-		var arr;
-		var value;
-		var series = {};
-		var keys = options.keys || Object.keys(this.rules);
-		keys.forEach(function(z) {
-			arr = _this.rules[z];
-			value = source[z];
-			arr.forEach(function(r) {
-				var rule = r;
+    var arr;
+    var value;
+    var series = {};
+    var keys = options.keys || Object.keys(this.rules);
+    keys.forEach(function (z) {
+      arr = _this.rules[z];
+      value = source[z];
+      arr.forEach(function (r) {
+        var rule = r;
 
-				if (typeof rule.transform === 'function') {
-					if (source === source_) {
-						source = _extends({}, source);
-					}
+        if (typeof rule.transform === 'function') {
+          if (source === source_) {
+            source = _extends({}, source);
+          }
 
-					value = source[z] = rule.transform(value);
-				}
+          value = source[z] = rule.transform(value);
+        }
 
-				if (typeof rule === 'function') {
-					rule = {
-						validator: rule
-					};
-				} else {
-					rule = _extends({}, rule);
-				}
+        if (typeof rule === 'function') {
+          rule = {
+            validator: rule };
 
-				rule.validator = _this.getValidationMethod(rule);
-				rule.field = z;
-				rule.fullField = rule.fullField || z;
-				rule.type = _this.getType(rule);
+        } else {
+          rule = _extends({}, rule);
+        }
 
-				if (!rule.validator) {
-					return;
-				}
+        rule.validator = _this.getValidationMethod(rule);
+        rule.field = z;
+        rule.fullField = rule.fullField || z;
+        rule.type = _this.getType(rule);
 
-				series[z] = series[z] || [];
-				series[z].push({
-					rule: rule,
-					value: value,
-					source: source,
-					field: z
-				});
-			});
-		});
-		var errorFields = {};
-		return asyncMap(
-			series,
-			options,
-			function(data, doIt) {
-				var rule = data.rule;
-				var deep =
-					(rule.type === 'object' || rule.type === 'array') &&
-					(typeof rule.fields === 'object' || typeof rule.defaultField === 'object');
-				deep = deep && (rule.required || (!rule.required && data.value));
-				rule.field = data.field;
+        if (!rule.validator) {
+          return;
+        }
 
-				function addFullfield(key, schema) {
-					return _extends({}, schema, {
-						fullField: rule.fullField + '.' + key
-					});
-				}
+        series[z] = series[z] || [];
+        series[z].push({
+          rule: rule,
+          value: value,
+          source: source,
+          field: z });
 
-				function cb(e) {
-					if (e === void 0) {
-						e = [];
-					}
+      });
+    });
+    var errorFields = {};
+    return asyncMap(
+    series,
+    options,
+    function (data, doIt) {
+      var rule = data.rule;
+      var deep =
+      (rule.type === 'object' || rule.type === 'array') && (
+      typeof rule.fields === 'object' || typeof rule.defaultField === 'object');
+      deep = deep && (rule.required || !rule.required && data.value);
+      rule.field = data.field;
 
-					var errors = e;
+      function addFullfield(key, schema) {
+        return _extends({}, schema, {
+          fullField: rule.fullField + '.' + key });
 
-					if (!Array.isArray(errors)) {
-						errors = [errors];
-					}
+      }
 
-					if (!options.suppressWarning && errors.length) {
-						Schema.warning('async-validator:', errors);
-					}
+      function cb(e) {
+        if (e === void 0) {
+          e = [];
+        }
 
-					if (errors.length && rule.message) {
-						errors = [].concat(rule.message);
-					}
+        var errors = e;
 
-					errors = errors.map(complementError(rule));
+        if (!Array.isArray(errors)) {
+          errors = [errors];
+        }
 
-					if (options.first && errors.length) {
-						errorFields[rule.field] = 1;
-						return doIt(errors);
-					}
+        if (!options.suppressWarning && errors.length) {
+          Schema.warning('async-validator:', errors);
+        }
 
-					if (!deep) {
-						doIt(errors);
-					} else {
-						// if rule is required but the target object
-						// does not exist fail at the rule level and don't
-						// go deeper
-						if (rule.required && !data.value) {
-							if (rule.message) {
-								errors = [].concat(rule.message).map(complementError(rule));
-							} else if (options.error) {
-								errors = [
-									options.error(
-										rule,
-										format(options.messages.required, rule.field)
-									)
-								];
-							} else {
-								errors = [];
-							}
+        if (errors.length && rule.message) {
+          errors = [].concat(rule.message);
+        }
 
-							return doIt(errors);
-						}
+        errors = errors.map(complementError(rule));
 
-						var fieldsSchema = {};
+        if (options.first && errors.length) {
+          errorFields[rule.field] = 1;
+          return doIt(errors);
+        }
 
-						if (rule.defaultField) {
-							for (var k in data.value) {
-								if (data.value.hasOwnProperty(k)) {
-									fieldsSchema[k] = rule.defaultField;
-								}
-							}
-						}
+        if (!deep) {
+          doIt(errors);
+        } else {
+          // if rule is required but the target object
+          // does not exist fail at the rule level and don't
+          // go deeper
+          if (rule.required && !data.value) {
+            if (rule.message) {
+              errors = [].concat(rule.message).map(complementError(rule));
+            } else if (options.error) {
+              errors = [
+              options.error(
+              rule,
+              format(options.messages.required, rule.field))];
 
-						fieldsSchema = _extends({}, fieldsSchema, {}, data.rule.fields);
 
-						for (var f in fieldsSchema) {
-							if (fieldsSchema.hasOwnProperty(f)) {
-								var fieldSchema = Array.isArray(fieldsSchema[f])
-									? fieldsSchema[f]
-									: [fieldsSchema[f]];
-								fieldsSchema[f] = fieldSchema.map(addFullfield.bind(null, f));
-							}
-						}
+            } else {
+              errors = [];
+            }
 
-						var schema = new Schema(fieldsSchema);
-						schema.messages(options.messages);
+            return doIt(errors);
+          }
 
-						if (data.rule.options) {
-							data.rule.options.messages = options.messages;
-							data.rule.options.error = options.error;
-						}
+          var fieldsSchema = {};
 
-						schema.validate(data.value, data.rule.options || options, function(errs) {
-							var finalErrors = [];
+          if (rule.defaultField) {
+            for (var k in data.value) {
+              if (data.value.hasOwnProperty(k)) {
+                fieldsSchema[k] = rule.defaultField;
+              }
+            }
+          }
 
-							if (errors && errors.length) {
-								finalErrors.push.apply(finalErrors, errors);
-							}
+          fieldsSchema = _extends({}, fieldsSchema, {}, data.rule.fields);
 
-							if (errs && errs.length) {
-								finalErrors.push.apply(finalErrors, errs);
-							}
+          for (var f in fieldsSchema) {
+            if (fieldsSchema.hasOwnProperty(f)) {
+              var fieldSchema = Array.isArray(fieldsSchema[f]) ?
+              fieldsSchema[f] :
+              [fieldsSchema[f]];
+              fieldsSchema[f] = fieldSchema.map(addFullfield.bind(null, f));
+            }
+          }
 
-							doIt(finalErrors.length ? finalErrors : null);
-						});
-					}
-				}
+          var schema = new Schema(fieldsSchema);
+          schema.messages(options.messages);
 
-				var res;
+          if (data.rule.options) {
+            data.rule.options.messages = options.messages;
+            data.rule.options.error = options.error;
+          }
 
-				if (rule.asyncValidator) {
-					res = rule.asyncValidator(rule, data.value, cb, data.source, options);
-				} else if (rule.validator) {
-					res = rule.validator(rule, data.value, cb, data.source, options);
+          schema.validate(data.value, data.rule.options || options, function (errs) {
+            var finalErrors = [];
 
-					if (res === true) {
-						cb();
-					} else if (res === false) {
-						cb(rule.message || rule.field + ' fails');
-					} else if (res instanceof Array) {
-						cb(res);
-					} else if (res instanceof Error) {
-						cb(res.message);
-					}
-				}
+            if (errors && errors.length) {
+              finalErrors.push.apply(finalErrors, errors);
+            }
 
-				if (res && res.then) {
-					res.then(
-						function() {
-							return cb();
-						},
-						function(e) {
-							return cb(e);
-						}
-					);
-				}
-			},
-			function(results) {
-				complete(results);
-			}
-		);
-	},
-	getType: function getType(rule) {
-		if (rule.type === undefined && rule.pattern instanceof RegExp) {
-			rule.type = 'pattern';
-		}
+            if (errs && errs.length) {
+              finalErrors.push.apply(finalErrors, errs);
+            }
 
-		if (
-			typeof rule.validator !== 'function' &&
-			rule.type &&
-			!validators.hasOwnProperty(rule.type)
-		) {
-			throw new Error(format('Unknown rule type %s', rule.type));
-		}
+            doIt(finalErrors.length ? finalErrors : null);
+          });
+        }
+      }
 
-		return rule.type || 'string';
-	},
-	getValidationMethod: function getValidationMethod(rule) {
-		if (typeof rule.validator === 'function') {
-			return rule.validator;
-		}
+      var res;
 
-		var keys = Object.keys(rule);
-		var messageIndex = keys.indexOf('message');
+      if (rule.asyncValidator) {
+        res = rule.asyncValidator(rule, data.value, cb, data.source, options);
+      } else if (rule.validator) {
+        res = rule.validator(rule, data.value, cb, data.source, options);
 
-		if (messageIndex !== -1) {
-			keys.splice(messageIndex, 1);
-		}
+        if (res === true) {
+          cb();
+        } else if (res === false) {
+          cb(rule.message || rule.field + ' fails');
+        } else if (res instanceof Array) {
+          cb(res);
+        } else if (res instanceof Error) {
+          cb(res.message);
+        }
+      }
 
-		if (keys.length === 1 && keys[0] === 'required') {
-			return validators.required;
-		}
+      if (res && res.then) {
+        res.then(
+        function () {
+          return cb();
+        },
+        function (e) {
+          return cb(e);
+        });
 
-		return validators[this.getType(rule)] || false;
-	}
-};
+      }
+    },
+    function (results) {
+      complete(results);
+    });
+
+  },
+  getType: function getType(rule) {
+    if (rule.type === undefined && rule.pattern instanceof RegExp) {
+      rule.type = 'pattern';
+    }
+
+    if (
+    typeof rule.validator !== 'function' &&
+    rule.type &&
+    !validators.hasOwnProperty(rule.type))
+    {
+      throw new Error(format('Unknown rule type %s', rule.type));
+    }
+
+    return rule.type || 'string';
+  },
+  getValidationMethod: function getValidationMethod(rule) {
+    if (typeof rule.validator === 'function') {
+      return rule.validator;
+    }
+
+    var keys = Object.keys(rule);
+    var messageIndex = keys.indexOf('message');
+
+    if (messageIndex !== -1) {
+      keys.splice(messageIndex, 1);
+    }
+
+    if (keys.length === 1 && keys[0] === 'required') {
+      return validators.required;
+    }
+
+    return validators[this.getType(rule)] || false;
+  } };
+
 
 Schema.register = function register(type, validator) {
-	if (typeof validator !== 'function') {
-		throw new Error('Cannot register a validator by type, validator is not a function');
-	}
+  if (typeof validator !== 'function') {
+    throw new Error('Cannot register a validator by type, validator is not a function');
+  }
 
-	validators[type] = validator;
+  validators[type] = validator;
 };
 
 Schema.warning = warning;
-Schema.messages = messages;
+Schema.messages = messages;var _default =
 
-/* harmony default export */ __webpack_exports__["default"] = (Schema);
-//# sourceMappingURL=index.js.map
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
+Schema;exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
 
 /***/ }),
 /* 189 */,
@@ -14360,48 +14274,44 @@ Schema.messages = messages;
 /* 192 */,
 /* 193 */,
 /* 194 */
-/*!*********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/mixins/parent.js ***!
-  \*********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!**********************************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/parent.js ***!
+  \**********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ 16);
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 15);var _default =
 
+{
+  data: function data() {
+    return {
+      Parent: null };
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-    data() {
-        return {
-            Parent: null,
-        }
+  },
+
+  computed: {
+    parent: function parent() {
+      return this.getParent() || this.Parent || {};
     },
 
-    computed: {
-        parent() {
-            return this.getParent() || this.Parent || {};
-        },
+    hasParent: function hasParent() {
+      return !(0, _utils.isEmpty)(this.parent);
+    } },
 
-        hasParent() {
-            return !Object(_utils__WEBPACK_IMPORTED_MODULE_0__["isEmpty"])(this.parent)
-        }
-    },
 
-    mounted() {
-        this.Parent = this.getParent()
-    },
+  mounted: function mounted() {
+    this.Parent = this.getParent();
+  },
 
-    methods: {
-        getParent() {
-            if (!this.ComponentName) {
-                return null
-            }
+  methods: {
+    getParent: function getParent() {
+      if (!this.ComponentName) {
+        return null;
+      }
 
-            return _utils__WEBPACK_IMPORTED_MODULE_0__["getParent"].call(this, this.ComponentName, this.Keys)
-        }
-    }
-});
+      return _utils.getParent.call(this, this.ComponentName, this.Keys);
+    } } };exports.default = _default;
 
 /***/ })
 ]]);
