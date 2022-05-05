@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "cl-loading-mask": "/node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask"
+  },
+  "component": true
+}

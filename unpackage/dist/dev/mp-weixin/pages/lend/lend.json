@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "我要借出",
+  "usingComponents": {
+    "cl-form": "/node-modules/cl-uni/components/cl-form/cl-form",
+    "cl-form-item": "/node-modules/cl-uni/components/cl-form-item/cl-form-item",
+    "cl-input": "/node-modules/cl-uni/components/cl-input/cl-input",
+    "cl-select": "/node-modules/cl-uni/components/cl-select/cl-select",
+    "cl-upload": "/node-modules/cl-uni/components/cl-upload/cl-upload",
+    "cl-button": "/node-modules/cl-uni/components/cl-button/cl-button"
+  }
+}

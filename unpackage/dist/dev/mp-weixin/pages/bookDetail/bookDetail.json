@@ -1,0 +1,11 @@
+{
+  "navigationBarTitleText": "书籍详情",
+  "navigationBarBackgroundColor": "#ff6364",
+  "navigationBarTextStyle": "white",
+  "usingComponents": {
+    "uni-section": "/uni_modules/uni-section/components/uni-section/uni-section",
+    "uni-icons": "/uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "cl-input": "/node-modules/cl-uni/components/cl-input/cl-input",
+    "cl-button": "/node-modules/cl-uni/components/cl-button/cl-button"
+  }
+}
