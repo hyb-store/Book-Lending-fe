@@ -324,7 +324,7 @@ var promiseInterceptor = {
 
 
 var SYNC_API_RE =
-/^\$|Window$|WindowStyle$|sendHostEvent|sendNativeEvent|restoreGlobal|getCurrentSubNVue|getMenuButtonBoundingClientRect|^report|interceptors|Interceptor$|getSubNVueById|requireNativePlugin|upx2px|hideKeyboard|canIUse|^create|Sync$|Manager$|base64ToArrayBuffer|arrayBufferToBase64|getLocale|setLocale/;
+/^\$|Window$|WindowStyle$|sendNativeEvent|restoreGlobal|getCurrentSubNVue|getMenuButtonBoundingClientRect|^report|interceptors|Interceptor$|getSubNVueById|requireNativePlugin|upx2px|hideKeyboard|canIUse|^create|Sync$|Manager$|base64ToArrayBuffer|arrayBufferToBase64|getLocale|setLocale/;
 
 var CONTEXT_API_RE = /^create|Manager$/;
 
@@ -804,16 +804,15 @@ var customize = cached(function (str) {
 });
 
 function initTriggerEvent(mpInstance) {
+  {
+    if (!wx.canIUse || !wx.canIUse('nextTick')) {
+      return;
+    }
+  }
   var oldTriggerEvent = mpInstance.triggerEvent;
-  var newTriggerEvent = function newTriggerEvent(event) {for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {args[_key3 - 1] = arguments[_key3];}
+  mpInstance.triggerEvent = function (event) {for (var _len3 = arguments.length, args = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {args[_key3 - 1] = arguments[_key3];}
     return oldTriggerEvent.apply(mpInstance, [customize(event)].concat(args));
   };
-  try {
-    // 京东小程序 triggerEvent 为只读
-    mpInstance.triggerEvent = newTriggerEvent;
-  } catch (error) {
-    mpInstance._triggerEvent = newTriggerEvent;
-  }
 }
 
 function initHook(name, options, isComponent) {
@@ -947,7 +946,7 @@ function initData(vueOptions, context) {
     try {
       data = data.call(context); // 支持 Vue.prototype 上挂的数据
     } catch (e) {
-      if (Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
+      if (Object({"VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
         console.warn('根据 Vue 的 data 函数初始化小程序 data 失败，请尽量确保 data 函数中不访问 vm 对象，否则可能影响首次数据渲染速度。', data);
       }
     }
@@ -1386,33 +1385,11 @@ function handleEvent(event) {var _this = this;
   }
 }
 
-var messages = {};
-
 var locale;
 
 {
   locale = wx.getSystemInfoSync().language;
 }
-
-function initI18nMessages() {
-  if (!isEnableLocale()) {
-    return;
-  }
-  var localeKeys = Object.keys(__uniConfig.locales);
-  if (localeKeys.length) {
-    localeKeys.forEach(function (locale) {
-      var curMessages = messages[locale];
-      var userMessages = __uniConfig.locales[locale];
-      if (curMessages) {
-        Object.assign(curMessages, userMessages);
-      } else {
-        messages[locale] = userMessages;
-      }
-    });
-  }
-}
-
-initI18nMessages();
 
 var i18n = (0, _uniI18n.initVueI18n)(
 locale,
@@ -1455,19 +1432,6 @@ function initAppLocale(Vue, appVm, locale) {
     } });
 
 }
-
-function isEnableLocale() {
-  return typeof __uniConfig !== 'undefined' && __uniConfig.locales && !!Object.keys(__uniConfig.locales).length;
-}
-
-// export function initI18n() {
-//   const localeKeys = Object.keys(__uniConfig.locales || {})
-//   if (localeKeys.length) {
-//     localeKeys.forEach((locale) =>
-//       i18n.add(locale, __uniConfig.locales[locale])
-//     )
-//   }
-// }
 
 var eventChannels = {};
 
@@ -1516,7 +1480,7 @@ function initScopedSlotsParams() {
     var has = center[vueId];
     if (!has) {
       parents[vueId] = this;
-      this.$on('hook:destroyed', function () {
+      this.$on('hook:destory', function () {
         delete parents[vueId];
       });
     }
@@ -1530,7 +1494,7 @@ function initScopedSlotsParams() {
       return key ? object[key] : object;
     } else {
       parents[vueId] = this;
-      this.$on('hook:destroyed', function () {
+      this.$on('hook:destory', function () {
         delete parents[vueId];
       });
     }
@@ -1987,17 +1951,17 @@ function createPlugin(vm) {
   var appOptions = parseApp(vm);
   if (isFn(appOptions.onShow) && wx.onAppShow) {
     wx.onAppShow(function () {for (var _len7 = arguments.length, args = new Array(_len7), _key7 = 0; _key7 < _len7; _key7++) {args[_key7] = arguments[_key7];}
-      vm.__call_hook('onShow', args);
+      appOptions.onShow.apply(vm, args);
     });
   }
   if (isFn(appOptions.onHide) && wx.onAppHide) {
     wx.onAppHide(function () {for (var _len8 = arguments.length, args = new Array(_len8), _key8 = 0; _key8 < _len8; _key8++) {args[_key8] = arguments[_key8];}
-      vm.__call_hook('onHide', args);
+      appOptions.onHide.apply(vm, args);
     });
   }
   if (isFn(appOptions.onLaunch)) {
     var args = wx.getLaunchOptionsSync && wx.getLaunchOptionsSync();
-    vm.__call_hook('onLaunch', args);
+    appOptions.onLaunch.call(vm, args);
   }
   return vm;
 }
@@ -6211,10 +6175,10 @@ function updateChildComponent (
     // keep a copy of raw propsData
     vm.$options.propsData = propsData;
   }
-
+  
   // fixed by xxxxxx update properties(mp runtime)
   vm._$updateProperties && vm._$updateProperties(vm);
-
+  
   // update listeners
   listeners = listeners || emptyObject;
   var oldListeners = vm.$options._parentListeners;
@@ -6745,7 +6709,7 @@ function initProps (vm, propsOptions) {
             }
             //fixed by xxxxxx __next_tick_pending,uni://form-field 时不告警
             if(
-                key === 'value' &&
+                key === 'value' && 
                 Array.isArray(vm.$options.behaviors) &&
                 vm.$options.behaviors.indexOf('uni://form-field') !== -1
               ){
@@ -6757,7 +6721,7 @@ function initProps (vm, propsOptions) {
             var $parent = vm.$parent;
             while($parent){
               if($parent.__next_tick_pending){
-                return
+                return  
               }
               $parent = $parent.$parent;
             }
@@ -7085,10 +7049,10 @@ function initMixin (Vue) {
     initEvents(vm);
     initRender(vm);
     callHook(vm, 'beforeCreate');
-    !vm._$fallback && initInjections(vm); // resolve injections before data/props
+    !vm._$fallback && initInjections(vm); // resolve injections before data/props  
     initState(vm);
     !vm._$fallback && initProvide(vm); // resolve provide after data/props
-    !vm._$fallback && callHook(vm, 'created');
+    !vm._$fallback && callHook(vm, 'created');      
 
     /* istanbul ignore if */
     if ( true && config.performance && mark) {
@@ -7647,7 +7611,7 @@ function type(obj) {
 
 function flushCallbacks$1(vm) {
     if (vm.__next_tick_callbacks && vm.__next_tick_callbacks.length) {
-        if (Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
+        if (Object({"VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
             var mpInstance = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:flushCallbacks[' + vm.__next_tick_callbacks.length + ']');
@@ -7668,14 +7632,14 @@ function nextTick$1(vm, cb) {
     //1.nextTick 之前 已 setData 且 setData 还未回调完成
     //2.nextTick 之前存在 render watcher
     if (!vm.__next_tick_pending && !hasRenderWatcher(vm)) {
-        if(Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG){
+        if(Object({"VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG){
             var mpInstance = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + vm._uid +
                 ']:nextVueTick');
         }
         return nextTick(cb, vm)
     }else{
-        if(Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG){
+        if(Object({"VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG){
             var mpInstance$1 = vm.$scope;
             console.log('[' + (+new Date) + '][' + (mpInstance$1.is || mpInstance$1.route) + '][' + vm._uid +
                 ']:nextMPTick');
@@ -7761,7 +7725,7 @@ var patch = function(oldVnode, vnode) {
     });
     var diffData = this.$shouldDiffData === false ? data : diff(data, mpData);
     if (Object.keys(diffData).length) {
-      if (Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}).VUE_APP_DEBUG) {
+      if (Object({"VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}).VUE_APP_DEBUG) {
         console.log('[' + (+new Date) + '][' + (mpInstance.is || mpInstance.route) + '][' + this._uid +
           ']差量更新',
           JSON.stringify(diffData));
@@ -7814,7 +7778,7 @@ function mountComponent$1(
       }
     }
   }
-
+  
   !vm._$fallback && callHook(vm, 'beforeMount');
 
   var updateComponent = function () {
@@ -7947,10 +7911,9 @@ function internalMixin(Vue) {
 
   Vue.prototype.$emit = function(event) {
     if (this.$scope && event) {
-      (this.$scope['_triggerEvent'] || this.$scope['triggerEvent'])
-        .call(this.$scope, event, {
-          __args__: toArray(arguments, 1)
-        })
+      this.$scope['triggerEvent'](event, {
+        __args__: toArray(arguments, 1)
+      });
     }
     return oldEmit.apply(this, arguments)
   };
@@ -8014,16 +7977,14 @@ function internalMixin(Vue) {
     if (!target) {
       target = this;
     }
-    // 解决动态属性添加
-    Vue.set(target, key, value)
+    target[key] = value;
   };
 
   Vue.prototype.__set_sync = function(target, key, value) {
     if (!target) {
       target = this;
     }
-    // 解决动态属性添加
-    Vue.set(target, key, value)
+    target[key] = value;
   };
 
   Vue.prototype.__get_orig = function(item) {
@@ -8156,7 +8117,7 @@ Vue.prototype.__patch__ = patch;
 // public mount method
 Vue.prototype.$mount = function(
     el ,
-    hydrating
+    hydrating 
 ) {
     return mountComponent$1(this, el, hydrating)
 };
@@ -8635,9 +8596,9 @@ function resolveLocaleChain(locale) {
 
 /***/ }),
 /* 5 */
-/*!*******************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/pages.json ***!
-  \*******************************************************/
+/*!*****************************************!*\
+  !*** E:/hyb/Book-Lending-fe/pages.json ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -8647,20 +8608,9 @@ function resolveLocaleChain(locale) {
 /* 6 */,
 /* 7 */,
 /* 8 */,
-/* 9 */
-/*!***************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/common/constant.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
-
-/***/ }),
+/* 9 */,
 /* 10 */,
-/* 11 */,
-/* 12 */
+/* 11 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -8788,462 +8738,428 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 13 */
-/*!*************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/index.js ***!
-  \*************************************************************************/
-/*! exports provided: Emitter, Storage, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 12 */
+/*!***********************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/index.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(uni) {/* harmony import */ var _utils_storage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./utils/storage */ 14);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Storage", function() { return _utils_storage__WEBPACK_IMPORTED_MODULE_0__["default"]; });
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });Object.defineProperty(exports, "Storage", { enumerable: true, get: function get() {return _storage.default;} });Object.defineProperty(exports, "Emitter", { enumerable: true, get: function get() {return _emitter.default;} });exports.default = void 0;var _storage = _interopRequireDefault(__webpack_require__(/*! ./utils/storage */ 13));
+var _emitter = _interopRequireDefault(__webpack_require__(/*! ./mixins/emitter */ 14));
+var _utils = __webpack_require__(/*! ./utils */ 15);
 
-/* harmony import */ var _mixins_emitter__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./mixins/emitter */ 15);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Emitter", function() { return _mixins_emitter__WEBPACK_IMPORTED_MODULE_1__["default"]; });
+__webpack_require__(/*! ./common */ 16);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
 
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./utils */ 16);
-/* harmony import */ var _common__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./common */ 17);
-/* harmony import */ var _common__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_common__WEBPACK_IMPORTED_MODULE_3__);
-
-
-
+var install = function install(Vue) {var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  // 默认配置数据
+  var data = {
+    // 首页页面路径
+    homePage: "/" };
 
 
+  var $cl = _objectSpread(_objectSpread({},
+  (0, _utils.deepMerge)(data, options)), {}, {
+    Storage: _storage.default,
+    author: "cool",
+    version: "1.8.16" });
 
-const install = (Vue, options = {}) => {
-	// 默认配置数据
-	let data = {
-		// 首页页面路径
-		homePage: "/",
-	};
 
-	let $cl = {
-		...Object(_utils__WEBPACK_IMPORTED_MODULE_2__["deepMerge"])(data, options),
-		Storage: _utils_storage__WEBPACK_IMPORTED_MODULE_0__["default"],
-		author: "cool",
-		version: "1.8.16",
-	};
-
-	Vue.prototype.$cl = uni.$cl = $cl;
-};
+  Vue.prototype.$cl = uni.$cl = $cl;
+};var _default =
 
 
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-	install,
-});
+{
+  install: install };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
+/***/ }),
+/* 13 */
+/*!*******************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/utils/storage.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default = {
+  // 后缀标识
+  suffix: "_deadtime",
+
+  /**
+                        * 获取
+                        * @param {*} key 关键字
+                        */
+  get: function get(key) {
+    return uni.getStorageSync(key);
+  },
+
+  /**
+      * 获取全部
+      */
+  info: function info() {
+    return uni.getStorageInfoSync();
+  },
+
+  /**
+      * 设置
+      * @param {*} key 关键字
+      * @param {*} value 值
+      * @param {*} expires 过期时间
+      */
+  set: function set(key, value, expires) {
+    uni.setStorageSync(key, value);
+
+    if (expires) {
+      uni.setStorageSync("".concat(key).concat(this.suffix), Date.parse(new Date()) + expires * 1000);
+    }
+  },
+
+  /**
+      * 是否过期
+      * @param {*} key 关键字
+      */
+  isExpired: function isExpired(key) {
+    return uni.getStorageSync("".concat(key).concat(this.suffix)) - Date.parse(new Date()) <= 0;
+  },
+
+  /**
+      * 移除
+      * @param {*} key 关键字
+      */
+  remove: function remove(key) {
+    return uni.removeStorageSync(key);
+  },
+
+  /**
+      * 清理
+      */
+  clear: function clear() {
+    uni.clearStorageSync();
+  } };exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
 /* 14 */
-/*!*********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/utils/storage.js ***!
-  \*********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/emitter.js ***!
+  \********************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(uni) {/* harmony default export */ __webpack_exports__["default"] = ({
-	// 后缀标识
-	suffix: "_deadtime",
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function _broadcast(componentName, eventName, params) {
+  this.$children.forEach(function (child) {
+    var name = child.$options.componentName;
 
-	/**
-	 * 获取
-	 * @param {*} key 关键字
-	 */
-	get(key) {
-		return uni.getStorageSync(key)
-	},
+    if (name === componentName) {
+      child.$emit.apply(child, [eventName].concat(params));
+    } else {
+      _broadcast.apply(child, [componentName, eventName].concat(params));
+    }
+  });
+}var _default =
 
-	/**
-	 * 获取全部
-	 */
-	info() {
-		return uni.getStorageInfoSync()
-	},
+{
+  methods: {
+    dispatch: function dispatch(componentName, eventName, params) {
+      var parent = this.$parent || this.$root;
+      var name = parent.$options.componentName;
 
-	/**
-	 * 设置
-	 * @param {*} key 关键字
-	 * @param {*} value 值
-	 * @param {*} expires 过期时间
-	 */
-	set(key, value, expires) {
-		uni.setStorageSync(key, value);
+      while (parent && (!name || name !== componentName)) {
+        parent = parent.$parent;
 
-		if (expires) {
-			uni.setStorageSync(`${key}${this.suffix}`, Date.parse(new Date()) + expires * 1000);
-		}
-	},
-
-	/**
-	 * 是否过期
-	 * @param {*} key 关键字
-	 */
-	isExpired(key) {
-		return uni.getStorageSync(`${key}${this.suffix}`) - Date.parse(new Date()) <= 0;
-	},
-
-	/**
-	 * 移除
-	 * @param {*} key 关键字
-	 */
-	remove(key) {
-		return uni.removeStorageSync(key)
-	},
-
-	/**
-	 * 清理
-	 */
-	clear() {
-		uni.clearStorageSync()
-	}
-});
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
+        if (parent) {
+          name = parent.$options.componentName;
+        }
+      }
+      if (parent) {
+        parent.$emit.apply(parent, [eventName].concat(params));
+      }
+    },
+    broadcast: function broadcast(componentName, eventName, params) {
+      _broadcast.call(this, componentName, eventName, params);
+    } } };exports.default = _default;
 
 /***/ }),
 /* 15 */
-/*!**********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/mixins/emitter.js ***!
-  \**********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/*!*****************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/utils/index.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-function broadcast(componentName, eventName, params) {
-	this.$children.forEach(child => {
-		var name = child.$options.componentName;
-
-		if (name === componentName) {
-			child.$emit.apply(child, [eventName].concat(params));
-		} else {
-			broadcast.apply(child, [componentName, eventName].concat(params));
-		}
-	});
-}
-
-/* harmony default export */ __webpack_exports__["default"] = ({
-	methods: {
-		dispatch(componentName, eventName, params) {
-			var parent = this.$parent || this.$root;
-			var name = parent.$options.componentName;
-
-			while (parent && (!name || name !== componentName)) {
-				parent = parent.$parent;
-
-				if (parent) {
-					name = parent.$options.componentName;
-				}
-			}
-			if (parent) {
-				parent.$emit.apply(parent, [eventName].concat(params));
-			}
-		},
-		broadcast(componentName, eventName, params) {
-			broadcast.call(this, componentName, eventName, params);
-		}
-	}
-});
-
-
-/***/ }),
-/* 16 */
-/*!*******************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/utils/index.js ***!
-  \*******************************************************************************/
-/*! exports provided: isDev, isArray, isObject, isFunction, isString, isNull, isBoolean, isNumber, isDecimal, isPromise, isEmpty, last, firstUpperCase, debounce, compareValue, cloneDeep, deepMerge, getCurrentPage, parseRpx, getParent, getCurrentColor, getUrlParam, orderBy */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDev", function() { return isDev; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isArray", function() { return isArray; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isObject", function() { return isObject; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFunction", function() { return isFunction; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isString", function() { return isString; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isNull", function() { return isNull; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isBoolean", function() { return isBoolean; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isNumber", function() { return isNumber; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDecimal", function() { return isDecimal; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isPromise", function() { return isPromise; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isEmpty", function() { return isEmpty; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "last", function() { return last; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "firstUpperCase", function() { return firstUpperCase; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "debounce", function() { return debounce; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "compareValue", function() { return compareValue; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "cloneDeep", function() { return cloneDeep; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "deepMerge", function() { return deepMerge; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCurrentPage", function() { return getCurrentPage; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "parseRpx", function() { return parseRpx; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getParent", function() { return getParent; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCurrentColor", function() { return getCurrentColor; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getUrlParam", function() { return getUrlParam; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "orderBy", function() { return orderBy; });
-// 是否开发模式
-const isDev = "development" == "development";
+Object.defineProperty(exports, "__esModule", { value: true });exports.isArray = isArray;exports.isObject = isObject;exports.isFunction = isFunction;exports.isString = isString;exports.isNull = isNull;exports.isBoolean = isBoolean;exports.isNumber = isNumber;exports.isDecimal = isDecimal;exports.isPromise = isPromise;exports.isEmpty = isEmpty;exports.last = last;exports.firstUpperCase = firstUpperCase;exports.debounce = debounce;exports.compareValue = compareValue;exports.cloneDeep = cloneDeep;exports.deepMerge = deepMerge;exports.getCurrentPage = getCurrentPage;exports.parseRpx = parseRpx;exports.getParent = getParent;exports.getCurrentColor = getCurrentColor;exports.getUrlParam = getUrlParam;exports.orderBy = orderBy;exports.isDev = void 0; // 是否开发模式
+var isDev = "development" == "development";
 
 // 是否Array类型
-function isArray(value) {
-	if (typeof Array.isArray === "function") {
-		return Array.isArray(value);
-	} else {
-		return Object.prototype.toString.call(value) === "[object Array]";
-	}
+exports.isDev = isDev;function isArray(value) {
+  if (typeof Array.isArray === "function") {
+    return Array.isArray(value);
+  } else {
+    return Object.prototype.toString.call(value) === "[object Array]";
+  }
 }
 
 // 是否Object类型
 function isObject(value) {
-	return Object.prototype.toString.call(value) === "[object Object]";
+  return Object.prototype.toString.call(value) === "[object Object]";
 }
 
 // 是否Function类型
 function isFunction(value) {
-	return typeof value === "function";
+  return typeof value === "function";
 }
 
 // 是否String类型
 function isString(value) {
-	return typeof value === "string";
+  return typeof value === "string";
 }
 
 // 是否null类型
 function isNull(value) {
-	return !value && value !== 0;
+  return !value && value !== 0;
 }
 
 // 是否Boolean类型
 function isBoolean(value) {
-	return typeof value === "boolean";
+  return typeof value === "boolean";
 }
 
 // 是否数字类型
 function isNumber(value) {
-	return typeof value === "number" && !isNaN(value);
+  return typeof value === "number" && !isNaN(value);
 }
 
 // 是否小数
 function isDecimal(value) {
-	return String(value).length - String(value).indexOf(".") + 1;
+  return String(value).length - String(value).indexOf(".") + 1;
 }
 
 // 是否Promise类型
 function isPromise(obj) {
-	obj !== null &&
-		(typeof obj === "object" || typeof obj === "function") &&
-		typeof obj.then === "function";
+  obj !== null && (
+  typeof obj === "object" || typeof obj === "function") &&
+  typeof obj.then === "function";
 }
 
 // 是否为空
 function isEmpty(value) {
-	if (isArray(value)) {
-		return value.length === 0;
-	}
+  if (isArray(value)) {
+    return value.length === 0;
+  }
 
-	if (isObject(value)) {
-		return Object.keys(value).length === 0;
-	}
+  if (isObject(value)) {
+    return Object.keys(value).length === 0;
+  }
 
-	return value === "" || value === undefined || value === null;
+  return value === "" || value === undefined || value === null;
 }
 
 // 取最后一个值
 function last(data) {
-	if (isArray(data) || isString(data)) {
-		return data[data.length - 1];
-	}
+  if (isArray(data) || isString(data)) {
+    return data[data.length - 1];
+  }
 }
 
 // 首字母大写
 function firstUpperCase(value) {
-	return value.replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
-		return $1.toUpperCase() + $2.toLowerCase();
-	});
+  return value.replace(/\b(\w)(\w*)/g, function ($0, $1, $2) {
+    return $1.toUpperCase() + $2.toLowerCase();
+  });
 }
 
 // 防抖
 function debounce(fn, wait, immediate) {
-	let timer;
-	return function () {
-		if (timer) clearTimeout(timer);
-		if (immediate) {
-			var callNow = !timer;
-			timer = setTimeout(() => {
-				timer = null;
-			}, wait);
-			if (callNow) {
-				fn.apply(this, arguments);
-			}
-		} else {
-			timer = setTimeout(() => {
-				fn.apply(this, arguments);
-			}, wait);
-		}
-	};
+  var timer;
+  return function () {var _arguments = arguments,_this = this;
+    if (timer) clearTimeout(timer);
+    if (immediate) {
+      var callNow = !timer;
+      timer = setTimeout(function () {
+        timer = null;
+      }, wait);
+      if (callNow) {
+        fn.apply(this, arguments);
+      }
+    } else {
+      timer = setTimeout(function () {
+        fn.apply(_this, _arguments);
+      }, wait);
+    }
+  };
 }
 
 // 比较值
 function compareValue(a, b) {
-	return String(a) === String(b);
+  return String(a) === String(b);
 }
 
 // 深拷贝
 function cloneDeep(v) {
-	if (isObject(v)) {
-		let d = {};
+  if (isObject(v)) {
+    var d = {};
 
-		for (let k in v) {
-			if (v.hasOwnProperty && v.hasOwnProperty(k)) {
-				if (v[k] && typeof v[k] === "object") {
-					d[k] = cloneDeep(v[k]);
-				} else {
-					d[k] = v[k];
-				}
-			}
-		}
+    for (var k in v) {
+      if (v.hasOwnProperty && v.hasOwnProperty(k)) {
+        if (v[k] && typeof v[k] === "object") {
+          d[k] = cloneDeep(v[k]);
+        } else {
+          d[k] = v[k];
+        }
+      }
+    }
 
-		return d;
-	} else if (isArray(v)) {
-		return v.map(cloneDeep);
-	} else {
-		return v;
-	}
+    return d;
+  } else if (isArray(v)) {
+    return v.map(cloneDeep);
+  } else {
+    return v;
+  }
 }
 
 // 深度合并
 function deepMerge(a, b) {
-	let k;
-	for (k in b) {
-		a[k] =
-			a[k] && a[k].toString() === "[object Object]" ? deepMerge(a[k], b[k]) : (a[k] = b[k]);
-	}
-	return a;
+  var k;
+  for (k in b) {
+    a[k] =
+    a[k] && a[k].toString() === "[object Object]" ? deepMerge(a[k], b[k]) : a[k] = b[k];
+  }
+  return a;
 }
 
 // 获取当前页面信息
-function getCurrentPage() {
-	const { route, $page, options, $route } = last(getCurrentPages());
+function getCurrentPage() {var _last =
+  last(getCurrentPages()),route = _last.route,$page = _last.$page,options = _last.options,$route = _last.$route;
 
-	return {
-		path: `/${route}`,
-		fullPath: $page.fullPath,
-		// #ifdef MP
-		query: options,
-		// #endif
-		// #ifdef H5
-		query: $route.params,
-		// #endif
-	};
+  return {
+    path: "/".concat(route),
+    fullPath: $page.fullPath,
+
+    query: options };
+
+
+
+
+
 }
 
 /**
- * 解析rpx
- * @param {*} val
- */
+   * 解析rpx
+   * @param {*} val
+   */
 function parseRpx(val) {
-	return isArray(val) ? val.map(parseRpx).join(" ") : isNumber(val) ? val + "rpx" : val;
+  return isArray(val) ? val.map(parseRpx).join(" ") : isNumber(val) ? val + "rpx" : val;
 }
 
 /**
- * 获取父级节点
- * @param {*} name componentName
- * @param {*} keys 保留的参数，避免 computed 非 H5 解析失败
- */
+   * 获取父级节点
+   * @param {*} name componentName
+   * @param {*} keys 保留的参数，避免 computed 非 H5 解析失败
+   */
 function getParent(name, keys) {
-	let parent = this.$parent;
+  var parent = this.$parent;
 
-	while (parent) {
-		if (parent.$options.componentName !== name) {
-			parent = parent.$parent;
-		} else {
-			return keys.reduce((result, key) => {
-				result[key] = parent[key];
-				return result;
-			}, {});
-		}
-	}
+  while (parent) {
+    if (parent.$options.componentName !== name) {
+      parent = parent.$parent;
+    } else {
+      return keys.reduce(function (result, key) {
+        result[key] = parent[key];
+        return result;
+      }, {});
+    }
+  }
 
-	return null;
+  return null;
 }
 
 /**
- * 获取当前颜色
- *
- * @param {*} { color, max, value }
- */
-function getCurrentColor({ color, max, value }) {
-	if (isString(color)) {
-		return color;
-	} else {
-		const colorArray = color
-			.map((item, index) => {
-				if (isString(item)) {
-					return {
-						color: item,
-						value: (index + 1) * (max / color.length),
-					};
-				}
-				return item;
-			})
-			.sort((a, b) => a.value - b.value);
+   * 获取当前颜色
+   *
+   * @param {*} { color, max, value }
+   */
+function getCurrentColor(_ref) {var color = _ref.color,max = _ref.max,value = _ref.value;
+  if (isString(color)) {
+    return color;
+  } else {
+    var colorArray = color.
+    map(function (item, index) {
+      if (isString(item)) {
+        return {
+          color: item,
+          value: (index + 1) * (max / color.length) };
 
-		for (let i = 0; i < colorArray.length; i++) {
-			if (colorArray[i].value >= value) {
-				return colorArray[i].color;
-			}
-		}
+      }
+      return item;
+    }).
+    sort(function (a, b) {return a.value - b.value;});
 
-		return colorArray[colorArray.length - 1].color;
-	}
+    for (var i = 0; i < colorArray.length; i++) {
+      if (colorArray[i].value >= value) {
+        return colorArray[i].color;
+      }
+    }
+
+    return colorArray[colorArray.length - 1].color;
+  }
 }
 
 // 获取地址栏参数
 function getUrlParam(name) {
-	let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-	let r = window.location.search.substr(1).match(reg);
-	if (r != null) return decodeURIComponent(r[2]);
-	return null;
+  var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+  var r = window.location.search.substr(1).match(reg);
+  if (r != null) return decodeURIComponent(r[2]);
+  return null;
 }
 
 // 根据某个字段排序
 function orderBy(list, key) {
-	return list.sort((a, b) => a[key] - b[key]);
+  return list.sort(function (a, b) {return a[key] - b[key];});
 }
 
-
 /***/ }),
-/* 17 */
-/*!**************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/common.js ***!
-  \**************************************************************************/
+/* 16 */
+/*!************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/common.js ***!
+  \************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-Promise.prototype.done = function(cb) {
-	let P = this.constructor;
+Promise.prototype.done = function (cb) {
+  var P = this.constructor;
 
-	return this.then(
-		value => P.resolve(cb()).then(() => value),
-		reason =>
-			P.resolve(cb()).then(() => {
-				throw reason;
-			})
-	);
+  return this.then(
+  function (value) {return P.resolve(cb()).then(function () {return value;});},
+  function (reason) {return (
+      P.resolve(cb()).then(function () {
+        throw reason;
+      }));});
+
 };
 
-
 /***/ }),
+/* 17 */,
 /* 18 */,
 /* 19 */,
 /* 20 */,
 /* 21 */,
 /* 22 */,
-/* 23 */,
+/* 23 */
+/*!*************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/common/constant.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
+
+/***/ }),
 /* 24 */,
 /* 25 */,
 /* 26 */,
@@ -9260,7 +9176,7 @@ Promise.prototype.done = function(cb) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global, uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@babel/runtime/regenerator */ 33));var _uniI18n = __webpack_require__(/*! @dcloudio/uni-i18n */ 4);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}function _toConsumableArray(arr) {return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();}function _nonIterableSpread() {throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}function _iterableToArray(iter) {if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);}function _arrayWithoutHoles(arr) {if (Array.isArray(arr)) return _arrayLikeToArray(arr);}function _createForOfIteratorHelper(o, allowArrayLike) {var it;if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {if (it) o = it;var i = 0;var F = function F() {};return { s: F, n: function n() {if (i >= o.length) return { done: true };return { done: false, value: o[i++] };}, e: function e(_e24) {throw _e24;}, f: F };}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}var normalCompletion = true,didErr = false,err;return { s: function s() {it = o[Symbol.iterator]();}, n: function n() {var step = it.next();normalCompletion = step.done;return step;}, e: function e(_e25) {didErr = true;err = _e25;}, f: function f() {try {if (!normalCompletion && it.return != null) it.return();} finally {if (didErr) throw err;}} };}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(o);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);return Constructor;}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _inherits(subClass, superClass) {if (typeof superClass !== "function" && superClass !== null) {throw new TypeError("Super expression must either be null or a function");}subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });if (superClass) _setPrototypeOf(subClass, superClass);}function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = _getPrototypeOf(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = _getPrototypeOf(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return _possibleConstructorReturn(this, result);};}function _possibleConstructorReturn(self, call) {if (call && (typeof call === "object" || typeof call === "function")) {return call;}return _assertThisInitialized(self);}function _assertThisInitialized(self) {if (self === void 0) {throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return self;}function _wrapNativeSuper(Class) {var _cache = typeof Map === "function" ? new Map() : undefined;_wrapNativeSuper = function _wrapNativeSuper(Class) {if (Class === null || !_isNativeFunction(Class)) return Class;if (typeof Class !== "function") {throw new TypeError("Super expression must either be null or a function");}if (typeof _cache !== "undefined") {if (_cache.has(Class)) return _cache.get(Class);_cache.set(Class, Wrapper);}function Wrapper() {return _construct(Class, arguments, _getPrototypeOf(this).constructor);}Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } });return _setPrototypeOf(Wrapper, Class);};return _wrapNativeSuper(Class);}function _construct(Parent, args, Class) {if (_isNativeReflectConstruct()) {_construct = Reflect.construct;} else {_construct = function _construct(Parent, args, Class) {var a = [null];a.push.apply(a, args);var Constructor = Function.bind.apply(Parent, a);var instance = new Constructor();if (Class) _setPrototypeOf(instance, Class.prototype);return instance;};}return _construct.apply(null, arguments);}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}function _isNativeFunction(fn) {return Function.toString.call(fn).indexOf("[native code]") !== -1;}function _setPrototypeOf(o, p) {_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {o.__proto__ = p;return o;};return _setPrototypeOf(o, p);}function _getPrototypeOf(o) {_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {return o.__proto__ || Object.getPrototypeOf(o);};return _getPrototypeOf(o);}"undefined" != typeof globalThis ? globalThis : "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof self && self;function t(e) {return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;}function n(e, t, n) {return e(n = { path: t, exports: {}, require: function require(e, t) {return function () {throw new Error("Dynamic requires are not currently supported by @rollup/plugin-commonjs");}(null == t && n.path);} }, n.exports), n.exports;}var s = n(function (e, t) {var n;e.exports = (n = n || function (e, t) {var n = Object.create || function () {function e() {}return function (t) {var n;return e.prototype = t, n = new e(), e.prototype = null, n;};}(),s = {},r = s.lib = {},o = r.Base = { extend: function extend(e) {var t = n(this);return e && t.mixIn(e), t.hasOwnProperty("init") && this.init !== t.init || (t.init = function () {t.$super.init.apply(this, arguments);}), t.init.prototype = t, t.$super = this, t;}, create: function create() {var e = this.extend();return e.init.apply(e, arguments), e;}, init: function init() {}, mixIn: function mixIn(e) {for (var t in e) {e.hasOwnProperty(t) && (this[t] = e[t]);}e.hasOwnProperty("toString") && (this.toString = e.toString);}, clone: function clone() {return this.init.prototype.extend(this);} },i = r.WordArray = o.extend({ init: function init(e, n) {e = this.words = e || [], this.sigBytes = n != t ? n : 4 * e.length;}, toString: function toString(e) {return (e || c).stringify(this);}, concat: function concat(e) {var t = this.words,n = e.words,s = this.sigBytes,r = e.sigBytes;if (this.clamp(), s % 4) for (var o = 0; o < r; o++) {var i = n[o >>> 2] >>> 24 - o % 4 * 8 & 255;t[s + o >>> 2] |= i << 24 - (s + o) % 4 * 8;} else for (o = 0; o < r; o += 4) {t[s + o >>> 2] = n[o >>> 2];}return this.sigBytes += r, this;}, clamp: function clamp() {var t = this.words,n = this.sigBytes;t[n >>> 2] &= 4294967295 << 32 - n % 4 * 8, t.length = e.ceil(n / 4);}, clone: function clone() {var e = o.clone.call(this);return e.words = this.words.slice(0), e;}, random: function random(t) {for (var n, s = [], r = function r(t) {t = t;var n = 987654321,s = 4294967295;return function () {var r = ((n = 36969 * (65535 & n) + (n >> 16) & s) << 16) + (t = 18e3 * (65535 & t) + (t >> 16) & s) & s;return r /= 4294967296, (r += .5) * (e.random() > .5 ? 1 : -1);};}, o = 0; o < t; o += 4) {var a = r(4294967296 * (n || e.random()));n = 987654071 * a(), s.push(4294967296 * a() | 0);}return new i.init(s, t);} }),a = s.enc = {},c = a.Hex = { stringify: function stringify(e) {for (var t = e.words, n = e.sigBytes, s = [], r = 0; r < n; r++) {var o = t[r >>> 2] >>> 24 - r % 4 * 8 & 255;s.push((o >>> 4).toString(16)), s.push((15 & o).toString(16));}return s.join("");}, parse: function parse(e) {for (var t = e.length, n = [], s = 0; s < t; s += 2) {n[s >>> 3] |= parseInt(e.substr(s, 2), 16) << 24 - s % 8 * 4;}return new i.init(n, t / 2);} },u = a.Latin1 = { stringify: function stringify(e) {for (var t = e.words, n = e.sigBytes, s = [], r = 0; r < n; r++) {var o = t[r >>> 2] >>> 24 - r % 4 * 8 & 255;s.push(String.fromCharCode(o));}return s.join("");}, parse: function parse(e) {for (var t = e.length, n = [], s = 0; s < t; s++) {n[s >>> 2] |= (255 & e.charCodeAt(s)) << 24 - s % 4 * 8;}return new i.init(n, t);} },h = a.Utf8 = { stringify: function stringify(e) {try {return decodeURIComponent(escape(u.stringify(e)));} catch (e) {throw new Error("Malformed UTF-8 data");}}, parse: function parse(e) {return u.parse(unescape(encodeURIComponent(e)));} },l = r.BufferedBlockAlgorithm = o.extend({ reset: function reset() {this._data = new i.init(), this._nDataBytes = 0;}, _append: function _append(e) {"string" == typeof e && (e = h.parse(e)), this._data.concat(e), this._nDataBytes += e.sigBytes;}, _process: function _process(t) {var n = this._data,s = n.words,r = n.sigBytes,o = this.blockSize,a = r / (4 * o),c = (a = t ? e.ceil(a) : e.max((0 | a) - this._minBufferSize, 0)) * o,u = e.min(4 * c, r);if (c) {for (var h = 0; h < c; h += o) {this._doProcessBlock(s, h);}var l = s.splice(0, c);n.sigBytes -= u;}return new i.init(l, u);}, clone: function clone() {var e = o.clone.call(this);return e._data = this._data.clone(), e;}, _minBufferSize: 0 });r.Hasher = l.extend({ cfg: o.extend(), init: function init(e) {this.cfg = this.cfg.extend(e), this.reset();}, reset: function reset() {l.reset.call(this), this._doReset();}, update: function update(e) {return this._append(e), this._process(), this;}, finalize: function finalize(e) {return e && this._append(e), this._doFinalize();}, blockSize: 16, _createHelper: function _createHelper(e) {return function (t, n) {return new e.init(n).finalize(t);};}, _createHmacHelper: function _createHmacHelper(e) {return function (t, n) {return new d.HMAC.init(e, n).finalize(t);};} });var d = s.algo = {};return s;}(Math), n);}),r = (n(function (e, t) {var n;e.exports = (n = s, function (e) {var t = n,s = t.lib,r = s.WordArray,o = s.Hasher,i = t.algo,a = [];!function () {for (var t = 0; t < 64; t++) {a[t] = 4294967296 * e.abs(e.sin(t + 1)) | 0;}}();var c = i.MD5 = o.extend({ _doReset: function _doReset() {this._hash = new r.init([1732584193, 4023233417, 2562383102, 271733878]);}, _doProcessBlock: function _doProcessBlock(e, t) {for (var n = 0; n < 16; n++) {var s = t + n,r = e[s];e[s] = 16711935 & (r << 8 | r >>> 24) | 4278255360 & (r << 24 | r >>> 8);}var o = this._hash.words,i = e[t + 0],c = e[t + 1],f = e[t + 2],p = e[t + 3],g = e[t + 4],m = e[t + 5],y = e[t + 6],_ = e[t + 7],w = e[t + 8],k = e[t + 9],S = e[t + 10],v = e[t + 11],T = e[t + 12],A = e[t + 13],P = e[t + 14],I = e[t + 15],b = o[0],E = o[1],O = o[2],C = o[3];b = u(b, E, O, C, i, 7, a[0]), C = u(C, b, E, O, c, 12, a[1]), O = u(O, C, b, E, f, 17, a[2]), E = u(E, O, C, b, p, 22, a[3]), b = u(b, E, O, C, g, 7, a[4]), C = u(C, b, E, O, m, 12, a[5]), O = u(O, C, b, E, y, 17, a[6]), E = u(E, O, C, b, _, 22, a[7]), b = u(b, E, O, C, w, 7, a[8]), C = u(C, b, E, O, k, 12, a[9]), O = u(O, C, b, E, S, 17, a[10]), E = u(E, O, C, b, v, 22, a[11]), b = u(b, E, O, C, T, 7, a[12]), C = u(C, b, E, O, A, 12, a[13]), O = u(O, C, b, E, P, 17, a[14]), b = h(b, E = u(E, O, C, b, I, 22, a[15]), O, C, c, 5, a[16]), C = h(C, b, E, O, y, 9, a[17]), O = h(O, C, b, E, v, 14, a[18]), E = h(E, O, C, b, i, 20, a[19]), b = h(b, E, O, C, m, 5, a[20]), C = h(C, b, E, O, S, 9, a[21]), O = h(O, C, b, E, I, 14, a[22]), E = h(E, O, C, b, g, 20, a[23]), b = h(b, E, O, C, k, 5, a[24]), C = h(C, b, E, O, P, 9, a[25]), O = h(O, C, b, E, p, 14, a[26]), E = h(E, O, C, b, w, 20, a[27]), b = h(b, E, O, C, A, 5, a[28]), C = h(C, b, E, O, f, 9, a[29]), O = h(O, C, b, E, _, 14, a[30]), b = l(b, E = h(E, O, C, b, T, 20, a[31]), O, C, m, 4, a[32]), C = l(C, b, E, O, w, 11, a[33]), O = l(O, C, b, E, v, 16, a[34]), E = l(E, O, C, b, P, 23, a[35]), b = l(b, E, O, C, c, 4, a[36]), C = l(C, b, E, O, g, 11, a[37]), O = l(O, C, b, E, _, 16, a[38]), E = l(E, O, C, b, S, 23, a[39]), b = l(b, E, O, C, A, 4, a[40]), C = l(C, b, E, O, i, 11, a[41]), O = l(O, C, b, E, p, 16, a[42]), E = l(E, O, C, b, y, 23, a[43]), b = l(b, E, O, C, k, 4, a[44]), C = l(C, b, E, O, T, 11, a[45]), O = l(O, C, b, E, I, 16, a[46]), b = d(b, E = l(E, O, C, b, f, 23, a[47]), O, C, i, 6, a[48]), C = d(C, b, E, O, _, 10, a[49]), O = d(O, C, b, E, P, 15, a[50]), E = d(E, O, C, b, m, 21, a[51]), b = d(b, E, O, C, T, 6, a[52]), C = d(C, b, E, O, p, 10, a[53]), O = d(O, C, b, E, S, 15, a[54]), E = d(E, O, C, b, c, 21, a[55]), b = d(b, E, O, C, w, 6, a[56]), C = d(C, b, E, O, I, 10, a[57]), O = d(O, C, b, E, y, 15, a[58]), E = d(E, O, C, b, A, 21, a[59]), b = d(b, E, O, C, g, 6, a[60]), C = d(C, b, E, O, v, 10, a[61]), O = d(O, C, b, E, f, 15, a[62]), E = d(E, O, C, b, k, 21, a[63]), o[0] = o[0] + b | 0, o[1] = o[1] + E | 0, o[2] = o[2] + O | 0, o[3] = o[3] + C | 0;}, _doFinalize: function _doFinalize() {var t = this._data,n = t.words,s = 8 * this._nDataBytes,r = 8 * t.sigBytes;n[r >>> 5] |= 128 << 24 - r % 32;var o = e.floor(s / 4294967296),i = s;n[15 + (r + 64 >>> 9 << 4)] = 16711935 & (o << 8 | o >>> 24) | 4278255360 & (o << 24 | o >>> 8), n[14 + (r + 64 >>> 9 << 4)] = 16711935 & (i << 8 | i >>> 24) | 4278255360 & (i << 24 | i >>> 8), t.sigBytes = 4 * (n.length + 1), this._process();for (var a = this._hash, c = a.words, u = 0; u < 4; u++) {var h = c[u];c[u] = 16711935 & (h << 8 | h >>> 24) | 4278255360 & (h << 24 | h >>> 8);}return a;}, clone: function clone() {var e = o.clone.call(this);return e._hash = this._hash.clone(), e;} });function u(e, t, n, s, r, o, i) {var a = e + (t & n | ~t & s) + r + i;return (a << o | a >>> 32 - o) + t;}function h(e, t, n, s, r, o, i) {var a = e + (t & s | n & ~s) + r + i;return (a << o | a >>> 32 - o) + t;}function l(e, t, n, s, r, o, i) {var a = e + (t ^ n ^ s) + r + i;return (a << o | a >>> 32 - o) + t;}function d(e, t, n, s, r, o, i) {var a = e + (n ^ (t | ~s)) + r + i;return (a << o | a >>> 32 - o) + t;}t.MD5 = o._createHelper(c), t.HmacMD5 = o._createHmacHelper(c);}(Math), n.MD5);}), n(function (e, t) {var n, r, o;e.exports = (r = (n = s).lib.Base, o = n.enc.Utf8, void (n.algo.HMAC = r.extend({ init: function init(e, t) {e = this._hasher = new e.init(), "string" == typeof t && (t = o.parse(t));var n = e.blockSize,s = 4 * n;t.sigBytes > s && (t = e.finalize(t)), t.clamp();for (var r = this._oKey = t.clone(), i = this._iKey = t.clone(), a = r.words, c = i.words, u = 0; u < n; u++) {a[u] ^= 1549556828, c[u] ^= 909522486;}r.sigBytes = i.sigBytes = s, this.reset();}, reset: function reset() {var e = this._hasher;e.reset(), e.update(this._iKey);}, update: function update(e) {return this._hasher.update(e), this;}, finalize: function finalize(e) {var t = this._hasher,n = t.finalize(e);return t.reset(), t.finalize(this._oKey.clone().concat(n));} })));}), n(function (e, t) {e.exports = s.HmacMD5;}));function o(e) {return Object.prototype.toString.call(e).slice(8, -1).toLowerCase();}function i(e) {return "object" === o(e);}var a = /*#__PURE__*/function (_Error) {_inherits(a, _Error);var _super = _createSuper(a);function a(e, t) {var _this;_classCallCheck(this, a);_this = _super.call(this, e), _this.code = t;return _this;}return a;}( /*#__PURE__*/_wrapNativeSuper(Error));function c(e) {return e && "string" == typeof e ? JSON.parse(e) : e;}var u = "development" === "development",h = "mp-weixin",l = c(undefined),d = c([]),f = true;var p = "";try {{var _e2 = __webpack_require__(/*! uni-stat-config */ 36).default || __webpack_require__(/*! uni-stat-config */ 36);p = _e2.appid;}} catch (e) {}var g = {};function m(e) {var t = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var n, s;return n = g, s = e, Object.prototype.hasOwnProperty.call(n, s) || (g[e] = t), g[e];}"app-plus" === h && (g = uni._globalUniCloudObj ? uni._globalUniCloudObj : uni._globalUniCloudObj = {});var y = ["invoke", "success", "fail", "complete"],_ = m("_globalUniCloudInterceptor");function w(e, t) {_[e] || (_[e] = {}), i(t) && Object.keys(t).forEach(function (n) {y.indexOf(n) > -1 && function (e, t, n) {var s = _[e][t];s || (s = _[e][t] = []), -1 === s.indexOf(n) && "function" == typeof n && s.push(n);}(e, n, t[n]);});}function k(e, t) {_[e] || (_[e] = {}), i(t) ? Object.keys(t).forEach(function (n) {y.indexOf(n) > -1 && function (e, t, n) {var s = _[e][t];if (!s) return;var r = s.indexOf(n);r > -1 && s.splice(r, 1);}(e, n, t[n]);}) : delete _[e];}function S(e, t) {return e && 0 !== e.length ? e.reduce(function (e, n) {return e.then(function () {return n(t);});}, Promise.resolve()) : Promise.resolve();}function v(e, t) {return _[e] && _[e][t] || [];}function T(e, t) {return t ? function (n) {var _this2 = this;var s = "callFunction" === t && "DCloud-clientDB" === (n && n.name);var r;r = this.isReady ? Promise.resolve() : this.initUniCloud, n = n || {};var o = r.then(function () {return s ? Promise.resolve() : S(v(t, "invoke"), n);}).then(function () {return e.call(_this2, n);}).then(function (e) {return s ? Promise.resolve(e) : S(v(t, "success"), e).then(function () {return S(v(t, "complete"), e);}).then(function () {return Promise.resolve(e);});}, function (e) {return s ? Promise.reject(e) : S(v(t, "fail"), e).then(function () {return S(v(t, "complete"), e);}).then(function () {return Promise.reject(e);});});if (!(n.success || n.fail || n.complete)) return o;o.then(function (e) {n.success && n.success(e), n.complete && n.complete(e);}, function (e) {n.fail && n.fail(e), n.complete && n.complete(e);});} : function (t) {if (!((t = t || {}).success || t.fail || t.complete)) return e.call(this, t);e.call(this, t).then(function (e) {t.success && t.success(e), t.complete && t.complete(e);}, function (e) {t.fail && t.fail(e), t.complete && t.complete(e);});};}var A = /*#__PURE__*/function (_Error2) {_inherits(A, _Error2);var _super2 = _createSuper(A);function A(e) {var _this3;_classCallCheck(this, A);_this3 = _super2.call(this, e.message), _this3.errMsg = e.message || "", Object.defineProperties(_assertThisInitialized(_this3), { code: { get: function get() {return e.code;} }, requestId: { get: function get() {return e.requestId;} }, message: { get: function get() {return this.errMsg;}, set: function set(e) {this.errMsg = e;} } });return _this3;}return A;}( /*#__PURE__*/_wrapNativeSuper(Error));var P;function I() {var e = uni.getLocale && uni.getLocale() || "en";if (P) return _objectSpread(_objectSpread({}, P), {}, { LOCALE: e });var _uni$getSystemInfoSyn = uni.getSystemInfoSync(),t = _uni$getSystemInfoSyn.deviceId,n = _uni$getSystemInfoSyn.platform;return P = { PLATFORM: h, OS: n, APPID: p, DEVICEID: t, CLIENT_SDK_VERSION: "1.0.21" }, _objectSpread(_objectSpread({}, P), {}, { LOCALE: e });}var b = { sign: function sign(e, t) {var n = "";return Object.keys(e).sort().forEach(function (t) {e[t] && (n = n + "&" + t + "=" + e[t]);}), n = n.slice(1), r(n, t).toString();}, wrappedRequest: function wrappedRequest(e, t) {return new Promise(function (n, s) {t(Object.assign(e, { complete: function complete(e) {e || (e = {}), u && "h5" === h && e.errMsg && 0 === e.errMsg.indexOf("request:fail") && console.warn("发布H5，需要在uniCloud后台操作，绑定安全域名，否则会因为跨域问题而无法访问。教程参考：https://uniapp.dcloud.io/uniCloud/quickstart?id=useinh5");var t = e.data && e.data.header && e.data.header["x-serverless-request-id"] || e.header && e.header["request-id"];if (!e.statusCode || e.statusCode >= 400) return s(new A({ code: "SYS_ERR", message: e.errMsg || "request:fail", requestId: t }));var r = e.data;if (r.error) return s(new A({ code: r.error.code, message: r.error.message, requestId: t }));r.result = r.data, r.requestId = t, delete r.data, n(r);} }));});} };var E = { request: function request(e) {return uni.request(e);}, uploadFile: function uploadFile(e) {return uni.uploadFile(e);}, setStorageSync: function setStorageSync(e, t) {return uni.setStorageSync(e, t);}, getStorageSync: function getStorageSync(e) {return uni.getStorageSync(e);}, removeStorageSync: function removeStorageSync(e) {return uni.removeStorageSync(e);}, clearStorageSync: function clearStorageSync() {return uni.clearStorageSync();} },O = { "uniCloud.init.paramRequired": "{param} required", "uniCloud.uploadFile.fileError": "filePath should be instance of File" };var _e3 = (0, _uniI18n.initVueI18n)({ "zh-Hans": { "uniCloud.init.paramRequired": "缺少参数：{param}", "uniCloud.uploadFile.fileError": "filePath应为File对象" }, "zh-Hant": { "uniCloud.init.paramRequired": "缺少参数：{param}", "uniCloud.uploadFile.fileError": "filePath应为File对象" }, en: O, fr: { "uniCloud.init.paramRequired": "{param} required", "uniCloud.uploadFile.fileError": "filePath should be instance of File" }, es: { "uniCloud.init.paramRequired": "{param} required", "uniCloud.uploadFile.fileError": "filePath should be instance of File" }, ja: O }, "zh-Hans"),C = _e3.t;var U = /*#__PURE__*/function () {function U(e) {_classCallCheck(this, U);["spaceId", "clientSecret"].forEach(function (t) {if (!Object.prototype.hasOwnProperty.call(e, t)) throw new Error(C("uniCloud.init.paramRequired", { param: t }));}), this.config = Object.assign({}, { endpoint: "https://api.bspapp.com" }, e), this.config.provider = "aliyun", this.config.requestUrl = this.config.endpoint + "/client", this.config.envType = this.config.envType || "public", this.config.accessTokenKey = "access_token_" + this.config.spaceId, this.adapter = E, this._getAccessTokenPromise = null, this._getAccessTokenPromiseStatus = null;}_createClass(U, [{ key: "setAccessToken", value: function setAccessToken(e) {this.accessToken = e;} }, { key: "requestWrapped", value: function requestWrapped(e) {return b.wrappedRequest(e, this.adapter.request);} }, { key: "requestAuth", value: function requestAuth(e) {return this.requestWrapped(e);} }, { key: "request", value: function request(e, t) {var _this4 = this;return Promise.resolve().then(function () {return _this4.hasAccessToken ? t ? _this4.requestWrapped(e) : _this4.requestWrapped(e).catch(function (t) {return new Promise(function (e, n) {!t || "GATEWAY_INVALID_TOKEN" !== t.code && "InvalidParameter.InvalidToken" !== t.code ? n(t) : e();}).then(function () {return _this4.getAccessToken();}).then(function () {var t = _this4.rebuildRequest(e);return _this4.request(t, !0);});}) : _this4.getAccessToken().then(function () {var t = _this4.rebuildRequest(e);return _this4.request(t, !0);});});} }, { key: "rebuildRequest", value: function rebuildRequest(e) {var t = Object.assign({}, e);return t.data.token = this.accessToken, t.header["x-basement-token"] = this.accessToken, t.header["x-serverless-sign"] = b.sign(t.data, this.config.clientSecret), t;} }, { key: "setupRequest", value: function setupRequest(e, t) {var n = Object.assign({}, e, { spaceId: this.config.spaceId, timestamp: Date.now() }),s = { "Content-Type": "application/json" };return "auth" !== t && (n.token = this.accessToken, s["x-basement-token"] = this.accessToken), s["x-serverless-sign"] = b.sign(n, this.config.clientSecret), { url: this.config.requestUrl, method: "POST", data: n, dataType: "json", header: s };} }, { key: "getAccessToken", value: function getAccessToken() {var _this5 = this;if ("pending" === this._getAccessTokenPromiseStatus) return this._getAccessTokenPromise;this._getAccessTokenPromiseStatus = "pending";return this._getAccessTokenPromise = this.requestAuth(this.setupRequest({ method: "serverless.auth.user.anonymousAuthorize", params: "{}" }, "auth")).then(function (e) {return new Promise(function (t, n) {e.result && e.result.accessToken ? (_this5.setAccessToken(e.result.accessToken), _this5._getAccessTokenPromiseStatus = "fulfilled", t(_this5.accessToken)) : (_this5._getAccessTokenPromiseStatus = "rejected", n(new A({ code: "AUTH_FAILED", message: "获取accessToken失败" })));});}, function (e) {return _this5._getAccessTokenPromiseStatus = "rejected", Promise.reject(e);}), this._getAccessTokenPromise;} }, { key: "authorize", value: function authorize() {this.getAccessToken();} }, { key: "callFunction", value: function callFunction(e) {var t = { method: "serverless.function.runtime.invoke", params: JSON.stringify({ functionTarget: e.name, functionArgs: e.data || {} }) };return this.request(this.setupRequest(t));} }, { key: "getOSSUploadOptionsFromPath", value: function getOSSUploadOptionsFromPath(e) {var t = { method: "serverless.file.resource.generateProximalSign", params: JSON.stringify(e) };return this.request(this.setupRequest(t));} }, { key: "uploadFileToOSS", value: function uploadFileToOSS(_ref) {var _this6 = this;var e = _ref.url,t = _ref.formData,n = _ref.name,s = _ref.filePath,r = _ref.fileType,o = _ref.onUploadProgress;return new Promise(function (i, a) {var c = _this6.adapter.uploadFile({ url: e, formData: t, name: n, filePath: s, fileType: r, header: { "X-OSS-server-side-encrpytion": "AES256" }, success: function success(e) {e && e.statusCode < 400 ? i(e) : a(new A({ code: "UPLOAD_FAILED", message: "文件上传失败" }));}, fail: function fail(e) {a(new A({ code: e.code || "UPLOAD_FAILED", message: e.message || e.errMsg || "文件上传失败" }));} });"function" == typeof o && c && "function" == typeof c.onProgressUpdate && c.onProgressUpdate(function (e) {o({ loaded: e.totalBytesSent, total: e.totalBytesExpectedToSend });});});} }, { key: "reportOSSUpload", value: function reportOSSUpload(e) {var t = { method: "serverless.file.resource.report", params: JSON.stringify(e) };return this.request(this.setupRequest(t));} }, { key: "uploadFile", value: function uploadFile(_ref2) {var _this7 = this;var e = _ref2.filePath,t = _ref2.cloudPath,_ref2$fileType = _ref2.fileType,n = _ref2$fileType === void 0 ? "image" : _ref2$fileType,s = _ref2.onUploadProgress,r = _ref2.config;if ("string" !== o(t)) throw new A({ code: "INVALID_PARAM", message: "cloudPath必须为字符串类型" });if (!(t = t.trim())) throw new A({ code: "CLOUDPATH_REQUIRED", message: "cloudPath不可为空" });if (/:\/\//.test(t)) throw new A({ code: "INVALID_PARAM", message: "cloudPath不合法" });var i = r && r.envType || this.config.envType;var a, c;return this.getOSSUploadOptionsFromPath({ env: i, filename: t }).then(function (t) {var r = t.result;a = r.id, c = "https://" + r.cdnDomain + "/" + r.ossPath;var o = { url: "https://" + r.host, formData: { "Cache-Control": "max-age=2592000", "Content-Disposition": "attachment", OSSAccessKeyId: r.accessKeyId, Signature: r.signature, host: r.host, id: a, key: r.ossPath, policy: r.policy, success_action_status: 200 }, fileName: "file", name: "file", filePath: e, fileType: n };return _this7.uploadFileToOSS(Object.assign({}, o, { onUploadProgress: s }));}).then(function () {return _this7.reportOSSUpload({ id: a });}).then(function (t) {return new Promise(function (n, s) {t.success ? n({ success: !0, filePath: e, fileID: c }) : s(new A({ code: "UPLOAD_FAILED", message: "文件上传失败" }));});});} }, { key: "deleteFile", value: function deleteFile(_ref3) {var e = _ref3.fileList;var t = { method: "serverless.file.resource.delete", params: JSON.stringify({ id: e[0] }) };return this.request(this.setupRequest(t));} }, { key: "getTempFileURL", value: function getTempFileURL() {var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref4.fileList;return new Promise(function (t, n) {Array.isArray(e) && 0 !== e.length || n(new A({ code: "INVALID_PARAM", message: "fileList的元素必须是非空的字符串" })), t({ fileList: e.map(function (e) {return { fileID: e, tempFileURL: e };}) });});} }, { key: "hasAccessToken", get: function get() {return !!this.accessToken;} }]);return U;}();var x = { init: function init(e) {var t = new U(e),n = { signInAnonymously: function signInAnonymously() {return t.authorize();}, getLoginState: function getLoginState() {return Promise.resolve(!1);} };return t.auth = function () {return n;}, t.customAuth = t.auth, t;} };var D = "undefined" != typeof location && "http:" === location.protocol ? "http:" : "https:";var R;!function (e) {e.local = "local", e.none = "none", e.session = "session";}(R || (R = {}));var q = function q() {};var L = function L() {var e;if (!Promise) {e = function e() {}, e.promise = {};var _t2 = function _t2() {throw new Error('Your Node runtime does support ES6 Promises. Set "global.Promise" to your preferred implementation of promises.');};return Object.defineProperty(e.promise, "then", { get: _t2 }), Object.defineProperty(e.promise, "catch", { get: _t2 }), e;}var t = new Promise(function (t, n) {e = function e(_e4, s) {return _e4 ? n(_e4) : t(s);};});return e.promise = t, e;};function F(e) {return void 0 === e;}function N(e) {return "[object Null]" === Object.prototype.toString.call(e);}var $;function M(e) {var t = (n = e, "[object Array]" === Object.prototype.toString.call(n) ? e : [e]);var n;var _iterator = _createForOfIteratorHelper(t),_step;try {for (_iterator.s(); !(_step = _iterator.n()).done;) {var _e5 = _step.value;var _t3 = _e5.isMatch,_n = _e5.genAdapter,_s = _e5.runtime;if (_t3()) return { adapter: _n(), runtime: _s };}} catch (err) {_iterator.e(err);} finally {_iterator.f();}}!function (e) {e.WEB = "web", e.WX_MP = "wx_mp";}($ || ($ = {}));var j = { adapter: null, runtime: void 0 },B = ["anonymousUuidKey"];var K = /*#__PURE__*/function (_q) {_inherits(K, _q);var _super3 = _createSuper(K);function K() {var _this8;_classCallCheck(this, K);_this8 = _super3.call(this), j.adapter.root.tcbObject || (j.adapter.root.tcbObject = {});return _this8;}_createClass(K, [{ key: "setItem", value: function setItem(e, t) {j.adapter.root.tcbObject[e] = t;} }, { key: "getItem", value: function getItem(e) {return j.adapter.root.tcbObject[e];} }, { key: "removeItem", value: function removeItem(e) {delete j.adapter.root.tcbObject[e];} }, { key: "clear", value: function clear() {delete j.adapter.root.tcbObject;} }]);return K;}(q);function H(e, t) {switch (e) {case "local":return t.localStorage || new K();case "none":return new K();default:return t.sessionStorage || new K();}}var W = /*#__PURE__*/function () {function W(e) {_classCallCheck(this, W);if (!this._storage) {this._persistence = j.adapter.primaryStorage || e.persistence, this._storage = H(this._persistence, j.adapter);var _t4 = "access_token_".concat(e.env),_n2 = "access_token_expire_".concat(e.env),_s2 = "refresh_token_".concat(e.env),_r = "anonymous_uuid_".concat(e.env),_o = "login_type_".concat(e.env),_i = "user_info_".concat(e.env);this.keys = { accessTokenKey: _t4, accessTokenExpireKey: _n2, refreshTokenKey: _s2, anonymousUuidKey: _r, loginTypeKey: _o, userInfoKey: _i };}}_createClass(W, [{ key: "updatePersistence", value: function updatePersistence(e) {if (e === this._persistence) return;var t = "local" === this._persistence;this._persistence = e;var n = H(e, j.adapter);for (var _e6 in this.keys) {var _s3 = this.keys[_e6];if (t && B.includes(_e6)) continue;var _r2 = this._storage.getItem(_s3);F(_r2) || N(_r2) || (n.setItem(_s3, _r2), this._storage.removeItem(_s3));}this._storage = n;} }, { key: "setStore", value: function setStore(e, t, n) {if (!this._storage) return;var s = { version: n || "localCachev1", content: t },r = JSON.stringify(s);try {this._storage.setItem(e, r);} catch (e) {throw e;}} }, { key: "getStore", value: function getStore(e, t) {try {if (!this._storage) return;} catch (e) {return "";}t = t || "localCachev1";var n = this._storage.getItem(e);if (!n) return "";if (n.indexOf(t) >= 0) {return JSON.parse(n).content;}return "";} }, { key: "removeStore", value: function removeStore(e) {this._storage.removeItem(e);} }]);return W;}();var z = {},J = {};function V(e) {return z[e];}var Y = function Y(e, t) {_classCallCheck(this, Y);this.data = t || null, this.name = e;};var X = /*#__PURE__*/function (_Y) {_inherits(X, _Y);var _super4 = _createSuper(X);function X(e, t) {var _this9;_classCallCheck(this, X);_this9 = _super4.call(this, "error", { error: e, data: t }), _this9.error = e;return _this9;}return X;}(Y);var G = new ( /*#__PURE__*/function () {function _class() {_classCallCheck(this, _class);this._listeners = {};}_createClass(_class, [{ key: "on", value: function on(e, t) {return function (e, t, n) {n[e] = n[e] || [], n[e].push(t);}(e, t, this._listeners), this;} }, { key: "off", value: function off(e, t) {return function (e, t, n) {if (n && n[e]) {var _s4 = n[e].indexOf(t);-1 !== _s4 && n[e].splice(_s4, 1);}}(e, t, this._listeners), this;} }, { key: "fire", value: function fire(e, t) {if (e instanceof X) return console.error(e.error), this;var n = "string" == typeof e ? new Y(e, t || {}) : e;var s = n.name;if (this._listens(s)) {n.target = this;var _e7 = this._listeners[s] ? _toConsumableArray(this._listeners[s]) : [];var _iterator2 = _createForOfIteratorHelper(_e7),_step2;try {for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {var _t5 = _step2.value;_t5.call(this, n);}} catch (err) {_iterator2.e(err);} finally {_iterator2.f();}}return this;} }, { key: "_listens", value: function _listens(e) {return this._listeners[e] && this._listeners[e].length > 0;} }]);return _class;}())();function Q(e, t) {G.on(e, t);}function Z(e) {var t = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};G.fire(e, t);}function ee(e, t) {G.off(e, t);}var te = "loginStateChanged",ne = "loginStateExpire",se = "loginTypeChanged",re = "anonymousConverted",oe = "refreshAccessToken";var ie;!function (e) {e.ANONYMOUS = "ANONYMOUS", e.WECHAT = "WECHAT", e.WECHAT_PUBLIC = "WECHAT-PUBLIC", e.WECHAT_OPEN = "WECHAT-OPEN", e.CUSTOM = "CUSTOM", e.EMAIL = "EMAIL", e.USERNAME = "USERNAME", e.NULL = "NULL";}(ie || (ie = {}));var ae = ["auth.getJwt", "auth.logout", "auth.signInWithTicket", "auth.signInAnonymously", "auth.signIn", "auth.fetchAccessTokenWithRefreshToken", "auth.signUpWithEmailAndPassword", "auth.activateEndUserMail", "auth.sendPasswordResetEmail", "auth.resetPasswordWithToken", "auth.isUsernameRegistered"],ce = { "X-SDK-Version": "1.3.5" };function ue(e, t, n) {var s = e[t];e[t] = function (t) {var r = {},o = {};n.forEach(function (n) {var _n$call = n.call(e, t),s = _n$call.data,i = _n$call.headers;Object.assign(r, s), Object.assign(o, i);});var i = t.data;return i && function () {var e;if (e = i, "[object FormData]" !== Object.prototype.toString.call(e)) t.data = _objectSpread(_objectSpread({}, i), r);else for (var _e8 in r) {i.append(_e8, r[_e8]);}}(), t.headers = _objectSpread(_objectSpread({}, t.headers || {}), o), s.call(e, t);};}function he() {var e = Math.random().toString(16).slice(2);return { data: { seqId: e }, headers: _objectSpread(_objectSpread({}, ce), {}, { "x-seqid": e }) };}var le = /*#__PURE__*/function () {function le() {var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};_classCallCheck(this, le);var t;this.config = e, this._reqClass = new j.adapter.reqClass({ timeout: this.config.timeout, timeoutMsg: "\u8BF7\u6C42\u5728".concat(this.config.timeout / 1e3, "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD"), restrictedMethods: ["post"] }), this._cache = V(this.config.env), this._localCache = (t = this.config.env, J[t]), ue(this._reqClass, "post", [he]), ue(this._reqClass, "upload", [he]), ue(this._reqClass, "download", [he]);}_createClass(le, [{ key: "post", value: function () {var _post = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee(e) {return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:_context.next = 2;return this._reqClass.post(e);case 2:return _context.abrupt("return", _context.sent);case 3:case "end":return _context.stop();}}}, _callee, this);}));function post(_x) {return _post.apply(this, arguments);}return post;}() }, { key: "upload", value: function () {var _upload = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee2(e) {return _regenerator.default.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:_context2.next = 2;return this._reqClass.upload(e);case 2:return _context2.abrupt("return", _context2.sent);case 3:case "end":return _context2.stop();}}}, _callee2, this);}));function upload(_x2) {return _upload.apply(this, arguments);}return upload;}() }, { key: "download", value: function () {var _download = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee3(e) {return _regenerator.default.wrap(function _callee3$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:_context3.next = 2;return this._reqClass.download(e);case 2:return _context3.abrupt("return", _context3.sent);case 3:case "end":return _context3.stop();}}}, _callee3, this);}));function download(_x3) {return _download.apply(this, arguments);}return download;}() }, { key: "refreshAccessToken", value: function () {var _refreshAccessToken2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee4() {var e, t;return _regenerator.default.wrap(function _callee4$(_context4) {while (1) {switch (_context4.prev = _context4.next) {case 0:this._refreshAccessTokenPromise || (this._refreshAccessTokenPromise = this._refreshAccessToken());_context4.prev = 1;_context4.next = 4;return this._refreshAccessTokenPromise;case 4:e = _context4.sent;_context4.next = 10;break;case 7:_context4.prev = 7;_context4.t0 = _context4["catch"](1);t = _context4.t0;case 10:if (!(this._refreshAccessTokenPromise = null, this._shouldRefreshAccessTokenHook = null, t)) {_context4.next = 12;break;}throw t;case 12:return _context4.abrupt("return", e);case 13:case "end":return _context4.stop();}}}, _callee4, this, [[1, 7]]);}));function refreshAccessToken() {return _refreshAccessToken2.apply(this, arguments);}return refreshAccessToken;}() }, { key: "_refreshAccessToken", value: function () {var _refreshAccessToken3 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee5() {var _this$_cache$keys, e, t, n, s, r, o, i, a, _e9, _e10, _t6, _s5;return _regenerator.default.wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:_this$_cache$keys = this._cache.keys, e = _this$_cache$keys.accessTokenKey, t = _this$_cache$keys.accessTokenExpireKey, n = _this$_cache$keys.refreshTokenKey, s = _this$_cache$keys.loginTypeKey, r = _this$_cache$keys.anonymousUuidKey;this._cache.removeStore(e), this._cache.removeStore(t);o = this._cache.getStore(n);if (o) {_context5.next = 5;break;}throw new Error("未登录CloudBase");case 5:i = { refresh_token: o };_context5.next = 8;return this.request("auth.fetchAccessTokenWithRefreshToken", i);case 8:a = _context5.sent;if (!a.data.code) {_context5.next = 21;break;}_e9 = a.data.code;if (!("SIGN_PARAM_INVALID" === _e9 || "REFRESH_TOKEN_EXPIRED" === _e9 || "INVALID_REFRESH_TOKEN" === _e9)) {_context5.next = 20;break;}if (!(this._cache.getStore(s) === ie.ANONYMOUS && "INVALID_REFRESH_TOKEN" === _e9)) {_context5.next = 19;break;}_e10 = this._cache.getStore(r);_t6 = this._cache.getStore(n);_context5.next = 17;return this.send("auth.signInAnonymously", { anonymous_uuid: _e10, refresh_token: _t6 });case 17:_s5 = _context5.sent;return _context5.abrupt("return", (this.setRefreshToken(_s5.refresh_token), this._refreshAccessToken()));case 19:Z(ne), this._cache.removeStore(n);case 20:throw new Error("\u5237\u65B0access token\u5931\u8D25\uFF1A".concat(a.data.code));case 21:if (!a.data.access_token) {_context5.next = 23;break;}return _context5.abrupt("return", (Z(oe), this._cache.setStore(e, a.data.access_token), this._cache.setStore(t, a.data.access_token_expire + Date.now()), { accessToken: a.data.access_token, accessTokenExpire: a.data.access_token_expire }));case 23:a.data.refresh_token && (this._cache.removeStore(n), this._cache.setStore(n, a.data.refresh_token), this._refreshAccessToken());case 24:case "end":return _context5.stop();}}}, _callee5, this);}));function _refreshAccessToken() {return _refreshAccessToken3.apply(this, arguments);}return _refreshAccessToken;}() }, { key: "getAccessToken", value: function () {var _getAccessToken = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee6() {var _this$_cache$keys2, e, t, n, s, r, o;return _regenerator.default.wrap(function _callee6$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:_this$_cache$keys2 = this._cache.keys, e = _this$_cache$keys2.accessTokenKey, t = _this$_cache$keys2.accessTokenExpireKey, n = _this$_cache$keys2.refreshTokenKey;if (this._cache.getStore(n)) {_context6.next = 3;break;}throw new Error("refresh token不存在，登录状态异常");case 3:s = this._cache.getStore(e), r = this._cache.getStore(t), o = !0;_context6.t0 = this._shouldRefreshAccessTokenHook;if (!_context6.t0) {_context6.next = 9;break;}_context6.next = 8;return this._shouldRefreshAccessTokenHook(s, r);case 8:_context6.t0 = !_context6.sent;case 9:_context6.t1 = _context6.t0;if (!_context6.t1) {_context6.next = 12;break;}o = !1;case 12:return _context6.abrupt("return", (!s || !r || r < Date.now()) && o ? this.refreshAccessToken() : { accessToken: s, accessTokenExpire: r });case 13:case "end":return _context6.stop();}}}, _callee6, this);}));function getAccessToken() {return _getAccessToken.apply(this, arguments);}return getAccessToken;}() }, { key: "request", value: function () {var _request = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee7(e, t, n) {var s, r, o, _e11, i, _e12, _e13, a, c, u, h, l, d, f, p, g;return _regenerator.default.wrap(function _callee7$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:s = "x-tcb-trace_".concat(this.config.env);r = "application/x-www-form-urlencoded";o = _objectSpread({ action: e, env: this.config.env, dataVersion: "2019-08-16" }, t);if (!(-1 === ae.indexOf(e))) {_context7.next = 10;break;}_e11 = this._cache.keys.refreshTokenKey;_context7.t0 = this._cache.getStore(_e11);if (!_context7.t0) {_context7.next = 10;break;}_context7.next = 9;return this.getAccessToken();case 9:o.access_token = _context7.sent.accessToken;case 10:if ("storage.uploadFile" === e) {i = new FormData();for (_e12 in i) {i.hasOwnProperty(_e12) && void 0 !== i[_e12] && i.append(_e12, o[_e12]);}r = "multipart/form-data";} else {r = "application/json", i = {};for (_e13 in o) {void 0 !== o[_e13] && (i[_e13] = o[_e13]);}}a = { headers: { "content-type": r } };n && n.onUploadProgress && (a.onUploadProgress = n.onUploadProgress);c = this._localCache.getStore(s);c && (a.headers["X-TCB-Trace"] = c);u = t.parse, h = t.inQuery, l = t.search;d = { env: this.config.env };u && (d.parse = !0), h && (d = _objectSpread(_objectSpread({}, h), d));f = function (e, t) {var n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};var s = /\?/.test(t);var r = "";for (var _e14 in n) {"" === r ? !s && (t += "?") : r += "&", r += "".concat(_e14, "=").concat(encodeURIComponent(n[_e14]));}return /^http(s)?\:\/\//.test(t += r) ? t : "".concat(e).concat(t);}(D, "//tcb-api.tencentcloudapi.com/web", d);l && (f += l);_context7.next = 22;return this.post(_objectSpread({ url: f, data: i }, a));case 22:p = _context7.sent;g = p.header && p.header["x-tcb-trace"];if (!(g && this._localCache.setStore(s, g), 200 !== Number(p.status) && 200 !== Number(p.statusCode) || !p.data)) {_context7.next = 26;break;}throw new Error("network request error");case 26:return _context7.abrupt("return", p);case 27:case "end":return _context7.stop();}}}, _callee7, this);}));function request(_x4, _x5, _x6) {return _request.apply(this, arguments);}return request;}() }, { key: "send", value: function () {var _send = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee8(e) {var t,n,_n3,_args8 = arguments;return _regenerator.default.wrap(function _callee8$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:t = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};_context8.next = 3;return this.request(e, t, { onUploadProgress: t.onUploadProgress });case 3:n = _context8.sent;if (!("ACCESS_TOKEN_EXPIRED" === n.data.code && -1 === ae.indexOf(e))) {_context8.next = 13;break;}_context8.next = 7;return this.refreshAccessToken();case 7:_context8.next = 9;return this.request(e, t, { onUploadProgress: t.onUploadProgress });case 9:_n3 = _context8.sent;if (!_n3.data.code) {_context8.next = 12;break;}throw new Error("[".concat(_n3.data.code, "] ").concat(_n3.data.message));case 12:return _context8.abrupt("return", _n3.data);case 13:if (!n.data.code) {_context8.next = 15;break;}throw new Error("[".concat(n.data.code, "] ").concat(n.data.message));case 15:return _context8.abrupt("return", n.data);case 16:case "end":return _context8.stop();}}}, _callee8, this);}));function send(_x7) {return _send.apply(this, arguments);}return send;}() }, { key: "setRefreshToken", value: function setRefreshToken(e) {var _this$_cache$keys3 = this._cache.keys,t = _this$_cache$keys3.accessTokenKey,n = _this$_cache$keys3.accessTokenExpireKey,s = _this$_cache$keys3.refreshTokenKey;this._cache.removeStore(t), this._cache.removeStore(n), this._cache.setStore(s, e);} }]);return le;}();var de = {};function fe(e) {return de[e];}var pe = /*#__PURE__*/function () {function pe(e) {_classCallCheck(this, pe);this.config = e, this._cache = V(e.env), this._request = fe(e.env);}_createClass(pe, [{ key: "setRefreshToken", value: function setRefreshToken(e) {var _this$_cache$keys4 = this._cache.keys,t = _this$_cache$keys4.accessTokenKey,n = _this$_cache$keys4.accessTokenExpireKey,s = _this$_cache$keys4.refreshTokenKey;this._cache.removeStore(t), this._cache.removeStore(n), this._cache.setStore(s, e);} }, { key: "setAccessToken", value: function setAccessToken(e, t) {var _this$_cache$keys5 = this._cache.keys,n = _this$_cache$keys5.accessTokenKey,s = _this$_cache$keys5.accessTokenExpireKey;this._cache.setStore(n, e), this._cache.setStore(s, t);} }, { key: "refreshUserInfo", value: function () {var _refreshUserInfo = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee9() {var _yield$this$_request$, e;return _regenerator.default.wrap(function _callee9$(_context9) {while (1) {switch (_context9.prev = _context9.next) {case 0:_context9.next = 2;return this._request.send("auth.getUserInfo", {});case 2:_yield$this$_request$ = _context9.sent;e = _yield$this$_request$.data;return _context9.abrupt("return", (this.setLocalUserInfo(e), e));case 5:case "end":return _context9.stop();}}}, _callee9, this);}));function refreshUserInfo() {return _refreshUserInfo.apply(this, arguments);}return refreshUserInfo;}() }, { key: "setLocalUserInfo", value: function setLocalUserInfo(e) {var t = this._cache.keys.userInfoKey;this._cache.setStore(t, e);} }]);return pe;}();var ge = /*#__PURE__*/function () {function ge(e) {_classCallCheck(this, ge);if (!e) throw new Error("envId is not defined");this._envId = e, this._cache = V(this._envId), this._request = fe(this._envId), this.setUserInfo();}_createClass(ge, [{ key: "linkWithTicket", value: function linkWithTicket(e) {if ("string" != typeof e) throw new Error("ticket must be string");return this._request.send("auth.linkWithTicket", { ticket: e });} }, { key: "linkWithRedirect", value: function linkWithRedirect(e) {e.signInWithRedirect();} }, { key: "updatePassword", value: function updatePassword(e, t) {return this._request.send("auth.updatePassword", { oldPassword: t, newPassword: e });} }, { key: "updateEmail", value: function updateEmail(e) {return this._request.send("auth.updateEmail", { newEmail: e });} }, { key: "updateUsername", value: function updateUsername(e) {if ("string" != typeof e) throw new Error("username must be a string");return this._request.send("auth.updateUsername", { username: e });} }, { key: "getLinkedUidList", value: function () {var _getLinkedUidList = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee10() {var _yield$this$_request$2, e, t, n;return _regenerator.default.wrap(function _callee10$(_context10) {while (1) {switch (_context10.prev = _context10.next) {case 0:_context10.next = 2;return this._request.send("auth.getLinkedUidList", {});case 2:_yield$this$_request$2 = _context10.sent;e = _yield$this$_request$2.data;t = !1;n = e.users;return _context10.abrupt("return", (n.forEach(function (e) {e.wxOpenId && e.wxPublicId && (t = !0);}), { users: n, hasPrimaryUid: t }));case 7:case "end":return _context10.stop();}}}, _callee10, this);}));function getLinkedUidList() {return _getLinkedUidList.apply(this, arguments);}return getLinkedUidList;}() }, { key: "setPrimaryUid", value: function setPrimaryUid(e) {return this._request.send("auth.setPrimaryUid", { uid: e });} }, { key: "unlink", value: function unlink(e) {return this._request.send("auth.unlink", { platform: e });} }, { key: "update", value: function () {var _update = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee11(e) {var t, n, s, r, o, i, _yield$this$_request$3, a;return _regenerator.default.wrap(function _callee11$(_context11) {while (1) {switch (_context11.prev = _context11.next) {case 0:t = e.nickName;n = e.gender;s = e.avatarUrl;r = e.province;o = e.country;i = e.city;_context11.next = 8;return this._request.send("auth.updateUserInfo", { nickName: t, gender: n, avatarUrl: s, province: r, country: o, city: i });case 8:_yield$this$_request$3 = _context11.sent;a = _yield$this$_request$3.data;this.setLocalUserInfo(a);case 11:case "end":return _context11.stop();}}}, _callee11, this);}));function update(_x8) {return _update.apply(this, arguments);}return update;}() }, { key: "refresh", value: function () {var _refresh = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee12() {var _yield$this$_request$4, e;return _regenerator.default.wrap(function _callee12$(_context12) {while (1) {switch (_context12.prev = _context12.next) {case 0:_context12.next = 2;return this._request.send("auth.getUserInfo", {});case 2:_yield$this$_request$4 = _context12.sent;e = _yield$this$_request$4.data;return _context12.abrupt("return", (this.setLocalUserInfo(e), e));case 5:case "end":return _context12.stop();}}}, _callee12, this);}));function refresh() {return _refresh.apply(this, arguments);}return refresh;}() }, { key: "setUserInfo", value: function setUserInfo() {var _this10 = this;var e = this._cache.keys.userInfoKey,t = this._cache.getStore(e);["uid", "loginType", "openid", "wxOpenId", "wxPublicId", "unionId", "qqMiniOpenId", "email", "hasPassword", "customUserId", "nickName", "gender", "avatarUrl"].forEach(function (e) {_this10[e] = t[e];}), this.location = { country: t.country, province: t.province, city: t.city };} }, { key: "setLocalUserInfo", value: function setLocalUserInfo(e) {var t = this._cache.keys.userInfoKey;this._cache.setStore(t, e), this.setUserInfo();} }]);return ge;}();var me = /*#__PURE__*/function () {function me(e) {_classCallCheck(this, me);if (!e) throw new Error("envId is not defined");this._cache = V(e);var _this$_cache$keys6 = this._cache.keys,t = _this$_cache$keys6.refreshTokenKey,n = _this$_cache$keys6.accessTokenKey,s = _this$_cache$keys6.accessTokenExpireKey,r = this._cache.getStore(t),o = this._cache.getStore(n),i = this._cache.getStore(s);this.credential = { refreshToken: r, accessToken: o, accessTokenExpire: i }, this.user = new ge(e);}_createClass(me, [{ key: "isAnonymousAuth", get: function get() {return this.loginType === ie.ANONYMOUS;} }, { key: "isCustomAuth", get: function get() {return this.loginType === ie.CUSTOM;} }, { key: "isWeixinAuth", get: function get() {return this.loginType === ie.WECHAT || this.loginType === ie.WECHAT_OPEN || this.loginType === ie.WECHAT_PUBLIC;} }, { key: "loginType", get: function get() {return this._cache.getStore(this._cache.keys.loginTypeKey);} }]);return me;}();var ye = /*#__PURE__*/function (_pe) {_inherits(ye, _pe);var _super5 = _createSuper(ye);function ye() {_classCallCheck(this, ye);return _super5.apply(this, arguments);}_createClass(ye, [{ key: "signIn", value: function () {var _signIn = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee13() {var _this$_cache$keys7, e, t, n, s, r, _e15;return _regenerator.default.wrap(function _callee13$(_context13) {while (1) {switch (_context13.prev = _context13.next) {case 0:this._cache.updatePersistence("local");_this$_cache$keys7 = this._cache.keys;e = _this$_cache$keys7.anonymousUuidKey;t = _this$_cache$keys7.refreshTokenKey;n = this._cache.getStore(e) || void 0;s = this._cache.getStore(t) || void 0;_context13.next = 8;return this._request.send("auth.signInAnonymously", { anonymous_uuid: n, refresh_token: s });case 8:r = _context13.sent;if (!(r.uuid && r.refresh_token)) {_context13.next = 20;break;}this._setAnonymousUUID(r.uuid);this.setRefreshToken(r.refresh_token);_context13.next = 14;return this._request.refreshAccessToken();case 14:Z(te);Z(se, { env: this.config.env, loginType: ie.ANONYMOUS, persistence: "local" });_e15 = new me(this.config.env);_context13.next = 19;return _e15.user.refresh();case 19:return _context13.abrupt("return", _e15);case 20:throw new Error("匿名登录失败");case 21:case "end":return _context13.stop();}}}, _callee13, this);}));function signIn() {return _signIn.apply(this, arguments);}return signIn;}() }, { key: "linkAndRetrieveDataWithTicket", value: function () {var _linkAndRetrieveDataWithTicket = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee14(e) {var _this$_cache$keys8, t, n, s, r, o;return _regenerator.default.wrap(function _callee14$(_context14) {while (1) {switch (_context14.prev = _context14.next) {case 0:_this$_cache$keys8 = this._cache.keys;t = _this$_cache$keys8.anonymousUuidKey;n = _this$_cache$keys8.refreshTokenKey;s = this._cache.getStore(t);r = this._cache.getStore(n);_context14.next = 7;return this._request.send("auth.linkAndRetrieveDataWithTicket", { anonymous_uuid: s, refresh_token: r, ticket: e });case 7:o = _context14.sent;if (!o.refresh_token) {_context14.next = 16;break;}this._clearAnonymousUUID();this.setRefreshToken(o.refresh_token);_context14.next = 13;return this._request.refreshAccessToken();case 13:Z(re, { env: this.config.env });Z(se, { loginType: ie.CUSTOM, persistence: "local" });return _context14.abrupt("return", { credential: { refreshToken: o.refresh_token } });case 16:throw new Error("匿名转化失败");case 17:case "end":return _context14.stop();}}}, _callee14, this);}));function linkAndRetrieveDataWithTicket(_x9) {return _linkAndRetrieveDataWithTicket.apply(this, arguments);}return linkAndRetrieveDataWithTicket;}() }, { key: "_setAnonymousUUID", value: function _setAnonymousUUID(e) {var _this$_cache$keys9 = this._cache.keys,t = _this$_cache$keys9.anonymousUuidKey,n = _this$_cache$keys9.loginTypeKey;this._cache.removeStore(t), this._cache.setStore(t, e), this._cache.setStore(n, ie.ANONYMOUS);} }, { key: "_clearAnonymousUUID", value: function _clearAnonymousUUID() {this._cache.removeStore(this._cache.keys.anonymousUuidKey);} }]);return ye;}(pe);var _e = /*#__PURE__*/function (_pe2) {_inherits(_e, _pe2);var _super6 = _createSuper(_e);function _e() {_classCallCheck(this, _e);return _super6.apply(this, arguments);}_createClass(_e, [{ key: "signIn", value: function () {var _signIn2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee15(e) {var t, n;return _regenerator.default.wrap(function _callee15$(_context15) {while (1) {switch (_context15.prev = _context15.next) {case 0:if (!("string" != typeof e)) {_context15.next = 2;break;}throw new Error("ticket must be a string");case 2:t = this._cache.keys.refreshTokenKey;_context15.next = 5;return this._request.send("auth.signInWithTicket", { ticket: e, refresh_token: this._cache.getStore(t) || "" });case 5:n = _context15.sent;if (!n.refresh_token) {_context15.next = 15;break;}this.setRefreshToken(n.refresh_token);_context15.next = 10;return this._request.refreshAccessToken();case 10:Z(te);Z(se, { env: this.config.env, loginType: ie.CUSTOM, persistence: this.config.persistence });_context15.next = 14;return this.refreshUserInfo();case 14:return _context15.abrupt("return", new me(this.config.env));case 15:throw new Error("自定义登录失败");case 16:case "end":return _context15.stop();}}}, _callee15, this);}));function signIn(_x10) {return _signIn2.apply(this, arguments);}return signIn;}() }]);return _e;}(pe);var we = /*#__PURE__*/function (_pe3) {_inherits(we, _pe3);var _super7 = _createSuper(we);function we() {_classCallCheck(this, we);return _super7.apply(this, arguments);}_createClass(we, [{ key: "signIn", value: function () {var _signIn3 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee16(e, t) {var n, s, r, o, i;return _regenerator.default.wrap(function _callee16$(_context16) {while (1) {switch (_context16.prev = _context16.next) {case 0:if (!("string" != typeof e)) {_context16.next = 2;break;}throw new Error("email must be a string");case 2:n = this._cache.keys.refreshTokenKey;_context16.next = 5;return this._request.send("auth.signIn", { loginType: "EMAIL", email: e, password: t, refresh_token: this._cache.getStore(n) || "" });case 5:s = _context16.sent;r = s.refresh_token;o = s.access_token;i = s.access_token_expire;if (!r) {_context16.next = 22;break;}this.setRefreshToken(r);if (!(o && i)) {_context16.next = 15;break;}this.setAccessToken(o, i);_context16.next = 17;break;case 15:_context16.next = 17;return this._request.refreshAccessToken();case 17:_context16.next = 19;return this.refreshUserInfo();case 19:Z(te);Z(se, { env: this.config.env, loginType: ie.EMAIL, persistence: this.config.persistence });return _context16.abrupt("return", new me(this.config.env));case 22:throw s.code ? new Error("\u90AE\u7BB1\u767B\u5F55\u5931\u8D25: [".concat(s.code, "] ").concat(s.message)) : new Error("邮箱登录失败");case 23:case "end":return _context16.stop();}}}, _callee16, this);}));function signIn(_x11, _x12) {return _signIn3.apply(this, arguments);}return signIn;}() }, { key: "activate", value: function () {var _activate = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee17(e) {return _regenerator.default.wrap(function _callee17$(_context17) {while (1) {switch (_context17.prev = _context17.next) {case 0:return _context17.abrupt("return", this._request.send("auth.activateEndUserMail", { token: e }));case 1:case "end":return _context17.stop();}}}, _callee17, this);}));function activate(_x13) {return _activate.apply(this, arguments);}return activate;}() }, { key: "resetPasswordWithToken", value: function () {var _resetPasswordWithToken = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee18(e, t) {return _regenerator.default.wrap(function _callee18$(_context18) {while (1) {switch (_context18.prev = _context18.next) {case 0:return _context18.abrupt("return", this._request.send("auth.resetPasswordWithToken", { token: e, newPassword: t }));case 1:case "end":return _context18.stop();}}}, _callee18, this);}));function resetPasswordWithToken(_x14, _x15) {return _resetPasswordWithToken.apply(this, arguments);}return resetPasswordWithToken;}() }]);return we;}(pe);var ke = /*#__PURE__*/function (_pe4) {_inherits(ke, _pe4);var _super8 = _createSuper(ke);function ke() {_classCallCheck(this, ke);return _super8.apply(this, arguments);}_createClass(ke, [{ key: "signIn", value: function () {var _signIn4 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee19(e, t) {var n, s, r, o, i;return _regenerator.default.wrap(function _callee19$(_context19) {while (1) {switch (_context19.prev = _context19.next) {case 0:if (!("string" != typeof e)) {_context19.next = 2;break;}throw new Error("username must be a string");case 2:"string" != typeof t && (t = "", console.warn("password is empty"));n = this._cache.keys.refreshTokenKey;_context19.next = 6;return this._request.send("auth.signIn", { loginType: ie.USERNAME, username: e, password: t, refresh_token: this._cache.getStore(n) || "" });case 6:s = _context19.sent;r = s.refresh_token;o = s.access_token_expire;i = s.access_token;if (!r) {_context19.next = 23;break;}this.setRefreshToken(r);if (!(i && o)) {_context19.next = 16;break;}this.setAccessToken(i, o);_context19.next = 18;break;case 16:_context19.next = 18;return this._request.refreshAccessToken();case 18:_context19.next = 20;return this.refreshUserInfo();case 20:Z(te);Z(se, { env: this.config.env, loginType: ie.USERNAME, persistence: this.config.persistence });return _context19.abrupt("return", new me(this.config.env));case 23:throw s.code ? new Error("\u7528\u6237\u540D\u5BC6\u7801\u767B\u5F55\u5931\u8D25: [".concat(s.code, "] ").concat(s.message)) : new Error("用户名密码登录失败");case 24:case "end":return _context19.stop();}}}, _callee19, this);}));function signIn(_x16, _x17) {return _signIn4.apply(this, arguments);}return signIn;}() }]);return ke;}(pe);var Se = /*#__PURE__*/function () {function Se(e) {_classCallCheck(this, Se);this.config = e, this._cache = V(e.env), this._request = fe(e.env), this._onAnonymousConverted = this._onAnonymousConverted.bind(this), this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this), Q(se, this._onLoginTypeChanged);}_createClass(Se, [{ key: "anonymousAuthProvider", value: function anonymousAuthProvider() {return new ye(this.config);} }, { key: "customAuthProvider", value: function customAuthProvider() {return new _e(this.config);} }, { key: "emailAuthProvider", value: function emailAuthProvider() {return new we(this.config);} }, { key: "usernameAuthProvider", value: function usernameAuthProvider() {return new ke(this.config);} }, { key: "signInAnonymously", value: function () {var _signInAnonymously = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee20() {return _regenerator.default.wrap(function _callee20$(_context20) {while (1) {switch (_context20.prev = _context20.next) {case 0:return _context20.abrupt("return", new ye(this.config).signIn());case 1:case "end":return _context20.stop();}}}, _callee20, this);}));function signInAnonymously() {return _signInAnonymously.apply(this, arguments);}return signInAnonymously;}() }, { key: "signInWithEmailAndPassword", value: function () {var _signInWithEmailAndPassword = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee21(e, t) {return _regenerator.default.wrap(function _callee21$(_context21) {while (1) {switch (_context21.prev = _context21.next) {case 0:return _context21.abrupt("return", new we(this.config).signIn(e, t));case 1:case "end":return _context21.stop();}}}, _callee21, this);}));function signInWithEmailAndPassword(_x18, _x19) {return _signInWithEmailAndPassword.apply(this, arguments);}return signInWithEmailAndPassword;}() }, { key: "signInWithUsernameAndPassword", value: function signInWithUsernameAndPassword(e, t) {return new ke(this.config).signIn(e, t);} }, { key: "linkAndRetrieveDataWithTicket", value: function () {var _linkAndRetrieveDataWithTicket2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee22(e) {return _regenerator.default.wrap(function _callee22$(_context22) {while (1) {switch (_context22.prev = _context22.next) {case 0:this._anonymousAuthProvider || (this._anonymousAuthProvider = new ye(this.config)), Q(re, this._onAnonymousConverted);_context22.next = 3;return this._anonymousAuthProvider.linkAndRetrieveDataWithTicket(e);case 3:return _context22.abrupt("return", _context22.sent);case 4:case "end":return _context22.stop();}}}, _callee22, this);}));function linkAndRetrieveDataWithTicket(_x20) {return _linkAndRetrieveDataWithTicket2.apply(this, arguments);}return linkAndRetrieveDataWithTicket;}() }, { key: "signOut", value: function () {var _signOut = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee23() {var _this$_cache$keys10, e, t, n, s, r;return _regenerator.default.wrap(function _callee23$(_context23) {while (1) {switch (_context23.prev = _context23.next) {case 0:if (!(this.loginType === ie.ANONYMOUS)) {_context23.next = 2;break;}throw new Error("匿名用户不支持登出操作");case 2:_this$_cache$keys10 = this._cache.keys, e = _this$_cache$keys10.refreshTokenKey, t = _this$_cache$keys10.accessTokenKey, n = _this$_cache$keys10.accessTokenExpireKey, s = this._cache.getStore(e);if (s) {_context23.next = 5;break;}return _context23.abrupt("return");case 5:_context23.next = 7;return this._request.send("auth.logout", { refresh_token: s });case 7:r = _context23.sent;return _context23.abrupt("return", (this._cache.removeStore(e), this._cache.removeStore(t), this._cache.removeStore(n), Z(te), Z(se, { env: this.config.env, loginType: ie.NULL, persistence: this.config.persistence }), r));case 9:case "end":return _context23.stop();}}}, _callee23, this);}));function signOut() {return _signOut.apply(this, arguments);}return signOut;}() }, { key: "signUpWithEmailAndPassword", value: function () {var _signUpWithEmailAndPassword = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee24(e, t) {return _regenerator.default.wrap(function _callee24$(_context24) {while (1) {switch (_context24.prev = _context24.next) {case 0:return _context24.abrupt("return", this._request.send("auth.signUpWithEmailAndPassword", { email: e, password: t }));case 1:case "end":return _context24.stop();}}}, _callee24, this);}));function signUpWithEmailAndPassword(_x21, _x22) {return _signUpWithEmailAndPassword.apply(this, arguments);}return signUpWithEmailAndPassword;}() }, { key: "sendPasswordResetEmail", value: function () {var _sendPasswordResetEmail = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee25(e) {return _regenerator.default.wrap(function _callee25$(_context25) {while (1) {switch (_context25.prev = _context25.next) {case 0:return _context25.abrupt("return", this._request.send("auth.sendPasswordResetEmail", { email: e }));case 1:case "end":return _context25.stop();}}}, _callee25, this);}));function sendPasswordResetEmail(_x23) {return _sendPasswordResetEmail.apply(this, arguments);}return sendPasswordResetEmail;}() }, { key: "onLoginStateChanged", value: function onLoginStateChanged(e) {var _this11 = this;Q(te, function () {var t = _this11.hasLoginState();e.call(_this11, t);});var t = this.hasLoginState();e.call(this, t);} }, { key: "onLoginStateExpired", value: function onLoginStateExpired(e) {Q(ne, e.bind(this));} }, { key: "onAccessTokenRefreshed", value: function onAccessTokenRefreshed(e) {Q(oe, e.bind(this));} }, { key: "onAnonymousConverted", value: function onAnonymousConverted(e) {Q(re, e.bind(this));} }, { key: "onLoginTypeChanged", value: function onLoginTypeChanged(e) {var _this12 = this;Q(se, function () {var t = _this12.hasLoginState();e.call(_this12, t);});} }, { key: "getAccessToken", value: function () {var _getAccessToken2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee26() {return _regenerator.default.wrap(function _callee26$(_context26) {while (1) {switch (_context26.prev = _context26.next) {case 0:_context26.next = 2;return this._request.getAccessToken();case 2:_context26.t0 = _context26.sent.accessToken;_context26.t1 = this.config.env;return _context26.abrupt("return", { accessToken: _context26.t0, env: _context26.t1 });case 5:case "end":return _context26.stop();}}}, _callee26, this);}));function getAccessToken() {return _getAccessToken2.apply(this, arguments);}return getAccessToken;}() }, { key: "hasLoginState", value: function hasLoginState() {var e = this._cache.keys.refreshTokenKey;return this._cache.getStore(e) ? new me(this.config.env) : null;} }, { key: "isUsernameRegistered", value: function () {var _isUsernameRegistered = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee27(e) {var _yield$this$_request$5, t;return _regenerator.default.wrap(function _callee27$(_context27) {while (1) {switch (_context27.prev = _context27.next) {case 0:if (!("string" != typeof e)) {_context27.next = 2;break;}throw new Error("username must be a string");case 2:_context27.next = 4;return this._request.send("auth.isUsernameRegistered", { username: e });case 4:_yield$this$_request$5 = _context27.sent;t = _yield$this$_request$5.data;return _context27.abrupt("return", t && t.isRegistered);case 7:case "end":return _context27.stop();}}}, _callee27, this);}));function isUsernameRegistered(_x24) {return _isUsernameRegistered.apply(this, arguments);}return isUsernameRegistered;}() }, { key: "getLoginState", value: function getLoginState() {return Promise.resolve(this.hasLoginState());} }, { key: "signInWithTicket", value: function () {var _signInWithTicket = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee28(e) {return _regenerator.default.wrap(function _callee28$(_context28) {while (1) {switch (_context28.prev = _context28.next) {case 0:return _context28.abrupt("return", new _e(this.config).signIn(e));case 1:case "end":return _context28.stop();}}}, _callee28, this);}));function signInWithTicket(_x25) {return _signInWithTicket.apply(this, arguments);}return signInWithTicket;}() }, { key: "shouldRefreshAccessToken", value: function shouldRefreshAccessToken(e) {this._request._shouldRefreshAccessTokenHook = e.bind(this);} }, { key: "getUserInfo", value: function getUserInfo() {return this._request.send("auth.getUserInfo", {}).then(function (e) {return e.code ? e : _objectSpread(_objectSpread({}, e.data), {}, { requestId: e.seqId });});} }, { key: "getAuthHeader", value: function getAuthHeader() {var _this$_cache$keys11 = this._cache.keys,e = _this$_cache$keys11.refreshTokenKey,t = _this$_cache$keys11.accessTokenKey,n = this._cache.getStore(e);return { "x-cloudbase-credentials": this._cache.getStore(t) + "/@@/" + n };} }, { key: "_onAnonymousConverted", value: function _onAnonymousConverted(e) {var t = e.data.env;t === this.config.env && this._cache.updatePersistence(this.config.persistence);} }, { key: "_onLoginTypeChanged", value: function _onLoginTypeChanged(e) {var _e$data = e.data,t = _e$data.loginType,n = _e$data.persistence,s = _e$data.env;s === this.config.env && (this._cache.updatePersistence(n), this._cache.setStore(this._cache.keys.loginTypeKey, t));} }, { key: "currentUser", get: function get() {var e = this.hasLoginState();return e && e.user || null;} }, { key: "loginType", get: function get() {return this._cache.getStore(this._cache.keys.loginTypeKey);} }]);return Se;}();var ve = function ve(e, t) {t = t || L();var n = fe(this.config.env),s = e.cloudPath,r = e.filePath,o = e.onUploadProgress,_e$fileType = e.fileType,i = _e$fileType === void 0 ? "image" : _e$fileType;return n.send("storage.getUploadMetadata", { path: s }).then(function (e) {var _e$data2 = e.data,a = _e$data2.url,c = _e$data2.authorization,u = _e$data2.token,h = _e$data2.fileId,l = _e$data2.cosFileId,d = e.requestId,f = { key: s, signature: c, "x-cos-meta-fileid": l, success_action_status: "201", "x-cos-security-token": u };n.upload({ url: a, data: f, file: r, name: s, fileType: i, onUploadProgress: o }).then(function (e) {201 === e.statusCode ? t(null, { fileID: h, requestId: d }) : t(new Error("STORAGE_REQUEST_FAIL: ".concat(e.data)));}).catch(function (e) {t(e);});}).catch(function (e) {t(e);}), t.promise;},Te = function Te(e, t) {t = t || L();var n = fe(this.config.env),s = e.cloudPath;return n.send("storage.getUploadMetadata", { path: s }).then(function (e) {t(null, e);}).catch(function (e) {t(e);}), t.promise;},Ae = function Ae(_ref5, t) {var e = _ref5.fileList;if (t = t || L(), !e || !Array.isArray(e)) return { code: "INVALID_PARAM", message: "fileList必须是非空的数组" };var _iterator3 = _createForOfIteratorHelper(e),_step3;try {for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {var _t7 = _step3.value;if (!_t7 || "string" != typeof _t7) return { code: "INVALID_PARAM", message: "fileList的元素必须是非空的字符串" };}} catch (err) {_iterator3.e(err);} finally {_iterator3.f();}var n = { fileid_list: e };return fe(this.config.env).send("storage.batchDeleteFile", n).then(function (e) {e.code ? t(null, e) : t(null, { fileList: e.data.delete_list, requestId: e.requestId });}).catch(function (e) {t(e);}), t.promise;},Pe = function Pe(_ref6, t) {var e = _ref6.fileList;t = t || L(), e && Array.isArray(e) || t(null, { code: "INVALID_PARAM", message: "fileList必须是非空的数组" });var n = [];var _iterator4 = _createForOfIteratorHelper(e),_step4;try {for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {var _s6 = _step4.value;"object" == typeof _s6 ? (_s6.hasOwnProperty("fileID") && _s6.hasOwnProperty("maxAge") || t(null, { code: "INVALID_PARAM", message: "fileList的元素必须是包含fileID和maxAge的对象" }), n.push({ fileid: _s6.fileID, max_age: _s6.maxAge })) : "string" == typeof _s6 ? n.push({ fileid: _s6 }) : t(null, { code: "INVALID_PARAM", message: "fileList的元素必须是字符串" });}} catch (err) {_iterator4.e(err);} finally {_iterator4.f();}var s = { file_list: n };return fe(this.config.env).send("storage.batchGetDownloadUrl", s).then(function (e) {e.code ? t(null, e) : t(null, { fileList: e.data.download_list, requestId: e.requestId });}).catch(function (e) {t(e);}), t.promise;},Ie = /*#__PURE__*/function () {var _ref8 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee29(_ref7, t) {var e, n, s, r;return _regenerator.default.wrap(function _callee29$(_context29) {while (1) {switch (_context29.prev = _context29.next) {case 0:e = _ref7.fileID;_context29.next = 3;return Pe.call(this, { fileList: [{ fileID: e, maxAge: 600 }] });case 3:n = _context29.sent.fileList[0];if (!("SUCCESS" !== n.code)) {_context29.next = 6;break;}return _context29.abrupt("return", t ? t(n) : new Promise(function (e) {e(n);}));case 6:s = fe(this.config.env);r = n.download_url;if (!(r = encodeURI(r), !t)) {_context29.next = 10;break;}return _context29.abrupt("return", s.download({ url: r }));case 10:_context29.t0 = t;_context29.next = 13;return s.download({ url: r });case 13:_context29.t1 = _context29.sent;(0, _context29.t0)(_context29.t1);case 15:case "end":return _context29.stop();}}}, _callee29, this);}));return function Ie(_x26, _x27) {return _ref8.apply(this, arguments);};}(),be = function be(_ref9, o) {var e = _ref9.name,t = _ref9.data,n = _ref9.query,s = _ref9.parse,r = _ref9.search;var i = o || L();var a;try {a = t ? JSON.stringify(t) : "";} catch (e) {return Promise.reject(e);}if (!e) return Promise.reject(new Error("函数名不能为空"));var c = { inQuery: n, parse: s, search: r, function_name: e, request_data: a };return fe(this.config.env).send("functions.invokeFunction", c).then(function (e) {if (e.code) i(null, e);else {var _t8 = e.data.response_data;if (s) i(null, { result: _t8, requestId: e.requestId });else try {_t8 = JSON.parse(e.data.response_data), i(null, { result: _t8, requestId: e.requestId });} catch (e) {i(new Error("response data must be json"));}}return i.promise;}).catch(function (e) {i(e);}), i.promise;},Ee = { timeout: 15e3, persistence: "session" },Oe = {};var Ce = /*#__PURE__*/function () {function Ce(e) {_classCallCheck(this, Ce);this.config = e || this.config, this.authObj = void 0;}_createClass(Ce, [{ key: "init", value: function init(e) {switch (j.adapter || (this.requestClient = new j.adapter.reqClass({ timeout: e.timeout || 5e3, timeoutMsg: "\u8BF7\u6C42\u5728".concat((e.timeout || 5e3) / 1e3, "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD") })), this.config = _objectSpread(_objectSpread({}, Ee), e), !0) {case this.config.timeout > 6e5:console.warn("timeout大于可配置上限[10分钟]，已重置为上限数值"), this.config.timeout = 6e5;break;case this.config.timeout < 100:console.warn("timeout小于可配置下限[100ms]，已重置为下限数值"), this.config.timeout = 100;}return new Ce(this.config);} }, { key: "auth", value: function auth() {var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref10.persistence;if (this.authObj) return this.authObj;var t = e || j.adapter.primaryStorage || Ee.persistence;var n;return t !== this.config.persistence && (this.config.persistence = t), function (e) {var t = e.env;z[t] = new W(e), J[t] = new W(_objectSpread(_objectSpread({}, e), {}, { persistence: "local" }));}(this.config), n = this.config, de[n.env] = new le(n), this.authObj = new Se(this.config), this.authObj;} }, { key: "on", value: function on(e, t) {return Q.apply(this, [e, t]);} }, { key: "off", value: function off(e, t) {return ee.apply(this, [e, t]);} }, { key: "callFunction", value: function callFunction(e, t) {return be.apply(this, [e, t]);} }, { key: "deleteFile", value: function deleteFile(e, t) {return Ae.apply(this, [e, t]);} }, { key: "getTempFileURL", value: function getTempFileURL(e, t) {return Pe.apply(this, [e, t]);} }, { key: "downloadFile", value: function downloadFile(e, t) {return Ie.apply(this, [e, t]);} }, { key: "uploadFile", value: function uploadFile(e, t) {return ve.apply(this, [e, t]);} }, { key: "getUploadMetadata", value: function getUploadMetadata(e, t) {return Te.apply(this, [e, t]);} }, { key: "registerExtension", value: function registerExtension(e) {Oe[e.name] = e;} }, { key: "invokeExtension", value: function () {var _invokeExtension = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee30(e, t) {var n;return _regenerator.default.wrap(function _callee30$(_context30) {while (1) {switch (_context30.prev = _context30.next) {case 0:n = Oe[e];if (n) {_context30.next = 3;break;}throw Error("\u6269\u5C55".concat(e, " \u5FC5\u987B\u5148\u6CE8\u518C"));case 3:_context30.next = 5;return n.invoke(t, this);case 5:return _context30.abrupt("return", _context30.sent);case 6:case "end":return _context30.stop();}}}, _callee30, this);}));function invokeExtension(_x28, _x29) {return _invokeExtension.apply(this, arguments);}return invokeExtension;}() }, { key: "useAdapters", value: function useAdapters(e) {var _ref11 = M(e) || {},t = _ref11.adapter,n = _ref11.runtime;t && (j.adapter = t), n && (j.runtime = n);} }]);return Ce;}();var Ue = new Ce();function xe(e, t, n) {void 0 === n && (n = {});var s = /\?/.test(t),r = "";for (var o in n) {"" === r ? !s && (t += "?") : r += "&", r += o + "=" + encodeURIComponent(n[o]);}return /^http(s)?:\/\//.test(t += r) ? t : "" + e + t;}var De = /*#__PURE__*/function () {function De() {_classCallCheck(this, De);}_createClass(De, [{ key: "post", value: function post(e) {var t = e.url,n = e.data,s = e.headers;return new Promise(function (e, r) {E.request({ url: xe("https:", t), data: n, method: "POST", header: s, success: function success(t) {e(t);}, fail: function fail(e) {r(e);} });});} }, { key: "upload", value: function upload(e) {return new Promise(function (t, n) {var s = e.url,r = e.file,o = e.data,i = e.headers,a = e.fileType,c = E.uploadFile({ url: xe("https:", s), name: "file", formData: Object.assign({}, o), filePath: r, fileType: a, header: i, success: function success(e) {var n = { statusCode: e.statusCode, data: e.data || {} };200 === e.statusCode && o.success_action_status && (n.statusCode = parseInt(o.success_action_status, 10)), t(n);}, fail: function fail(e) {u && "mp-alipay" === h && console.warn("支付宝小程序开发工具上传腾讯云时无法准确判断是否上传成功，请使用真机测试"), n(new Error(e.errMsg || "uploadFile:fail"));} });"function" == typeof e.onUploadProgress && c && "function" == typeof c.onProgressUpdate && c.onProgressUpdate(function (t) {e.onUploadProgress({ loaded: t.totalBytesSent, total: t.totalBytesExpectedToSend });});});} }]);return De;}();var Re = { setItem: function setItem(e, t) {E.setStorageSync(e, t);}, getItem: function getItem(e) {return E.getStorageSync(e);}, removeItem: function removeItem(e) {E.removeStorageSync(e);}, clear: function clear() {E.clearStorageSync();} };var qe = { genAdapter: function genAdapter() {return { root: {}, reqClass: De, localStorage: Re, primaryStorage: "local" };}, isMatch: function isMatch() {return !0;}, runtime: "uni_app" };Ue.useAdapters(qe);var Le = Ue,Fe = Le.init;Le.init = function (e) {e.env = e.spaceId;var t = Fe.call(this, e);t.config.provider = "tencent", t.config.spaceId = e.spaceId;var n = t.auth;return t.auth = function (e) {var t = n.call(this, e);return ["linkAndRetrieveDataWithTicket", "signInAnonymously", "signOut", "getAccessToken", "getLoginState", "signInWithTicket", "getUserInfo"].forEach(function (e) {t[e] = T(t[e]).bind(t);}), t;}, t.customAuth = t.auth, t;};var Ne = Le;function $e() {return { token: E.getStorageSync("uni_id_token") || E.getStorageSync("uniIdToken"), tokenExpired: E.getStorageSync("uni_id_token_expired") };}function Me() {if (!u || "h5" !== h) return;uni.getStorageSync("__LAST_DCLOUD_APPID") !== p && (uni.setStorageSync("__LAST_DCLOUD_APPID", p), console.warn("检测到当前项目与上次运行到此端口的项目不一致，自动清理uni-id保存的token信息（仅开发调试时生效）"), E.removeStorageSync("uni_id_token"), E.removeStorageSync("uniIdToken"), E.removeStorageSync("uni_id_token_expired"));}var je = /*#__PURE__*/function (_U) {_inherits(je, _U);var _super9 = _createSuper(je);function je() {_classCallCheck(this, je);return _super9.apply(this, arguments);}_createClass(je, [{ key: "getAccessToken", value: function getAccessToken() {var _this13 = this;return new Promise(function (e, t) {var n = "Anonymous_Access_token";_this13.setAccessToken(n), e(n);});} }, { key: "setupRequest", value: function setupRequest(e, t) {var n = Object.assign({}, e, { spaceId: this.config.spaceId, timestamp: Date.now() }),s = { "Content-Type": "application/json" };"auth" !== t && (n.token = this.accessToken, s["x-basement-token"] = this.accessToken), s["x-serverless-sign"] = b.sign(n, this.config.clientSecret);var r = I();s["x-client-info"] = JSON.stringify(r);var _$e = $e(),o = _$e.token;return s["x-client-token"] = o, { url: this.config.requestUrl, method: "POST", data: n, dataType: "json", header: JSON.parse(JSON.stringify(s)) };} }, { key: "uploadFileToOSS", value: function uploadFileToOSS(_ref12) {var _this14 = this;var e = _ref12.url,t = _ref12.formData,n = _ref12.name,s = _ref12.filePath,r = _ref12.fileType,o = _ref12.onUploadProgress;return new Promise(function (i, a) {var c = _this14.adapter.uploadFile({ url: e, formData: t, name: n, filePath: s, fileType: r, success: function success(e) {e && e.statusCode < 400 ? i(e) : a(new A({ code: "UPLOAD_FAILED", message: "文件上传失败" }));}, fail: function fail(e) {a(new A({ code: e.code || "UPLOAD_FAILED", message: e.message || e.errMsg || "文件上传失败" }));} });"function" == typeof o && c && "function" == typeof c.onProgressUpdate && c.onProgressUpdate(function (e) {o({ loaded: e.totalBytesSent, total: e.totalBytesExpectedToSend });});});} }, { key: "uploadFile", value: function uploadFile(_ref13) {var _this15 = this;var e = _ref13.filePath,t = _ref13.cloudPath,_ref13$fileType = _ref13.fileType,n = _ref13$fileType === void 0 ? "image" : _ref13$fileType,s = _ref13.onUploadProgress;if (!t) throw new A({ code: "CLOUDPATH_REQUIRED", message: "cloudPath不可为空" });var r;return this.getOSSUploadOptionsFromPath({ cloudPath: t }).then(function (t) {var _t$result = t.result,o = _t$result.url,i = _t$result.formData,a = _t$result.name;r = t.result.fileUrl;var c = { url: o, formData: i, name: a, filePath: e, fileType: n };return _this15.uploadFileToOSS(Object.assign({}, c, { onUploadProgress: s }));}).then(function () {return _this15.reportOSSUpload({ cloudPath: t });}).then(function (t) {return new Promise(function (n, s) {t.success ? n({ success: !0, filePath: e, fileID: r }) : s(new A({ code: "UPLOAD_FAILED", message: "文件上传失败" }));});});} }, { key: "deleteFile", value: function deleteFile(_ref14) {var e = _ref14.fileList;var t = { method: "serverless.file.resource.delete", params: JSON.stringify({ fileList: e }) };return this.request(this.setupRequest(t));} }, { key: "getTempFileURL", value: function getTempFileURL() {var _ref15 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref15.fileList;var t = { method: "serverless.file.resource.getTempFileURL", params: JSON.stringify({ fileList: e }) };return this.request(this.setupRequest(t));} }]);return je;}(U);var Be = { init: function init(e) {var t = new je(e),n = { signInAnonymously: function signInAnonymously() {return t.authorize();}, getLoginState: function getLoginState() {return Promise.resolve(!1);} };return t.auth = function () {return n;}, t.customAuth = t.auth, t;} };function Ke(_ref16) {var e = _ref16.data;var t;t = I();var n = JSON.parse(JSON.stringify(e || {}));if (Object.assign(n, { clientInfo: t }), !n.uniIdToken) {var _$e2 = $e(),_e16 = _$e2.token;_e16 && (n.uniIdToken = _e16);}return n;}function He(_ref17) {var _this16 = this;var e = _ref17.name,t = _ref17.data;var n = this.localAddress,s = this.localPort,r = { aliyun: "aliyun", tencent: "tcb" }[this.config.provider],o = this.config.spaceId,i = "http://".concat(n, ":").concat(s, "/system/check-function"),a = "http://".concat(n, ":").concat(s, "/cloudfunctions/").concat(e);return new Promise(function (t, n) {E.request({ method: "POST", url: i, data: { name: e, platform: h, provider: r, spaceId: o }, timeout: 3e3, success: function success(e) {t(e);}, fail: function fail() {t({ data: { code: "NETWORK_ERROR", message: "连接本地调试服务失败，请检查客户端是否和主机在同一局域网下，自动切换为已部署的云函数。" } });} });}).then(function () {var _ref18 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref18.data;var _ref19 = e || {},t = _ref19.code,n = _ref19.message;return { code: 0 === t ? 0 : t || "SYS_ERR", message: n || "SYS_ERR" };}).then(function (_ref20) {var n = _ref20.code,s = _ref20.message;if (0 !== n) {switch (n) {case "MODULE_ENCRYPTED":console.error("\u6B64\u4E91\u51FD\u6570\uFF08".concat(e, "\uFF09\u4F9D\u8D56\u52A0\u5BC6\u516C\u5171\u6A21\u5757\u4E0D\u53EF\u672C\u5730\u8C03\u8BD5\uFF0C\u81EA\u52A8\u5207\u6362\u4E3A\u4E91\u7AEF\u5DF2\u90E8\u7F72\u7684\u4E91\u51FD\u6570"));break;case "FUNCTION_ENCRYPTED":console.error("\u6B64\u4E91\u51FD\u6570\uFF08".concat(e, "\uFF09\u5DF2\u52A0\u5BC6\u4E0D\u53EF\u672C\u5730\u8C03\u8BD5\uFF0C\u81EA\u52A8\u5207\u6362\u4E3A\u4E91\u7AEF\u5DF2\u90E8\u7F72\u7684\u4E91\u51FD\u6570"));break;case "ACTION_ENCRYPTED":console.error(s || "需要访问加密的uni-clientDB-action，自动切换为云端环境");break;case "NETWORK_ERROR":{var _e17 = "连接本地调试服务失败，请检查客户端是否和主机在同一局域网下";throw console.error(_e17), new Error(_e17);}case "SWITCH_TO_CLOUD":break;default:{var _e18 = "\u68C0\u6D4B\u672C\u5730\u8C03\u8BD5\u670D\u52A1\u51FA\u73B0\u9519\u8BEF\uFF1A".concat(s, "\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC\u73AF\u5883\u6216\u91CD\u542F\u5BA2\u6237\u7AEF\u518D\u8BD5");throw console.error(_e18), new Error(_e18);}}return _this16._originCallFunction({ name: e, data: t });}return new Promise(function (e, n) {var s = Ke.call(_this16, { data: t });E.request({ method: "POST", url: a, data: { provider: r, platform: h, param: s }, success: function success() {var _ref21 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},t = _ref21.statusCode,s = _ref21.data;return !t || t >= 400 ? n(new A({ code: s.code || "SYS_ERR", message: s.message || "request:fail" })) : e({ result: s });}, fail: function fail(e) {n(new A({ code: e.code || e.errCode || "SYS_ERR", message: e.message || e.errMsg || "request:fail" }));} });});});}var We = [{ rule: /fc_function_not_found|FUNCTION_NOT_FOUND/, content: "，云函数[{functionName}]在云端不存在，请检查此云函数名称是否正确以及该云函数是否已上传到服务空间", mode: "append" }];var ze = /[\\^$.*+?()[\]{}|]/g,Je = RegExp(ze.source);function Ve(e, t, n) {return e.replace(new RegExp((s = t) && Je.test(s) ? s.replace(ze, "\\$&") : s, "g"), n);var s;}function Ye(_ref22) {var e = _ref22.functionName,t = _ref22.result,n = _ref22.logPvd;if (this.config.useDebugFunction && t && t.requestId) {var _s7 = JSON.stringify({ spaceId: this.config.spaceId, functionName: e, requestId: t.requestId });console.log("[".concat(n, "-request]").concat(_s7, "[/").concat(n, "-request]"));}}function Xe(e) {var t = e.callFunction,n = function n(_n4) {var _this17 = this;var s = _n4.name;_n4.data = Ke.call(e, { data: _n4.data });var r = { aliyun: "aliyun", tencent: "tcb" }[this.config.provider];return t.call(this, _n4).then(function (e) {return Ye.call(_this17, { functionName: s, result: e, logPvd: r }), Promise.resolve(e);}, function (e) {return Ye.call(_this17, { functionName: s, result: e, logPvd: r }), e && e.message && (e.message = function () {var _ref23 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},_ref23$message = _ref23.message,e = _ref23$message === void 0 ? "" : _ref23$message,_ref23$extraInfo = _ref23.extraInfo,t = _ref23$extraInfo === void 0 ? {} : _ref23$extraInfo,_ref23$formatter = _ref23.formatter,n = _ref23$formatter === void 0 ? [] : _ref23$formatter;for (var _s8 = 0; _s8 < n.length; _s8++) {var _n$_s = n[_s8],_r3 = _n$_s.rule,_o2 = _n$_s.content,i = _n$_s.mode,_a = e.match(_r3);if (!_a) continue;var _c = _o2;for (var _e19 = 1; _e19 < _a.length; _e19++) {_c = Ve(_c, "{$".concat(_e19, "}"), _a[_e19]);}for (var _e20 in t) {_c = Ve(_c, "{".concat(_e20, "}"), t[_e20]);}return "replace" === i ? _c : e + _c;}return e;}({ message: "[".concat(_n4.name, "]: ").concat(e.message), formatter: We, extraInfo: { functionName: s } })), Promise.reject(e);});};e.callFunction = function (t) {var s;return u && e.debugInfo && !e.debugInfo.forceRemote && d ? (e._originCallFunction || (e._originCallFunction = n), s = He.call(this, t)) : s = n.call(this, t), Object.defineProperty(s, "result", { get: function get() {return console.warn("当前返回结果为Promise类型，不可直接访问其result属性，详情请参考：https://uniapp.dcloud.net.cn/uniCloud/faq?id=promise"), {};} }), s;};}var Ge = Symbol("CLIENT_DB_INTERNAL");function Qe(e, t) {return e.then = "DoNotReturnProxyWithAFunctionNamedThen", e._internalType = Ge, e.__ob__ = void 0, new Proxy(e, { get: function get(e, n, s) {if ("_uniClient" === n) return null;if (n in e || "string" != typeof n) {var _t9 = e[n];return "function" == typeof _t9 ? _t9.bind(e) : _t9;}return t.get(e, n, s);} });}function Ze(e) {return { on: function on(t, n) {e[t] = e[t] || [], e[t].indexOf(n) > -1 || e[t].push(n);}, off: function off(t, n) {e[t] = e[t] || [];var s = e[t].indexOf(n);-1 !== s && e[t].splice(s, 1);} };}var et = ["db.Geo", "db.command", "command.aggregate"];function tt(e, t) {return et.indexOf("".concat(e, ".").concat(t)) > -1;}function nt(e) {switch (o(e)) {case "array":return e.map(function (e) {return nt(e);});case "object":return e._internalType === Ge || Object.keys(e).forEach(function (t) {e[t] = nt(e[t]);}), e;case "regexp":return { $regexp: { source: e.source, flags: e.flags } };case "date":return { $date: e.toISOString() };default:return e;}}var st = /*#__PURE__*/function () {function st(e, t, n) {_classCallCheck(this, st);this.content = e, this.prevStage = t || null, this.udb = null, this._database = n;}_createClass(st, [{ key: "toJSON", value: function toJSON() {var e = this;var t = [e.content];for (; e.prevStage;) {e = e.prevStage, t.push(e.content);}return { $db: t.reverse().map(function (e) {return { $method: e.$method, $param: nt(e.$param) };}) };} }, { key: "getAction", value: function getAction() {var e = this.toJSON().$db.find(function (e) {return "action" === e.$method;});return e && e.$param && e.$param[0];} }, { key: "getCommand", value: function getCommand() {return { $db: this.toJSON().$db.filter(function (e) {return "action" !== e.$method;}) };} }, { key: "get", value: function get() {return this._send("get", Array.from(arguments));} }, { key: "add", value: function add() {return this._send("add", Array.from(arguments));} }, { key: "remove", value: function remove() {return this._send("remove", Array.from(arguments));} }, { key: "update", value: function update() {return this._send("update", Array.from(arguments));} }, { key: "end", value: function end() {return this._send("end", Array.from(arguments));} }, { key: "set", value: function set() {throw new Error("clientDB禁止使用set方法");} }, { key: "_send", value: function _send(e, t) {var n = this.getAction(),s = this.getCommand();if (s.$db.push({ $method: e, $param: nt(t) }), u) {var _e21 = s.$db.find(function (e) {return "collection" === e.$method;}),_t10 = _e21 && _e21.$param;_t10 && 1 === _t10.length && "string" == typeof _e21.$param[0] && _e21.$param[0].indexOf(",") > -1 && console.warn("检测到使用JQL语法联表查询时，未使用getTemp先过滤主表数据，在主表数据量大的情况下可能会查询缓慢。\n- 如何优化请参考此文档：https://uniapp.dcloud.net.cn/uniCloud/jql?id=lookup-with-temp \n- 如果主表数据量很小请忽略此信息，项目发行时不会出现此提示。");}return this._database._callCloudFunction({ action: n, command: s });} }, { key: "useAggregate", get: function get() {var e = this,t = !1;for (; e.prevStage;) {e = e.prevStage;var _n5 = e.content.$method;if ("aggregate" === _n5 || "pipeline" === _n5) {t = !0;break;}}return t;} }, { key: "count", get: function get() {if (!this.useAggregate) return function () {return this._send("count", Array.from(arguments));};var e = this;return function () {return rt({ $method: "count", $param: nt(Array.from(arguments)) }, e, this._database);};} }]);return st;}();function rt(e, t, n) {return Qe(new st(e, t, n), { get: function get(e, t) {var s = "db";return e && e.content && (s = e.content.$method), tt(s, t) ? rt({ $method: t }, e, n) : function () {return rt({ $method: t, $param: nt(Array.from(arguments)) }, e, n);};} });}function ot(_ref24) {var e = _ref24.path,t = _ref24.method;return /*#__PURE__*/function () {function _class2() {_classCallCheck(this, _class2);this.param = Array.from(arguments);}_createClass(_class2, [{ key: "toJSON", value: function toJSON() {return { $newDb: [].concat(_toConsumableArray(e.map(function (e) {return { $method: e };})), [{ $method: t, $param: this.param }]) };} }]);return _class2;}();}var it = /*#__PURE__*/function (_ref25) {_inherits(it, _ref25);var _super10 = _createSuper(it);function it() {_classCallCheck(this, it);return _super10.apply(this, arguments);}_createClass(it, [{ key: "_callCloudFunction", value: function _callCloudFunction(_ref26) {var _this18 = this;var e = _ref26.action,t = _ref26.command,n = _ref26.multiCommand,s = _ref26.queryList;function r(e, t) {if (n && s) for (var _n6 = 0; _n6 < s.length; _n6++) {var _r4 = s[_n6];_r4.udb && "function" == typeof _r4.udb.setResult && (t ? _r4.udb.setResult(t) : _r4.udb.setResult(e.result.dataList[_n6]));}}var o = S(v("database", "invoke")),i = this._uniClient;return o.then(function () {return i.callFunction({ name: "DCloud-clientDB", data: { action: e, command: t, multiCommand: n } });}).then(function (e) {var _e$result = e.result,t = _e$result.code,n = _e$result.message,s = _e$result.token,o = _e$result.tokenExpired,_e$result$systemInfo = _e$result.systemInfo,i = _e$result$systemInfo === void 0 ? [] : _e$result$systemInfo;if (i) for (var _e22 = 0; _e22 < i.length; _e22++) {var _i$_e = i[_e22],_t11 = _i$_e.level,_n7 = _i$_e.message,_s9 = _i$_e.detail,_r5 = console["app-plus" === h && "warn" === _t11 ? "error" : _t11] || console.log;var _o3 = "[System Info]" + _n7;_s9 && (_o3 = "".concat(_o3, "\n\u8BE6\u7EC6\u4FE1\u606F\uFF1A").concat(_s9)), _r5(_o3);}if (t) {var _e23 = new a(n, t);return _this18._callback("error", [_e23]), Promise.reject(_e23);}s && o && (!function () {var _ref27 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref27.token,t = _ref27.tokenExpired;e && E.setStorageSync("uni_id_token", e), t && E.setStorageSync("uni_id_token_expired", t);}({ token: s, tokenExpired: o }), _this18._callbackAuth("refreshToken", [{ token: s, tokenExpired: o }]), _this18._callback("refreshToken", [{ token: s, tokenExpired: o }]));var c = e.result.affectedDocs;return "number" == typeof c && Object.defineProperty(e.result, "affectedDocs", { get: function get() {return console.warn("affectedDocs不再推荐使用，请使用inserted/deleted/updated/data.length替代"), c;} }), S(v("database", "success"), e).then(function () {return S(v("database", "complete"), e);}).then(function () {return r(e, null), Promise.resolve(e);});}, function (e) {var t = new a(e.message, e.code || "SYSTEM_ERROR");return _this18._callback("error", [t]), /fc_function_not_found|FUNCTION_NOT_FOUND/g.test(e.message) && console.warn("clientDB未初始化，请在web控制台保存一次schema以开启clientDB"), S(v("database", "fail"), e).then(function () {return S(v("database", "complete"), e);}).then(function () {return r(null, e), Promise.reject(e);});});} }]);return it;}( /*#__PURE__*/function () {function _class3() {var _ref28 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},_ref28$uniClient = _ref28.uniClient,e = _ref28$uniClient === void 0 ? {} : _ref28$uniClient;_classCallCheck(this, _class3);this._uniClient = e, this._authCallBacks = {}, this._dbCallBacks = {}, e.isDefault && (this._dbCallBacks = m("_globalUniCloudDatabaseCallback")), this.auth = Ze(this._authCallBacks), Object.assign(this, Ze(this._dbCallBacks)), this.env = Qe({}, { get: function get(e, t) {return { $env: t };} }), this.Geo = Qe({}, { get: function get(e, t) {return ot({ path: ["Geo"], method: t });} }), this.serverDate = ot({ path: [], method: "serverDate" }), this.RegExp = ot({ path: [], method: "RegExp" });}_createClass(_class3, [{ key: "getCloudEnv", value: function getCloudEnv(e) {if ("string" != typeof e || !e.trim()) throw new Error("getCloudEnv参数错误");return { $env: e.replace("$cloudEnv_", "") };} }, { key: "_callback", value: function _callback(e, t) {var n = this._dbCallBacks;n[e] && n[e].forEach(function (e) {e.apply(void 0, _toConsumableArray(t));});} }, { key: "_callbackAuth", value: function _callbackAuth(e, t) {var n = this._authCallBacks;n[e] && n[e].forEach(function (e) {e.apply(void 0, _toConsumableArray(t));});} }, { key: "multiSend", value: function multiSend() {var e = Array.from(arguments),t = e.map(function (e) {var t = e.getAction(),n = e.getCommand();if ("getTemp" !== n.$db[n.$db.length - 1].$method) throw new Error("multiSend只支持子命令内使用getTemp");return { action: t, command: n };});return this._callCloudFunction({ multiCommand: t, queryList: e });} }]);return _class3;}());function at(e) {e.database = function (t) {if (t && Object.keys(t).length > 0) return e.init(t).database();if (this._database) return this._database;var n = function (e) {var t = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};return Qe(new e(t), { get: function get(e, t) {return tt("db", t) ? rt({ $method: t }, null, e) : function () {return rt({ $method: t, $param: nt(Array.from(arguments)) }, null, e);};} });}(it, { uniClient: e });return this._database = n, n;};}var ct;var ut = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",ht = /^(?:[A-Za-z\d+/]{4})*?(?:[A-Za-z\d+/]{2}(?:==)?|[A-Za-z\d+/]{3}=?)?$/;function lt() {var e = $e().token || "",t = e.split(".");if (!e || 3 !== t.length) return { uid: null, role: [], permission: [], tokenExpired: 0 };var n;try {n = JSON.parse((s = t[1], decodeURIComponent(ct(s).split("").map(function (e) {return "%" + ("00" + e.charCodeAt(0).toString(16)).slice(-2);}).join(""))));} catch (e) {throw new Error("获取当前用户信息出错，详细错误信息为：" + e.message);}var s;return n.tokenExpired = 1e3 * n.exp, delete n.exp, delete n.iat, n;}ct = "function" != typeof atob ? function (e) {if (e = String(e).replace(/[\t\n\f\r ]+/g, ""), !ht.test(e)) throw new Error("Failed to execute 'atob' on 'Window': The string to be decoded is not correctly encoded.");var t;e += "==".slice(2 - (3 & e.length));for (var n, s, r = "", o = 0; o < e.length;) {t = ut.indexOf(e.charAt(o++)) << 18 | ut.indexOf(e.charAt(o++)) << 12 | (n = ut.indexOf(e.charAt(o++))) << 6 | (s = ut.indexOf(e.charAt(o++))), r += 64 === n ? String.fromCharCode(t >> 16 & 255) : 64 === s ? String.fromCharCode(t >> 16 & 255, t >> 8 & 255) : String.fromCharCode(t >> 16 & 255, t >> 8 & 255, 255 & t);}return r;} : atob;var dt = t(n(function (e, t) {Object.defineProperty(t, "__esModule", { value: !0 });var n = "chooseAndUploadFile:ok",s = "chooseAndUploadFile:fail";function r(e, t) {return e.tempFiles.forEach(function (e, n) {e.name || (e.name = e.path.substring(e.path.lastIndexOf("/") + 1)), t && (e.fileType = t), e.cloudPath = Date.now() + "_" + n + e.name.substring(e.name.lastIndexOf("."));}), e.tempFilePaths || (e.tempFilePaths = e.tempFiles.map(function (e) {return e.path;})), e;}function o(e, t, _ref29) {var s = _ref29.onChooseFile,r = _ref29.onUploadProgress;return t.then(function (e) {if (s) {var _t12 = s(e);if (void 0 !== _t12) return Promise.resolve(_t12).then(function (t) {return void 0 === t ? e : t;});}return e;}).then(function (t) {return !1 === t ? { errMsg: n, tempFilePaths: [], tempFiles: [] } : function (e, t) {var s = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 5;var r = arguments.length > 3 ? arguments[3] : undefined;(t = Object.assign({}, t)).errMsg = n;var o = t.tempFiles,i = o.length;var a = 0;return new Promise(function (n) {for (; a < s;) {c();}function c() {var s = a++;if (s >= i) return void (!o.find(function (e) {return !e.url && !e.errMsg;}) && n(t));var u = o[s];e.uploadFile({ filePath: u.path, cloudPath: u.cloudPath, fileType: u.fileType, onUploadProgress: function onUploadProgress(e) {e.index = s, e.tempFile = u, e.tempFilePath = u.path, r && r(e);} }).then(function (e) {u.url = e.fileID, s < i && c();}).catch(function (e) {u.errMsg = e.errMsg || e.message, s < i && c();});}});}(e, t, 5, r);});}t.initChooseAndUploadFile = function (e) {return function () {var t = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { type: "all" };return "image" === t.type ? o(e, function (e) {var t = e.count,n = e.sizeType,_e$sourceType = e.sourceType,o = _e$sourceType === void 0 ? ["album", "camera"] : _e$sourceType,i = e.extension;return new Promise(function (e, a) {uni.chooseImage({ count: t, sizeType: n, sourceType: o, extension: i, success: function success(t) {e(r(t, "image"));}, fail: function fail(e) {a({ errMsg: e.errMsg.replace("chooseImage:fail", s) });} });});}(t), t) : "video" === t.type ? o(e, function (e) {var t = e.camera,n = e.compressed,o = e.maxDuration,_e$sourceType2 = e.sourceType,i = _e$sourceType2 === void 0 ? ["album", "camera"] : _e$sourceType2,a = e.extension;return new Promise(function (e, c) {uni.chooseVideo({ camera: t, compressed: n, maxDuration: o, sourceType: i, extension: a, success: function success(t) {var n = t.tempFilePath,s = t.duration,o = t.size,i = t.height,a = t.width;e(r({ errMsg: "chooseVideo:ok", tempFilePaths: [n], tempFiles: [{ name: t.tempFile && t.tempFile.name || "", path: n, size: o, type: t.tempFile && t.tempFile.type || "", width: a, height: i, duration: s, fileType: "video", cloudPath: "" }] }, "video"));}, fail: function fail(e) {c({ errMsg: e.errMsg.replace("chooseVideo:fail", s) });} });});}(t), t) : o(e, function (e) {var t = e.count,n = e.extension;return new Promise(function (e, o) {var i = uni.chooseFile;if ("undefined" != typeof wx && "function" == typeof wx.chooseMessageFile && (i = wx.chooseMessageFile), "function" != typeof i) return o({ errMsg: s + " 请指定 type 类型，该平台仅支持选择 image 或 video。" });i({ type: "all", count: t, extension: n, success: function success(t) {e(r(t));}, fail: function fail(e) {o({ errMsg: e.errMsg.replace("chooseFile:fail", s) });} });});}(t), t);};};}));var ft = "manual";function pt(e) {return { props: { localdata: { type: Array, default: function _default() {return [];} }, options: { type: [Object, Array], default: function _default() {return {};} }, spaceInfo: { type: Object, default: function _default() {return {};} }, collection: { type: [String, Array], default: "" }, action: { type: String, default: "" }, field: { type: String, default: "" }, orderby: { type: String, default: "" }, where: { type: [String, Object], default: "" }, pageData: { type: String, default: "add" }, pageCurrent: { type: Number, default: 1 }, pageSize: { type: Number, default: 20 }, getcount: { type: [Boolean, String], default: !1 }, gettree: { type: [Boolean, String], default: !1 }, gettreepath: { type: [Boolean, String], default: !1 }, startwith: { type: String, default: "" }, limitlevel: { type: Number, default: 10 }, groupby: { type: String, default: "" }, groupField: { type: String, default: "" }, distinct: { type: [Boolean, String], default: !1 }, foreignKey: { type: String, default: "" }, loadtime: { type: String, default: "auto" }, manual: { type: Boolean, default: !1 } }, data: function data() {return { mixinDatacomLoading: !1, mixinDatacomHasMore: !1, mixinDatacomResData: [], mixinDatacomErrorMessage: "", mixinDatacomPage: {} };}, created: function created() {var _this19 = this;this.mixinDatacomPage = { current: this.pageCurrent, size: this.pageSize, count: 0 }, this.$watch(function () {var e = [];return ["pageCurrent", "pageSize", "localdata", "collection", "action", "field", "orderby", "where", "getont", "getcount", "gettree", "groupby", "groupField", "distinct"].forEach(function (t) {e.push(_this19[t]);}), e;}, function (e, t) {if (_this19.loadtime === ft) return;var n = !1;var s = [];for (var _r6 = 2; _r6 < e.length; _r6++) {e[_r6] !== t[_r6] && (s.push(e[_r6]), n = !0);}e[0] !== t[0] && (_this19.mixinDatacomPage.current = _this19.pageCurrent), _this19.mixinDatacomPage.size = _this19.pageSize, _this19.onMixinDatacomPropsChange(n, s);});}, methods: { onMixinDatacomPropsChange: function onMixinDatacomPropsChange(e, t) {}, mixinDatacomEasyGet: function mixinDatacomEasyGet() {var _this20 = this;var _ref30 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},_ref30$getone = _ref30.getone,e = _ref30$getone === void 0 ? !1 : _ref30$getone,t = _ref30.success,n = _ref30.fail;this.mixinDatacomLoading || (this.mixinDatacomLoading = !0, this.mixinDatacomErrorMessage = "", this.mixinDatacomGet().then(function (n) {_this20.mixinDatacomLoading = !1;var _n$result = n.result,s = _n$result.data,r = _n$result.count;_this20.getcount && (_this20.mixinDatacomPage.count = r), _this20.mixinDatacomHasMore = s.length < _this20.pageSize;var o = e ? s.length ? s[0] : void 0 : s;_this20.mixinDatacomResData = o, t && t(o);}).catch(function (e) {_this20.mixinDatacomLoading = !1, _this20.mixinDatacomErrorMessage = e, n && n(e);}));}, mixinDatacomGet: function mixinDatacomGet() {var _n8;var t = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};var n = e.database(this.spaceInfo);var s = t.action || this.action;s && (n = n.action(s));var r = t.collection || this.collection;n = Array.isArray(r) ? (_n8 = n).collection.apply(_n8, _toConsumableArray(r)) : n.collection(r);var o = t.where || this.where;o && Object.keys(o).length && (n = n.where(o));var i = t.field || this.field;i && (n = n.field(i));var a = t.foreignKey || this.foreignKey;a && (n = n.foreignKey(a));var c = t.groupby || this.groupby;c && (n = n.groupBy(c));var u = t.groupField || this.groupField;u && (n = n.groupField(u));!0 === (void 0 !== t.distinct ? t.distinct : this.distinct) && (n = n.distinct());var h = t.orderby || this.orderby;h && (n = n.orderBy(h));var l = void 0 !== t.pageCurrent ? t.pageCurrent : this.mixinDatacomPage.current,d = void 0 !== t.pageSize ? t.pageSize : this.mixinDatacomPage.size,f = void 0 !== t.getcount ? t.getcount : this.getcount,p = void 0 !== t.gettree ? t.gettree : this.gettree,g = void 0 !== t.gettreepath ? t.gettreepath : this.gettreepath,m = { getCount: f },y = { limitLevel: void 0 !== t.limitlevel ? t.limitlevel : this.limitlevel, startWith: void 0 !== t.startwith ? t.startwith : this.startwith };return p && (m.getTree = y), g && (m.getTreePath = y), n = n.skip(d * (l - 1)).limit(d).get(m), n;} } };}function gt(_x30, _x31) {return _gt.apply(this, arguments);}function _gt() {_gt = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee32(e, t) {var n, _e26, s;return _regenerator.default.wrap(function _callee32$(_context32) {while (1) {switch (_context32.prev = _context32.next) {case 0:n = "http://".concat(e, ":").concat(t, "/system/ping");_context32.prev = 1;_context32.next = 4;return s = { url: n, timeout: 500 }, new Promise(function (e, t) {E.request(_objectSpread(_objectSpread({}, s), {}, { success: function success(t) {e(t);}, fail: function fail(e) {t(e);} }));});case 4:_e26 = _context32.sent;return _context32.abrupt("return", !(!_e26.data || 0 !== _e26.data.code));case 8:_context32.prev = 8;_context32.t0 = _context32["catch"](1);return _context32.abrupt("return", !1);case 11:case "end":return _context32.stop();}}}, _callee32, null, [[1, 8]]);}));return _gt.apply(this, arguments);}function mt(e) {if (e.initUniCloudStatus && "rejected" !== e.initUniCloudStatus) return;var t = Promise.resolve();var n;n = 1, t = new Promise(function (e, t) {setTimeout(function () {e();}, n);}), e.isReady = !1, e.isDefault = !1;var s = e.auth();e.initUniCloudStatus = "pending", e.initUniCloud = t.then(function () {return s.getLoginState();}).then(function (e) {return e ? Promise.resolve() : s.signInAnonymously();}).then(function () {if (!u) return Promise.resolve();if (u && e.debugInfo) {var _e$debugInfo = e.debugInfo,_t13 = _e$debugInfo.address,_n9 = _e$debugInfo.servePort;return function () {var _ref31 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee31(e, t) {var n, _s10, _r7;return _regenerator.default.wrap(function _callee31$(_context31) {while (1) {switch (_context31.prev = _context31.next) {case 0:_s10 = 0;case 1:if (!(_s10 < e.length)) {_context31.next = 11;break;}_r7 = e[_s10];_context31.next = 5;return gt(_r7, t);case 5:if (!_context31.sent) {_context31.next = 8;break;}n = _r7;return _context31.abrupt("break", 11);case 8:_s10++;_context31.next = 1;break;case 11:return _context31.abrupt("return", { address: n, port: t });case 12:case "end":return _context31.stop();}}}, _callee31);}));return function (_x32, _x33) {return _ref31.apply(this, arguments);};}()(_t13, _n9);}}).then(function () {var _ref32 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},t = _ref32.address,n = _ref32.port;if (!u) return Promise.resolve();if (t) e.localAddress = t, e.localPort = n;else if (e.debugInfo) {var _t14 = console["app-plus" === h ? "error" : "warn"];var _n10 = "";"remote" === e.debugInfo.initialLaunchType ? (e.debugInfo.forceRemote = !0, _n10 = "当前客户端和HBuilderX不在同一局域网下（或其他网络原因无法连接HBuilderX），uniCloud本地调试服务不对当前客户端生效。\n- 如果不使用uniCloud本地调试服务，请直接忽略此信息。\n- 如需使用uniCloud本地调试服务，请将客户端与主机连接到同一局域网下并重新运行到客户端。\n- 如果在HBuilderX开启的状态下切换过网络环境，请重启HBuilderX后再试\n- 检查系统防火墙是否拦截了HBuilderX自带的nodejs") : _n10 = "无法连接uniCloud本地调试服务，请检查当前客户端是否与主机在同一局域网下。\n- 如需使用uniCloud本地调试服务，请将客户端与主机连接到同一局域网下并重新运行到客户端。\n- 如果在HBuilderX开启的状态下切换过网络环境，请重启HBuilderX后再试\n- 检查系统防火墙是否拦截了HBuilderX自带的nodejs", "h5" === h && (_n10 += "\n- 部分浏览器开启节流模式之后访问本地地址受限，请检查是否启用了节流模式"), _t14(_n10);}}).then(function () {Me(), e.isReady = !0, e.initUniCloudStatus = "fulfilled";}).catch(function (t) {console.error(t), e.initUniCloudStatus = "rejected";});}var yt = new ( /*#__PURE__*/function () {function _class4() {_classCallCheck(this, _class4);}_createClass(_class4, [{ key: "init", value: function init(e) {var t = {};var n = !1 !== e.debugFunction && u && ("h5" === h && navigator.userAgent.indexOf("HBuilderX") > 0 || "app-plus" === h);switch (e.provider) {case "tencent":t = Ne.init(Object.assign(e, { useDebugFunction: n }));break;case "aliyun":t = x.init(Object.assign(e, { useDebugFunction: n }));break;case "private":t = Be.init(Object.assign(e, { useDebugFunction: n }));break;default:throw new Error("未提供正确的provider参数");}var s = l;u && s && !s.code && (t.debugInfo = s), mt(t), t.reInit = function () {mt(this);}, Xe(t), function (e) {var t = e.uploadFile;e.uploadFile = function (e) {return t.call(this, e);};}(t), at(t), function (e) {e.getCurrentUserInfo = lt, e.chooseAndUploadFile = dt.initChooseAndUploadFile(e), Object.assign(e, { get mixinDatacom() {return pt(e);} });}(t);return ["callFunction", "uploadFile", "deleteFile", "getTempFileURL", "downloadFile", "chooseAndUploadFile"].forEach(function (e) {if (!t[e]) return;var n = t[e];t[e] = function () {return t.reInit(), n.apply(t, Array.from(arguments));}, t[e] = T(t[e], e).bind(t);}), t.init = this.init, t;} }]);return _class4;}())();(function () {{var e = d;var t = {};if (1 === e.length) t = e[0], yt = yt.init(t), yt.isDefault = !0;else {var _t15 = ["auth", "callFunction", "uploadFile", "deleteFile", "getTempFileURL", "downloadFile", "database", "getCurrentUSerInfo"];var _n11;_n11 = e && e.length > 0 ? "应用有多个服务空间，请通过uniCloud.init方法指定要使用的服务空间" : f ? "应用未关联服务空间，请在uniCloud目录右键关联服务空间" : "uni-app cli项目内使用uniCloud需要使用HBuilderX的运行菜单运行项目，且需要在uniCloud目录关联服务空间", _t15.forEach(function (e) {yt[e] = function () {return console.error(_n11), Promise.reject(new A({ code: "SYS_ERR", message: _n11 }));};});}Object.assign(yt, { get mixinDatacom() {return pt(yt);} }), yt.addInterceptor = w, yt.removeInterceptor = k, u && "h5" === h && (window.uniCloud = yt);}})();var _t = yt;exports.default = _t;
+/* WEBPACK VAR INJECTION */(function(global, uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _regenerator = _interopRequireDefault(__webpack_require__(/*! ./node_modules/@babel/runtime/regenerator */ 33));var _uniI18n = __webpack_require__(/*! @dcloudio/uni-i18n */ 4);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {try {var info = gen[key](arg);var value = info.value;} catch (error) {reject(error);return;}if (info.done) {resolve(value);} else {Promise.resolve(value).then(_next, _throw);}}function _asyncToGenerator(fn) {return function () {var self = this,args = arguments;return new Promise(function (resolve, reject) {var gen = fn.apply(self, args);function _next(value) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);}function _throw(err) {asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);}_next(undefined);});};}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}function _toConsumableArray(arr) {return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();}function _nonIterableSpread() {throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}function _iterableToArray(iter) {if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);}function _arrayWithoutHoles(arr) {if (Array.isArray(arr)) return _arrayLikeToArray(arr);}function _createForOfIteratorHelper(o, allowArrayLike) {var it;if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) {if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") {if (it) o = it;var i = 0;var F = function F() {};return { s: F, n: function n() {if (i >= o.length) return { done: true };return { done: false, value: o[i++] };}, e: function e(_e25) {throw _e25;}, f: F };}throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}var normalCompletion = true,didErr = false,err;return { s: function s() {it = o[Symbol.iterator]();}, n: function n() {var step = it.next();normalCompletion = step.done;return step;}, e: function e(_e26) {didErr = true;err = _e26;}, f: function f() {try {if (!normalCompletion && it.return != null) it.return();} finally {if (didErr) throw err;}} };}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(o);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;}function _defineProperties(target, props) {for (var i = 0; i < props.length; i++) {var descriptor = props[i];descriptor.enumerable = descriptor.enumerable || false;descriptor.configurable = true;if ("value" in descriptor) descriptor.writable = true;Object.defineProperty(target, descriptor.key, descriptor);}}function _createClass(Constructor, protoProps, staticProps) {if (protoProps) _defineProperties(Constructor.prototype, protoProps);if (staticProps) _defineProperties(Constructor, staticProps);return Constructor;}function _classCallCheck(instance, Constructor) {if (!(instance instanceof Constructor)) {throw new TypeError("Cannot call a class as a function");}}function _inherits(subClass, superClass) {if (typeof superClass !== "function" && superClass !== null) {throw new TypeError("Super expression must either be null or a function");}subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } });if (superClass) _setPrototypeOf(subClass, superClass);}function _createSuper(Derived) {var hasNativeReflectConstruct = _isNativeReflectConstruct();return function _createSuperInternal() {var Super = _getPrototypeOf(Derived),result;if (hasNativeReflectConstruct) {var NewTarget = _getPrototypeOf(this).constructor;result = Reflect.construct(Super, arguments, NewTarget);} else {result = Super.apply(this, arguments);}return _possibleConstructorReturn(this, result);};}function _possibleConstructorReturn(self, call) {if (call && (typeof call === "object" || typeof call === "function")) {return call;}return _assertThisInitialized(self);}function _assertThisInitialized(self) {if (self === void 0) {throw new ReferenceError("this hasn't been initialised - super() hasn't been called");}return self;}function _wrapNativeSuper(Class) {var _cache = typeof Map === "function" ? new Map() : undefined;_wrapNativeSuper = function _wrapNativeSuper(Class) {if (Class === null || !_isNativeFunction(Class)) return Class;if (typeof Class !== "function") {throw new TypeError("Super expression must either be null or a function");}if (typeof _cache !== "undefined") {if (_cache.has(Class)) return _cache.get(Class);_cache.set(Class, Wrapper);}function Wrapper() {return _construct(Class, arguments, _getPrototypeOf(this).constructor);}Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } });return _setPrototypeOf(Wrapper, Class);};return _wrapNativeSuper(Class);}function _construct(Parent, args, Class) {if (_isNativeReflectConstruct()) {_construct = Reflect.construct;} else {_construct = function _construct(Parent, args, Class) {var a = [null];a.push.apply(a, args);var Constructor = Function.bind.apply(Parent, a);var instance = new Constructor();if (Class) _setPrototypeOf(instance, Class.prototype);return instance;};}return _construct.apply(null, arguments);}function _isNativeReflectConstruct() {if (typeof Reflect === "undefined" || !Reflect.construct) return false;if (Reflect.construct.sham) return false;if (typeof Proxy === "function") return true;try {Date.prototype.toString.call(Reflect.construct(Date, [], function () {}));return true;} catch (e) {return false;}}function _isNativeFunction(fn) {return Function.toString.call(fn).indexOf("[native code]") !== -1;}function _setPrototypeOf(o, p) {_setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {o.__proto__ = p;return o;};return _setPrototypeOf(o, p);}function _getPrototypeOf(o) {_getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {return o.__proto__ || Object.getPrototypeOf(o);};return _getPrototypeOf(o);}"undefined" != typeof globalThis ? globalThis : "undefined" != typeof window ? window : "undefined" != typeof global ? global : "undefined" != typeof self && self;function t(e) {return e && e.__esModule && Object.prototype.hasOwnProperty.call(e, "default") ? e.default : e;}function n(e, t, n) {return e(n = { path: t, exports: {}, require: function require(e, t) {return function () {throw new Error("Dynamic requires are not currently supported by @rollup/plugin-commonjs");}(null == t && n.path);} }, n.exports), n.exports;}var s = n(function (e, t) {var n;e.exports = (n = n || function (e, t) {var n = Object.create || function () {function e() {}return function (t) {var n;return e.prototype = t, n = new e(), e.prototype = null, n;};}(),s = {},r = s.lib = {},o = r.Base = { extend: function extend(e) {var t = n(this);return e && t.mixIn(e), t.hasOwnProperty("init") && this.init !== t.init || (t.init = function () {t.$super.init.apply(this, arguments);}), t.init.prototype = t, t.$super = this, t;}, create: function create() {var e = this.extend();return e.init.apply(e, arguments), e;}, init: function init() {}, mixIn: function mixIn(e) {for (var t in e) {e.hasOwnProperty(t) && (this[t] = e[t]);}e.hasOwnProperty("toString") && (this.toString = e.toString);}, clone: function clone() {return this.init.prototype.extend(this);} },i = r.WordArray = o.extend({ init: function init(e, n) {e = this.words = e || [], this.sigBytes = n != t ? n : 4 * e.length;}, toString: function toString(e) {return (e || c).stringify(this);}, concat: function concat(e) {var t = this.words,n = e.words,s = this.sigBytes,r = e.sigBytes;if (this.clamp(), s % 4) for (var o = 0; o < r; o++) {var i = n[o >>> 2] >>> 24 - o % 4 * 8 & 255;t[s + o >>> 2] |= i << 24 - (s + o) % 4 * 8;} else for (o = 0; o < r; o += 4) {t[s + o >>> 2] = n[o >>> 2];}return this.sigBytes += r, this;}, clamp: function clamp() {var t = this.words,n = this.sigBytes;t[n >>> 2] &= 4294967295 << 32 - n % 4 * 8, t.length = e.ceil(n / 4);}, clone: function clone() {var e = o.clone.call(this);return e.words = this.words.slice(0), e;}, random: function random(t) {for (var n, s = [], r = function r(t) {t = t;var n = 987654321,s = 4294967295;return function () {var r = ((n = 36969 * (65535 & n) + (n >> 16) & s) << 16) + (t = 18e3 * (65535 & t) + (t >> 16) & s) & s;return r /= 4294967296, (r += .5) * (e.random() > .5 ? 1 : -1);};}, o = 0; o < t; o += 4) {var a = r(4294967296 * (n || e.random()));n = 987654071 * a(), s.push(4294967296 * a() | 0);}return new i.init(s, t);} }),a = s.enc = {},c = a.Hex = { stringify: function stringify(e) {for (var t = e.words, n = e.sigBytes, s = [], r = 0; r < n; r++) {var o = t[r >>> 2] >>> 24 - r % 4 * 8 & 255;s.push((o >>> 4).toString(16)), s.push((15 & o).toString(16));}return s.join("");}, parse: function parse(e) {for (var t = e.length, n = [], s = 0; s < t; s += 2) {n[s >>> 3] |= parseInt(e.substr(s, 2), 16) << 24 - s % 8 * 4;}return new i.init(n, t / 2);} },u = a.Latin1 = { stringify: function stringify(e) {for (var t = e.words, n = e.sigBytes, s = [], r = 0; r < n; r++) {var o = t[r >>> 2] >>> 24 - r % 4 * 8 & 255;s.push(String.fromCharCode(o));}return s.join("");}, parse: function parse(e) {for (var t = e.length, n = [], s = 0; s < t; s++) {n[s >>> 2] |= (255 & e.charCodeAt(s)) << 24 - s % 4 * 8;}return new i.init(n, t);} },h = a.Utf8 = { stringify: function stringify(e) {try {return decodeURIComponent(escape(u.stringify(e)));} catch (e) {throw new Error("Malformed UTF-8 data");}}, parse: function parse(e) {return u.parse(unescape(encodeURIComponent(e)));} },l = r.BufferedBlockAlgorithm = o.extend({ reset: function reset() {this._data = new i.init(), this._nDataBytes = 0;}, _append: function _append(e) {"string" == typeof e && (e = h.parse(e)), this._data.concat(e), this._nDataBytes += e.sigBytes;}, _process: function _process(t) {var n = this._data,s = n.words,r = n.sigBytes,o = this.blockSize,a = r / (4 * o),c = (a = t ? e.ceil(a) : e.max((0 | a) - this._minBufferSize, 0)) * o,u = e.min(4 * c, r);if (c) {for (var h = 0; h < c; h += o) {this._doProcessBlock(s, h);}var l = s.splice(0, c);n.sigBytes -= u;}return new i.init(l, u);}, clone: function clone() {var e = o.clone.call(this);return e._data = this._data.clone(), e;}, _minBufferSize: 0 }),d = (r.Hasher = l.extend({ cfg: o.extend(), init: function init(e) {this.cfg = this.cfg.extend(e), this.reset();}, reset: function reset() {l.reset.call(this), this._doReset();}, update: function update(e) {return this._append(e), this._process(), this;}, finalize: function finalize(e) {return e && this._append(e), this._doFinalize();}, blockSize: 16, _createHelper: function _createHelper(e) {return function (t, n) {return new e.init(n).finalize(t);};}, _createHmacHelper: function _createHmacHelper(e) {return function (t, n) {return new d.HMAC.init(e, n).finalize(t);};} }), s.algo = {});return s;}(Math), n);}),r = (n(function (e, t) {var n;e.exports = (n = s, function (e) {var t = n,s = t.lib,r = s.WordArray,o = s.Hasher,i = t.algo,a = [];!function () {for (var t = 0; t < 64; t++) {a[t] = 4294967296 * e.abs(e.sin(t + 1)) | 0;}}();var c = i.MD5 = o.extend({ _doReset: function _doReset() {this._hash = new r.init([1732584193, 4023233417, 2562383102, 271733878]);}, _doProcessBlock: function _doProcessBlock(e, t) {for (var n = 0; n < 16; n++) {var s = t + n,r = e[s];e[s] = 16711935 & (r << 8 | r >>> 24) | 4278255360 & (r << 24 | r >>> 8);}var o = this._hash.words,i = e[t + 0],c = e[t + 1],f = e[t + 2],p = e[t + 3],g = e[t + 4],m = e[t + 5],y = e[t + 6],_ = e[t + 7],w = e[t + 8],k = e[t + 9],S = e[t + 10],v = e[t + 11],T = e[t + 12],P = e[t + 13],A = e[t + 14],I = e[t + 15],E = o[0],b = o[1],O = o[2],U = o[3];E = u(E, b, O, U, i, 7, a[0]), U = u(U, E, b, O, c, 12, a[1]), O = u(O, U, E, b, f, 17, a[2]), b = u(b, O, U, E, p, 22, a[3]), E = u(E, b, O, U, g, 7, a[4]), U = u(U, E, b, O, m, 12, a[5]), O = u(O, U, E, b, y, 17, a[6]), b = u(b, O, U, E, _, 22, a[7]), E = u(E, b, O, U, w, 7, a[8]), U = u(U, E, b, O, k, 12, a[9]), O = u(O, U, E, b, S, 17, a[10]), b = u(b, O, U, E, v, 22, a[11]), E = u(E, b, O, U, T, 7, a[12]), U = u(U, E, b, O, P, 12, a[13]), O = u(O, U, E, b, A, 17, a[14]), E = h(E, b = u(b, O, U, E, I, 22, a[15]), O, U, c, 5, a[16]), U = h(U, E, b, O, y, 9, a[17]), O = h(O, U, E, b, v, 14, a[18]), b = h(b, O, U, E, i, 20, a[19]), E = h(E, b, O, U, m, 5, a[20]), U = h(U, E, b, O, S, 9, a[21]), O = h(O, U, E, b, I, 14, a[22]), b = h(b, O, U, E, g, 20, a[23]), E = h(E, b, O, U, k, 5, a[24]), U = h(U, E, b, O, A, 9, a[25]), O = h(O, U, E, b, p, 14, a[26]), b = h(b, O, U, E, w, 20, a[27]), E = h(E, b, O, U, P, 5, a[28]), U = h(U, E, b, O, f, 9, a[29]), O = h(O, U, E, b, _, 14, a[30]), E = l(E, b = h(b, O, U, E, T, 20, a[31]), O, U, m, 4, a[32]), U = l(U, E, b, O, w, 11, a[33]), O = l(O, U, E, b, v, 16, a[34]), b = l(b, O, U, E, A, 23, a[35]), E = l(E, b, O, U, c, 4, a[36]), U = l(U, E, b, O, g, 11, a[37]), O = l(O, U, E, b, _, 16, a[38]), b = l(b, O, U, E, S, 23, a[39]), E = l(E, b, O, U, P, 4, a[40]), U = l(U, E, b, O, i, 11, a[41]), O = l(O, U, E, b, p, 16, a[42]), b = l(b, O, U, E, y, 23, a[43]), E = l(E, b, O, U, k, 4, a[44]), U = l(U, E, b, O, T, 11, a[45]), O = l(O, U, E, b, I, 16, a[46]), E = d(E, b = l(b, O, U, E, f, 23, a[47]), O, U, i, 6, a[48]), U = d(U, E, b, O, _, 10, a[49]), O = d(O, U, E, b, A, 15, a[50]), b = d(b, O, U, E, m, 21, a[51]), E = d(E, b, O, U, T, 6, a[52]), U = d(U, E, b, O, p, 10, a[53]), O = d(O, U, E, b, S, 15, a[54]), b = d(b, O, U, E, c, 21, a[55]), E = d(E, b, O, U, w, 6, a[56]), U = d(U, E, b, O, I, 10, a[57]), O = d(O, U, E, b, y, 15, a[58]), b = d(b, O, U, E, P, 21, a[59]), E = d(E, b, O, U, g, 6, a[60]), U = d(U, E, b, O, v, 10, a[61]), O = d(O, U, E, b, f, 15, a[62]), b = d(b, O, U, E, k, 21, a[63]), o[0] = o[0] + E | 0, o[1] = o[1] + b | 0, o[2] = o[2] + O | 0, o[3] = o[3] + U | 0;}, _doFinalize: function _doFinalize() {var t = this._data,n = t.words,s = 8 * this._nDataBytes,r = 8 * t.sigBytes;n[r >>> 5] |= 128 << 24 - r % 32;var o = e.floor(s / 4294967296),i = s;n[15 + (r + 64 >>> 9 << 4)] = 16711935 & (o << 8 | o >>> 24) | 4278255360 & (o << 24 | o >>> 8), n[14 + (r + 64 >>> 9 << 4)] = 16711935 & (i << 8 | i >>> 24) | 4278255360 & (i << 24 | i >>> 8), t.sigBytes = 4 * (n.length + 1), this._process();for (var a = this._hash, c = a.words, u = 0; u < 4; u++) {var h = c[u];c[u] = 16711935 & (h << 8 | h >>> 24) | 4278255360 & (h << 24 | h >>> 8);}return a;}, clone: function clone() {var e = o.clone.call(this);return e._hash = this._hash.clone(), e;} });function u(e, t, n, s, r, o, i) {var a = e + (t & n | ~t & s) + r + i;return (a << o | a >>> 32 - o) + t;}function h(e, t, n, s, r, o, i) {var a = e + (t & s | n & ~s) + r + i;return (a << o | a >>> 32 - o) + t;}function l(e, t, n, s, r, o, i) {var a = e + (t ^ n ^ s) + r + i;return (a << o | a >>> 32 - o) + t;}function d(e, t, n, s, r, o, i) {var a = e + (n ^ (t | ~s)) + r + i;return (a << o | a >>> 32 - o) + t;}t.MD5 = o._createHelper(c), t.HmacMD5 = o._createHmacHelper(c);}(Math), n.MD5);}), n(function (e, t) {var n, r, o;e.exports = (r = (n = s).lib.Base, o = n.enc.Utf8, void (n.algo.HMAC = r.extend({ init: function init(e, t) {e = this._hasher = new e.init(), "string" == typeof t && (t = o.parse(t));var n = e.blockSize,s = 4 * n;t.sigBytes > s && (t = e.finalize(t)), t.clamp();for (var r = this._oKey = t.clone(), i = this._iKey = t.clone(), a = r.words, c = i.words, u = 0; u < n; u++) {a[u] ^= 1549556828, c[u] ^= 909522486;}r.sigBytes = i.sigBytes = s, this.reset();}, reset: function reset() {var e = this._hasher;e.reset(), e.update(this._iKey);}, update: function update(e) {return this._hasher.update(e), this;}, finalize: function finalize(e) {var t = this._hasher,n = t.finalize(e);return t.reset(), t.finalize(this._oKey.clone().concat(n));} })));}), n(function (e, t) {e.exports = s.HmacMD5;}));function o(e) {return Object.prototype.toString.call(e).slice(8, -1).toLowerCase();}function i(e) {return "object" === o(e);}var a = /*#__PURE__*/function (_Error) {_inherits(a, _Error);var _super = _createSuper(a);function a(e, t) {var _this;_classCallCheck(this, a);_this = _super.call(this, e), _this.code = t;return _this;}return a;}( /*#__PURE__*/_wrapNativeSuper(Error));function c(e) {return e && "string" == typeof e ? JSON.parse(e) : e;}var u = "development" === "development",h = "mp-weixin",l = c(undefined),d = c([]),f = true;var p = "";try {{var _e2 = __webpack_require__(/*! uni-stat-config */ 36).default || __webpack_require__(/*! uni-stat-config */ 36);p = _e2.appid;}} catch (e) {}var g = {};function m(e) {var t = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};var n, s;return n = g, s = e, Object.prototype.hasOwnProperty.call(n, s) || (g[e] = t), g[e];}"app-plus" === h && (g = uni._globalUniCloudObj ? uni._globalUniCloudObj : uni._globalUniCloudObj = {});var y = ["invoke", "success", "fail", "complete"],_ = m("_globalUniCloudInterceptor");function w(e, t) {_[e] || (_[e] = {}), i(t) && Object.keys(t).forEach(function (n) {y.indexOf(n) > -1 && function (e, t, n) {var s = _[e][t];s || (s = _[e][t] = []), -1 === s.indexOf(n) && "function" == typeof n && s.push(n);}(e, n, t[n]);});}function k(e, t) {_[e] || (_[e] = {}), i(t) ? Object.keys(t).forEach(function (n) {y.indexOf(n) > -1 && function (e, t, n) {var s = _[e][t];if (!s) return;var r = s.indexOf(n);r > -1 && s.splice(r, 1);}(e, n, t[n]);}) : delete _[e];}function S(e, t) {return e && 0 !== e.length ? e.reduce(function (e, n) {return e.then(function () {return n(t);});}, Promise.resolve()) : Promise.resolve();}function v(e, t) {return _[e] && _[e][t] || [];}function T(e, t) {return t ? function (n) {var _this2 = this;var s = "callFunction" === t && "DCloud-clientDB" === (n && n.name);var r;r = this.isReady ? Promise.resolve() : this.initUniCloud, n = n || {};var o = r.then(function () {return s ? Promise.resolve() : S(v(t, "invoke"), n);}).then(function () {return e.call(_this2, n);}).then(function (e) {return s ? Promise.resolve(e) : S(v(t, "success"), e).then(function () {return S(v(t, "complete"), e);}).then(function () {return Promise.resolve(e);});}, function (e) {return s ? Promise.reject(e) : S(v(t, "fail"), e).then(function () {return S(v(t, "complete"), e);}).then(function () {return Promise.reject(e);});});if (!(n.success || n.fail || n.complete)) return o;o.then(function (e) {n.success && n.success(e), n.complete && n.complete(e);}).catch(function (e) {n.fail && n.fail(e), n.complete && n.complete(e);});} : function (t) {if (!((t = t || {}).success || t.fail || t.complete)) return e.call(this, t);e.call(this, t).then(function (e) {t.success && t.success(e), t.complete && t.complete(e);}, function (e) {t.fail && t.fail(e), t.complete && t.complete(e);});};}var P = /*#__PURE__*/function (_Error2) {_inherits(P, _Error2);var _super2 = _createSuper(P);function P(e) {var _this3;_classCallCheck(this, P);_this3 = _super2.call(this, e.message), _this3.errMsg = e.message || "", Object.defineProperties(_assertThisInitialized(_this3), { code: { get: function get() {return e.code;} }, requestId: { get: function get() {return e.requestId;} }, message: { get: function get() {return this.errMsg;}, set: function set(e) {this.errMsg = e;} } });return _this3;}return P;}( /*#__PURE__*/_wrapNativeSuper(Error));var _e3 = (0, _uniI18n.initVueI18n)({ "zh-Hans": { "uniCloud.init.paramRequired": "缺少参数：{param}", "uniCloud.uploadFile.fileError": "filePath应为File对象" }, "zh-Hant": { "uniCloud.init.paramRequired": "缺少参数：{param}", "uniCloud.uploadFile.fileError": "filePath应为File对象" }, en: { "uniCloud.init.paramRequired": "{param} required", "uniCloud.uploadFile.fileError": "filePath should be instance of File" }, fr: { "uniCloud.init.paramRequired": "{param} required", "uniCloud.uploadFile.fileError": "filePath should be instance of File" }, es: { "uniCloud.init.paramRequired": "{param} required", "uniCloud.uploadFile.fileError": "filePath should be instance of File" } }, "zh-Hans"),A = _e3.t,I = _e3.setLocale,E = _e3.getLocale;function b() {var _uni$getSystemInfoSyn = uni.getSystemInfoSync(),e = _uni$getSystemInfoSyn.deviceId,t = _uni$getSystemInfoSyn.platform;return { PLATFORM: h, OS: t, APPID: p, LOCALE: E(), DEVICEID: e, CLIENT_SDK_VERSION: "1.0.13" };}var O = { sign: function sign(e, t) {var n = "";return Object.keys(e).sort().forEach(function (t) {e[t] && (n = n + "&" + t + "=" + e[t]);}), n = n.slice(1), r(n, t).toString();}, wrappedRequest: function wrappedRequest(e, t) {return new Promise(function (n, s) {t(Object.assign(e, { complete: function complete(e) {e || (e = {}), u && "h5" === h && e.errMsg && 0 === e.errMsg.indexOf("request:fail") && console.warn("发布H5，需要在uniCloud后台操作，绑定安全域名，否则会因为跨域问题而无法访问。教程参考：https://uniapp.dcloud.io/uniCloud/quickstart?id=useinh5");var t = e.data && e.data.header && e.data.header["x-serverless-request-id"] || e.header && e.header["request-id"];if (!e.statusCode || e.statusCode >= 400) return s(new P({ code: "SYS_ERR", message: e.errMsg || "request:fail", requestId: t }));var r = e.data;if (r.error) return s(new P({ code: r.error.code, message: r.error.message, requestId: t }));r.result = r.data, r.requestId = t, delete r.data, n(r);} }));});} };var U = { request: function request(e) {return uni.request(e);}, uploadFile: function uploadFile(e) {return uni.uploadFile(e);}, setStorageSync: function setStorageSync(e, t) {return uni.setStorageSync(e, t);}, getStorageSync: function getStorageSync(e) {return uni.getStorageSync(e);}, removeStorageSync: function removeStorageSync(e) {return uni.removeStorageSync(e);}, clearStorageSync: function clearStorageSync() {return uni.clearStorageSync();} };var C = /*#__PURE__*/function () {function C(e) {_classCallCheck(this, C);["spaceId", "clientSecret"].forEach(function (t) {if (!Object.prototype.hasOwnProperty.call(e, t)) throw new Error(A("uniCloud.init.paramRequired", { param: t }));}), this.config = Object.assign({}, { endpoint: "https://api.bspapp.com" }, e), this.config.provider = "aliyun", this.config.requestUrl = this.config.endpoint + "/client", this.config.envType = this.config.envType || "public", this.config.accessTokenKey = "access_token_" + this.config.spaceId, this.adapter = U, this._getAccessTokenPromise = null, this._getAccessTokenPromiseStatus = null;}_createClass(C, [{ key: "setAccessToken", value: function setAccessToken(e) {this.accessToken = e;} }, { key: "requestWrapped", value: function requestWrapped(e) {return O.wrappedRequest(e, this.adapter.request);} }, { key: "requestAuth", value: function requestAuth(e) {return this.requestWrapped(e);} }, { key: "request", value: function request(e, t) {var _this4 = this;return Promise.resolve().then(function () {return _this4.hasAccessToken ? t ? _this4.requestWrapped(e) : _this4.requestWrapped(e).catch(function (t) {return new Promise(function (e, n) {!t || "GATEWAY_INVALID_TOKEN" !== t.code && "InvalidParameter.InvalidToken" !== t.code ? n(t) : e();}).then(function () {return _this4.getAccessToken();}).then(function () {var t = _this4.rebuildRequest(e);return _this4.request(t, !0);});}) : _this4.getAccessToken().then(function () {var t = _this4.rebuildRequest(e);return _this4.request(t, !0);});});} }, { key: "rebuildRequest", value: function rebuildRequest(e) {var t = Object.assign({}, e);return t.data.token = this.accessToken, t.header["x-basement-token"] = this.accessToken, t.header["x-serverless-sign"] = O.sign(t.data, this.config.clientSecret), t;} }, { key: "setupRequest", value: function setupRequest(e, t) {var n = Object.assign({}, e, { spaceId: this.config.spaceId, timestamp: Date.now() }),s = { "Content-Type": "application/json" };return "auth" !== t && (n.token = this.accessToken, s["x-basement-token"] = this.accessToken), s["x-serverless-sign"] = O.sign(n, this.config.clientSecret), { url: this.config.requestUrl, method: "POST", data: n, dataType: "json", header: s };} }, { key: "getAccessToken", value: function getAccessToken() {var _this5 = this;if ("pending" === this._getAccessTokenPromiseStatus) return this._getAccessTokenPromise;this._getAccessTokenPromiseStatus = "pending";return this._getAccessTokenPromise = this.requestAuth(this.setupRequest({ method: "serverless.auth.user.anonymousAuthorize", params: "{}" }, "auth")).then(function (e) {return new Promise(function (t, n) {e.result && e.result.accessToken ? (_this5.setAccessToken(e.result.accessToken), _this5._getAccessTokenPromiseStatus = "fulfilled", t(_this5.accessToken)) : (_this5._getAccessTokenPromiseStatus = "rejected", n(new P({ code: "AUTH_FAILED", message: "获取accessToken失败" })));});}, function (e) {return _this5._getAccessTokenPromiseStatus = "rejected", Promise.reject(e);}), this._getAccessTokenPromise;} }, { key: "authorize", value: function authorize() {this.getAccessToken();} }, { key: "callFunction", value: function callFunction(e) {var t = { method: "serverless.function.runtime.invoke", params: JSON.stringify({ functionTarget: e.name, functionArgs: e.data || {} }) };return this.request(this.setupRequest(t));} }, { key: "getOSSUploadOptionsFromPath", value: function getOSSUploadOptionsFromPath(e) {var t = { method: "serverless.file.resource.generateProximalSign", params: JSON.stringify(e) };return this.request(this.setupRequest(t));} }, { key: "uploadFileToOSS", value: function uploadFileToOSS(_ref) {var _this6 = this;var e = _ref.url,t = _ref.formData,n = _ref.name,s = _ref.filePath,r = _ref.fileType,o = _ref.onUploadProgress;return new Promise(function (i, a) {var c = _this6.adapter.uploadFile({ url: e, formData: t, name: n, filePath: s, fileType: r, header: { "X-OSS-server-side-encrpytion": "AES256" }, success: function success(e) {e && e.statusCode < 400 ? i(e) : a(new P({ code: "UPLOAD_FAILED", message: "文件上传失败" }));}, fail: function fail(e) {a(new P({ code: e.code || "UPLOAD_FAILED", message: e.message || e.errMsg || "文件上传失败" }));} });"function" == typeof o && c && "function" == typeof c.onProgressUpdate && c.onProgressUpdate(function (e) {o({ loaded: e.totalBytesSent, total: e.totalBytesExpectedToSend });});});} }, { key: "reportOSSUpload", value: function reportOSSUpload(e) {var t = { method: "serverless.file.resource.report", params: JSON.stringify(e) };return this.request(this.setupRequest(t));} }, { key: "uploadFile", value: function uploadFile(_ref2) {var _this7 = this;var e = _ref2.filePath,t = _ref2.cloudPath,_ref2$fileType = _ref2.fileType,n = _ref2$fileType === void 0 ? "image" : _ref2$fileType,s = _ref2.onUploadProgress,r = _ref2.config;if ("string" !== o(t)) throw new P({ code: "INVALID_PARAM", message: "cloudPath必须为字符串类型" });if (!(t = t.trim())) throw new P({ code: "CLOUDPATH_REQUIRED", message: "cloudPath不可为空" });if (/:\/\//.test(t)) throw new P({ code: "INVALID_PARAM", message: "cloudPath不合法" });var i = r && r.envType || this.config.envType;var a, c;return this.getOSSUploadOptionsFromPath({ env: i, filename: t }).then(function (t) {var r = t.result;a = r.id, c = "https://" + r.cdnDomain + "/" + r.ossPath;var o = { url: "https://" + r.host, formData: { "Cache-Control": "max-age=2592000", "Content-Disposition": "attachment", OSSAccessKeyId: r.accessKeyId, Signature: r.signature, host: r.host, id: a, key: r.ossPath, policy: r.policy, success_action_status: 200 }, fileName: "file", name: "file", filePath: e, fileType: n };return _this7.uploadFileToOSS(Object.assign({}, o, { onUploadProgress: s }));}).then(function () {return _this7.reportOSSUpload({ id: a });}).then(function (t) {return new Promise(function (n, s) {t.success ? n({ success: !0, filePath: e, fileID: c }) : s(new P({ code: "UPLOAD_FAILED", message: "文件上传失败" }));});});} }, { key: "deleteFile", value: function deleteFile(_ref3) {var e = _ref3.fileList;var t = { method: "serverless.file.resource.delete", params: JSON.stringify({ id: e[0] }) };return this.request(this.setupRequest(t));} }, { key: "getTempFileURL", value: function getTempFileURL() {var _ref4 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref4.fileList;return new Promise(function (t, n) {Array.isArray(e) && 0 !== e.length || n(new P({ code: "INVALID_PARAM", message: "fileList的元素必须是非空的字符串" })), t({ fileList: e.map(function (e) {return { fileID: e, tempFileURL: e };}) });});} }, { key: "hasAccessToken", get: function get() {return !!this.accessToken;} }]);return C;}();var x = { init: function init(e) {var t = new C(e),n = { signInAnonymously: function signInAnonymously() {return t.authorize();}, getLoginState: function getLoginState() {return Promise.resolve(!1);} };return t.auth = function () {return n;}, t.customAuth = t.auth, t;} },D = "undefined" != typeof location && "http:" === location.protocol ? "http:" : "https:";var R;!function (e) {e.local = "local", e.none = "none", e.session = "session";}(R || (R = {}));var q = function q() {};var F = function F() {var e;if (!Promise) {e = function e() {}, e.promise = {};var _t = function _t() {throw new Error('Your Node runtime does support ES6 Promises. Set "global.Promise" to your preferred implementation of promises.');};return Object.defineProperty(e.promise, "then", { get: _t }), Object.defineProperty(e.promise, "catch", { get: _t }), e;}var t = new Promise(function (t, n) {e = function e(_e4, s) {return _e4 ? n(_e4) : t(s);};});return e.promise = t, e;};function L(e) {return void 0 === e;}function N(e) {return "[object Null]" === Object.prototype.toString.call(e);}var M;function $(e) {var t = (n = e, "[object Array]" === Object.prototype.toString.call(n) ? e : [e]);var n;var _iterator = _createForOfIteratorHelper(t),_step;try {for (_iterator.s(); !(_step = _iterator.n()).done;) {var _e5 = _step.value;var _t2 = _e5.isMatch,_n = _e5.genAdapter,_s = _e5.runtime;if (_t2()) return { adapter: _n(), runtime: _s };}} catch (err) {_iterator.e(err);} finally {_iterator.f();}}!function (e) {e.WEB = "web", e.WX_MP = "wx_mp";}(M || (M = {}));var j = { adapter: null, runtime: void 0 },K = ["anonymousUuidKey"];var B = /*#__PURE__*/function (_q) {_inherits(B, _q);var _super3 = _createSuper(B);function B() {var _this8;_classCallCheck(this, B);_this8 = _super3.call(this), j.adapter.root.tcbObject || (j.adapter.root.tcbObject = {});return _this8;}_createClass(B, [{ key: "setItem", value: function setItem(e, t) {j.adapter.root.tcbObject[e] = t;} }, { key: "getItem", value: function getItem(e) {return j.adapter.root.tcbObject[e];} }, { key: "removeItem", value: function removeItem(e) {delete j.adapter.root.tcbObject[e];} }, { key: "clear", value: function clear() {delete j.adapter.root.tcbObject;} }]);return B;}(q);function H(e, t) {switch (e) {case "local":return t.localStorage || new B();case "none":return new B();default:return t.sessionStorage || new B();}}var W = /*#__PURE__*/function () {function W(e) {_classCallCheck(this, W);if (!this._storage) {this._persistence = j.adapter.primaryStorage || e.persistence, this._storage = H(this._persistence, j.adapter);var _t3 = "access_token_".concat(e.env),_n2 = "access_token_expire_".concat(e.env),_s2 = "refresh_token_".concat(e.env),_r = "anonymous_uuid_".concat(e.env),_o = "login_type_".concat(e.env),_i = "user_info_".concat(e.env);this.keys = { accessTokenKey: _t3, accessTokenExpireKey: _n2, refreshTokenKey: _s2, anonymousUuidKey: _r, loginTypeKey: _o, userInfoKey: _i };}}_createClass(W, [{ key: "updatePersistence", value: function updatePersistence(e) {if (e === this._persistence) return;var t = "local" === this._persistence;this._persistence = e;var n = H(e, j.adapter);for (var _e6 in this.keys) {var _s3 = this.keys[_e6];if (t && K.includes(_e6)) continue;var _r2 = this._storage.getItem(_s3);L(_r2) || N(_r2) || (n.setItem(_s3, _r2), this._storage.removeItem(_s3));}this._storage = n;} }, { key: "setStore", value: function setStore(e, t, n) {if (!this._storage) return;var s = { version: n || "localCachev1", content: t },r = JSON.stringify(s);try {this._storage.setItem(e, r);} catch (e) {throw e;}} }, { key: "getStore", value: function getStore(e, t) {try {if (!this._storage) return;} catch (e) {return "";}t = t || "localCachev1";var n = this._storage.getItem(e);if (!n) return "";if (n.indexOf(t) >= 0) {return JSON.parse(n).content;}return "";} }, { key: "removeStore", value: function removeStore(e) {this._storage.removeItem(e);} }]);return W;}();var z = {},V = {};function J(e) {return z[e];}var Y = function Y(e, t) {_classCallCheck(this, Y);this.data = t || null, this.name = e;};var X = /*#__PURE__*/function (_Y) {_inherits(X, _Y);var _super4 = _createSuper(X);function X(e, t) {var _this9;_classCallCheck(this, X);_this9 = _super4.call(this, "error", { error: e, data: t }), _this9.error = e;return _this9;}return X;}(Y);var G = new ( /*#__PURE__*/function () {function _class() {_classCallCheck(this, _class);this._listeners = {};}_createClass(_class, [{ key: "on", value: function on(e, t) {return function (e, t, n) {n[e] = n[e] || [], n[e].push(t);}(e, t, this._listeners), this;} }, { key: "off", value: function off(e, t) {return function (e, t, n) {if (n && n[e]) {var _s4 = n[e].indexOf(t);-1 !== _s4 && n[e].splice(_s4, 1);}}(e, t, this._listeners), this;} }, { key: "fire", value: function fire(e, t) {if (e instanceof X) return console.error(e.error), this;var n = "string" == typeof e ? new Y(e, t || {}) : e;var s = n.name;if (this._listens(s)) {n.target = this;var _e7 = this._listeners[s] ? _toConsumableArray(this._listeners[s]) : [];var _iterator2 = _createForOfIteratorHelper(_e7),_step2;try {for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {var _t4 = _step2.value;_t4.call(this, n);}} catch (err) {_iterator2.e(err);} finally {_iterator2.f();}}return this;} }, { key: "_listens", value: function _listens(e) {return this._listeners[e] && this._listeners[e].length > 0;} }]);return _class;}())();function Q(e, t) {G.on(e, t);}function Z(e) {var t = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};G.fire(e, t);}function ee(e, t) {G.off(e, t);}var te = "loginStateChanged",ne = "loginStateExpire",se = "loginTypeChanged",re = "anonymousConverted",oe = "refreshAccessToken";var ie;!function (e) {e.ANONYMOUS = "ANONYMOUS", e.WECHAT = "WECHAT", e.WECHAT_PUBLIC = "WECHAT-PUBLIC", e.WECHAT_OPEN = "WECHAT-OPEN", e.CUSTOM = "CUSTOM", e.EMAIL = "EMAIL", e.USERNAME = "USERNAME", e.NULL = "NULL";}(ie || (ie = {}));var ae = ["auth.getJwt", "auth.logout", "auth.signInWithTicket", "auth.signInAnonymously", "auth.signIn", "auth.fetchAccessTokenWithRefreshToken", "auth.signUpWithEmailAndPassword", "auth.activateEndUserMail", "auth.sendPasswordResetEmail", "auth.resetPasswordWithToken", "auth.isUsernameRegistered"],ce = { "X-SDK-Version": "1.3.5" };function ue(e, t, n) {var s = e[t];e[t] = function (t) {var r = {},o = {};n.forEach(function (n) {var _n$call = n.call(e, t),s = _n$call.data,i = _n$call.headers;Object.assign(r, s), Object.assign(o, i);});var i = t.data;return i && function () {var e;if (e = i, "[object FormData]" !== Object.prototype.toString.call(e)) t.data = _objectSpread(_objectSpread({}, i), r);else for (var _e8 in r) {i.append(_e8, r[_e8]);}}(), t.headers = _objectSpread(_objectSpread({}, t.headers || {}), o), s.call(e, t);};}function he() {var e = Math.random().toString(16).slice(2);return { data: { seqId: e }, headers: _objectSpread(_objectSpread({}, ce), {}, { "x-seqid": e }) };}var le = /*#__PURE__*/function () {function le() {var e = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};_classCallCheck(this, le);var t;this.config = e, this._reqClass = new j.adapter.reqClass({ timeout: this.config.timeout, timeoutMsg: "\u8BF7\u6C42\u5728".concat(this.config.timeout / 1e3, "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD"), restrictedMethods: ["post"] }), this._cache = J(this.config.env), this._localCache = (t = this.config.env, V[t]), ue(this._reqClass, "post", [he]), ue(this._reqClass, "upload", [he]), ue(this._reqClass, "download", [he]);}_createClass(le, [{ key: "post", value: function () {var _post = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee(e) {return _regenerator.default.wrap(function _callee$(_context) {while (1) {switch (_context.prev = _context.next) {case 0:_context.next = 2;return this._reqClass.post(e);case 2:return _context.abrupt("return", _context.sent);case 3:case "end":return _context.stop();}}}, _callee, this);}));function post(_x) {return _post.apply(this, arguments);}return post;}() }, { key: "upload", value: function () {var _upload = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee2(e) {return _regenerator.default.wrap(function _callee2$(_context2) {while (1) {switch (_context2.prev = _context2.next) {case 0:_context2.next = 2;return this._reqClass.upload(e);case 2:return _context2.abrupt("return", _context2.sent);case 3:case "end":return _context2.stop();}}}, _callee2, this);}));function upload(_x2) {return _upload.apply(this, arguments);}return upload;}() }, { key: "download", value: function () {var _download = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee3(e) {return _regenerator.default.wrap(function _callee3$(_context3) {while (1) {switch (_context3.prev = _context3.next) {case 0:_context3.next = 2;return this._reqClass.download(e);case 2:return _context3.abrupt("return", _context3.sent);case 3:case "end":return _context3.stop();}}}, _callee3, this);}));function download(_x3) {return _download.apply(this, arguments);}return download;}() }, { key: "refreshAccessToken", value: function () {var _refreshAccessToken2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee4() {var e, t;return _regenerator.default.wrap(function _callee4$(_context4) {while (1) {switch (_context4.prev = _context4.next) {case 0:this._refreshAccessTokenPromise || (this._refreshAccessTokenPromise = this._refreshAccessToken());_context4.prev = 1;_context4.next = 4;return this._refreshAccessTokenPromise;case 4:e = _context4.sent;_context4.next = 10;break;case 7:_context4.prev = 7;_context4.t0 = _context4["catch"](1);t = _context4.t0;case 10:if (!(this._refreshAccessTokenPromise = null, this._shouldRefreshAccessTokenHook = null, t)) {_context4.next = 12;break;}throw t;case 12:return _context4.abrupt("return", e);case 13:case "end":return _context4.stop();}}}, _callee4, this, [[1, 7]]);}));function refreshAccessToken() {return _refreshAccessToken2.apply(this, arguments);}return refreshAccessToken;}() }, { key: "_refreshAccessToken", value: function () {var _refreshAccessToken3 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee5() {var _this$_cache$keys, e, t, n, s, r, o, i, a, _e9, _e10, _t5, _s5;return _regenerator.default.wrap(function _callee5$(_context5) {while (1) {switch (_context5.prev = _context5.next) {case 0:_this$_cache$keys = this._cache.keys, e = _this$_cache$keys.accessTokenKey, t = _this$_cache$keys.accessTokenExpireKey, n = _this$_cache$keys.refreshTokenKey, s = _this$_cache$keys.loginTypeKey, r = _this$_cache$keys.anonymousUuidKey;this._cache.removeStore(e), this._cache.removeStore(t);o = this._cache.getStore(n);if (o) {_context5.next = 5;break;}throw new Error("未登录CloudBase");case 5:i = { refresh_token: o };_context5.next = 8;return this.request("auth.fetchAccessTokenWithRefreshToken", i);case 8:a = _context5.sent;if (!a.data.code) {_context5.next = 21;break;}_e9 = a.data.code;if (!("SIGN_PARAM_INVALID" === _e9 || "REFRESH_TOKEN_EXPIRED" === _e9 || "INVALID_REFRESH_TOKEN" === _e9)) {_context5.next = 20;break;}if (!(this._cache.getStore(s) === ie.ANONYMOUS && "INVALID_REFRESH_TOKEN" === _e9)) {_context5.next = 19;break;}_e10 = this._cache.getStore(r);_t5 = this._cache.getStore(n);_context5.next = 17;return this.send("auth.signInAnonymously", { anonymous_uuid: _e10, refresh_token: _t5 });case 17:_s5 = _context5.sent;return _context5.abrupt("return", (this.setRefreshToken(_s5.refresh_token), this._refreshAccessToken()));case 19:Z(ne), this._cache.removeStore(n);case 20:throw new Error("\u5237\u65B0access token\u5931\u8D25\uFF1A".concat(a.data.code));case 21:if (!a.data.access_token) {_context5.next = 23;break;}return _context5.abrupt("return", (Z(oe), this._cache.setStore(e, a.data.access_token), this._cache.setStore(t, a.data.access_token_expire + Date.now()), { accessToken: a.data.access_token, accessTokenExpire: a.data.access_token_expire }));case 23:a.data.refresh_token && (this._cache.removeStore(n), this._cache.setStore(n, a.data.refresh_token), this._refreshAccessToken());case 24:case "end":return _context5.stop();}}}, _callee5, this);}));function _refreshAccessToken() {return _refreshAccessToken3.apply(this, arguments);}return _refreshAccessToken;}() }, { key: "getAccessToken", value: function () {var _getAccessToken = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee6() {var _this$_cache$keys2, e, t, n, s, r, o;return _regenerator.default.wrap(function _callee6$(_context6) {while (1) {switch (_context6.prev = _context6.next) {case 0:_this$_cache$keys2 = this._cache.keys, e = _this$_cache$keys2.accessTokenKey, t = _this$_cache$keys2.accessTokenExpireKey, n = _this$_cache$keys2.refreshTokenKey;if (this._cache.getStore(n)) {_context6.next = 3;break;}throw new Error("refresh token不存在，登录状态异常");case 3:s = this._cache.getStore(e), r = this._cache.getStore(t), o = !0;_context6.t0 = this._shouldRefreshAccessTokenHook;if (!_context6.t0) {_context6.next = 9;break;}_context6.next = 8;return this._shouldRefreshAccessTokenHook(s, r);case 8:_context6.t0 = !_context6.sent;case 9:_context6.t1 = _context6.t0;if (!_context6.t1) {_context6.next = 12;break;}o = !1;case 12:return _context6.abrupt("return", (!s || !r || r < Date.now()) && o ? this.refreshAccessToken() : { accessToken: s, accessTokenExpire: r });case 13:case "end":return _context6.stop();}}}, _callee6, this);}));function getAccessToken() {return _getAccessToken.apply(this, arguments);}return getAccessToken;}() }, { key: "request", value: function () {var _request = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee7(e, t, n) {var s, r, o, _e11, i, _e12, _e13, a, c, u, h, l, d, f, p, g;return _regenerator.default.wrap(function _callee7$(_context7) {while (1) {switch (_context7.prev = _context7.next) {case 0:s = "x-tcb-trace_".concat(this.config.env);r = "application/x-www-form-urlencoded";o = _objectSpread({ action: e, env: this.config.env, dataVersion: "2019-08-16" }, t);if (!(-1 === ae.indexOf(e))) {_context7.next = 10;break;}_e11 = this._cache.keys.refreshTokenKey;_context7.t0 = this._cache.getStore(_e11);if (!_context7.t0) {_context7.next = 10;break;}_context7.next = 9;return this.getAccessToken();case 9:o.access_token = _context7.sent.accessToken;case 10:if ("storage.uploadFile" === e) {i = new FormData();for (_e12 in i) {i.hasOwnProperty(_e12) && void 0 !== i[_e12] && i.append(_e12, o[_e12]);}r = "multipart/form-data";} else {r = "application/json", i = {};for (_e13 in o) {void 0 !== o[_e13] && (i[_e13] = o[_e13]);}}a = { headers: { "content-type": r } };n && n.onUploadProgress && (a.onUploadProgress = n.onUploadProgress);c = this._localCache.getStore(s);c && (a.headers["X-TCB-Trace"] = c);u = t.parse, h = t.inQuery, l = t.search;d = { env: this.config.env };u && (d.parse = !0), h && (d = _objectSpread(_objectSpread({}, h), d));f = function (e, t) {var n = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};var s = /\?/.test(t);var r = "";for (var _e14 in n) {"" === r ? !s && (t += "?") : r += "&", r += "".concat(_e14, "=").concat(encodeURIComponent(n[_e14]));}return /^http(s)?\:\/\//.test(t += r) ? t : "".concat(e).concat(t);}(D, "//tcb-api.tencentcloudapi.com/web", d);l && (f += l);_context7.next = 22;return this.post(_objectSpread({ url: f, data: i }, a));case 22:p = _context7.sent;g = p.header && p.header["x-tcb-trace"];if (!(g && this._localCache.setStore(s, g), 200 !== Number(p.status) && 200 !== Number(p.statusCode) || !p.data)) {_context7.next = 26;break;}throw new Error("network request error");case 26:return _context7.abrupt("return", p);case 27:case "end":return _context7.stop();}}}, _callee7, this);}));function request(_x4, _x5, _x6) {return _request.apply(this, arguments);}return request;}() }, { key: "send", value: function () {var _send = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee8(e) {var t,n,_n3,_args8 = arguments;return _regenerator.default.wrap(function _callee8$(_context8) {while (1) {switch (_context8.prev = _context8.next) {case 0:t = _args8.length > 1 && _args8[1] !== undefined ? _args8[1] : {};_context8.next = 3;return this.request(e, t, { onUploadProgress: t.onUploadProgress });case 3:n = _context8.sent;if (!("ACCESS_TOKEN_EXPIRED" === n.data.code && -1 === ae.indexOf(e))) {_context8.next = 13;break;}_context8.next = 7;return this.refreshAccessToken();case 7:_context8.next = 9;return this.request(e, t, { onUploadProgress: t.onUploadProgress });case 9:_n3 = _context8.sent;if (!_n3.data.code) {_context8.next = 12;break;}throw new Error("[".concat(_n3.data.code, "] ").concat(_n3.data.message));case 12:return _context8.abrupt("return", _n3.data);case 13:if (!n.data.code) {_context8.next = 15;break;}throw new Error("[".concat(n.data.code, "] ").concat(n.data.message));case 15:return _context8.abrupt("return", n.data);case 16:case "end":return _context8.stop();}}}, _callee8, this);}));function send(_x7) {return _send.apply(this, arguments);}return send;}() }, { key: "setRefreshToken", value: function setRefreshToken(e) {var _this$_cache$keys3 = this._cache.keys,t = _this$_cache$keys3.accessTokenKey,n = _this$_cache$keys3.accessTokenExpireKey,s = _this$_cache$keys3.refreshTokenKey;this._cache.removeStore(t), this._cache.removeStore(n), this._cache.setStore(s, e);} }]);return le;}();var de = {};function fe(e) {return de[e];}var pe = /*#__PURE__*/function () {function pe(e) {_classCallCheck(this, pe);this.config = e, this._cache = J(e.env), this._request = fe(e.env);}_createClass(pe, [{ key: "setRefreshToken", value: function setRefreshToken(e) {var _this$_cache$keys4 = this._cache.keys,t = _this$_cache$keys4.accessTokenKey,n = _this$_cache$keys4.accessTokenExpireKey,s = _this$_cache$keys4.refreshTokenKey;this._cache.removeStore(t), this._cache.removeStore(n), this._cache.setStore(s, e);} }, { key: "setAccessToken", value: function setAccessToken(e, t) {var _this$_cache$keys5 = this._cache.keys,n = _this$_cache$keys5.accessTokenKey,s = _this$_cache$keys5.accessTokenExpireKey;this._cache.setStore(n, e), this._cache.setStore(s, t);} }, { key: "refreshUserInfo", value: function () {var _refreshUserInfo = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee9() {var _yield$this$_request$, e;return _regenerator.default.wrap(function _callee9$(_context9) {while (1) {switch (_context9.prev = _context9.next) {case 0:_context9.next = 2;return this._request.send("auth.getUserInfo", {});case 2:_yield$this$_request$ = _context9.sent;e = _yield$this$_request$.data;return _context9.abrupt("return", (this.setLocalUserInfo(e), e));case 5:case "end":return _context9.stop();}}}, _callee9, this);}));function refreshUserInfo() {return _refreshUserInfo.apply(this, arguments);}return refreshUserInfo;}() }, { key: "setLocalUserInfo", value: function setLocalUserInfo(e) {var t = this._cache.keys.userInfoKey;this._cache.setStore(t, e);} }]);return pe;}();var ge = /*#__PURE__*/function () {function ge(e) {_classCallCheck(this, ge);if (!e) throw new Error("envId is not defined");this._envId = e, this._cache = J(this._envId), this._request = fe(this._envId), this.setUserInfo();}_createClass(ge, [{ key: "linkWithTicket", value: function linkWithTicket(e) {if ("string" != typeof e) throw new Error("ticket must be string");return this._request.send("auth.linkWithTicket", { ticket: e });} }, { key: "linkWithRedirect", value: function linkWithRedirect(e) {e.signInWithRedirect();} }, { key: "updatePassword", value: function updatePassword(e, t) {return this._request.send("auth.updatePassword", { oldPassword: t, newPassword: e });} }, { key: "updateEmail", value: function updateEmail(e) {return this._request.send("auth.updateEmail", { newEmail: e });} }, { key: "updateUsername", value: function updateUsername(e) {if ("string" != typeof e) throw new Error("username must be a string");return this._request.send("auth.updateUsername", { username: e });} }, { key: "getLinkedUidList", value: function () {var _getLinkedUidList = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee10() {var _yield$this$_request$2, e, t, n;return _regenerator.default.wrap(function _callee10$(_context10) {while (1) {switch (_context10.prev = _context10.next) {case 0:_context10.next = 2;return this._request.send("auth.getLinkedUidList", {});case 2:_yield$this$_request$2 = _context10.sent;e = _yield$this$_request$2.data;t = !1;n = e.users;return _context10.abrupt("return", (n.forEach(function (e) {e.wxOpenId && e.wxPublicId && (t = !0);}), { users: n, hasPrimaryUid: t }));case 7:case "end":return _context10.stop();}}}, _callee10, this);}));function getLinkedUidList() {return _getLinkedUidList.apply(this, arguments);}return getLinkedUidList;}() }, { key: "setPrimaryUid", value: function setPrimaryUid(e) {return this._request.send("auth.setPrimaryUid", { uid: e });} }, { key: "unlink", value: function unlink(e) {return this._request.send("auth.unlink", { platform: e });} }, { key: "update", value: function () {var _update = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee11(e) {var t, n, s, r, o, i, _yield$this$_request$3, a;return _regenerator.default.wrap(function _callee11$(_context11) {while (1) {switch (_context11.prev = _context11.next) {case 0:t = e.nickName;n = e.gender;s = e.avatarUrl;r = e.province;o = e.country;i = e.city;_context11.next = 8;return this._request.send("auth.updateUserInfo", { nickName: t, gender: n, avatarUrl: s, province: r, country: o, city: i });case 8:_yield$this$_request$3 = _context11.sent;a = _yield$this$_request$3.data;this.setLocalUserInfo(a);case 11:case "end":return _context11.stop();}}}, _callee11, this);}));function update(_x8) {return _update.apply(this, arguments);}return update;}() }, { key: "refresh", value: function () {var _refresh = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee12() {var _yield$this$_request$4, e;return _regenerator.default.wrap(function _callee12$(_context12) {while (1) {switch (_context12.prev = _context12.next) {case 0:_context12.next = 2;return this._request.send("auth.getUserInfo", {});case 2:_yield$this$_request$4 = _context12.sent;e = _yield$this$_request$4.data;return _context12.abrupt("return", (this.setLocalUserInfo(e), e));case 5:case "end":return _context12.stop();}}}, _callee12, this);}));function refresh() {return _refresh.apply(this, arguments);}return refresh;}() }, { key: "setUserInfo", value: function setUserInfo() {var _this10 = this;var e = this._cache.keys.userInfoKey,t = this._cache.getStore(e);["uid", "loginType", "openid", "wxOpenId", "wxPublicId", "unionId", "qqMiniOpenId", "email", "hasPassword", "customUserId", "nickName", "gender", "avatarUrl"].forEach(function (e) {_this10[e] = t[e];}), this.location = { country: t.country, province: t.province, city: t.city };} }, { key: "setLocalUserInfo", value: function setLocalUserInfo(e) {var t = this._cache.keys.userInfoKey;this._cache.setStore(t, e), this.setUserInfo();} }]);return ge;}();var me = /*#__PURE__*/function () {function me(e) {_classCallCheck(this, me);if (!e) throw new Error("envId is not defined");this._cache = J(e);var _this$_cache$keys6 = this._cache.keys,t = _this$_cache$keys6.refreshTokenKey,n = _this$_cache$keys6.accessTokenKey,s = _this$_cache$keys6.accessTokenExpireKey,r = this._cache.getStore(t),o = this._cache.getStore(n),i = this._cache.getStore(s);this.credential = { refreshToken: r, accessToken: o, accessTokenExpire: i }, this.user = new ge(e);}_createClass(me, [{ key: "isAnonymousAuth", get: function get() {return this.loginType === ie.ANONYMOUS;} }, { key: "isCustomAuth", get: function get() {return this.loginType === ie.CUSTOM;} }, { key: "isWeixinAuth", get: function get() {return this.loginType === ie.WECHAT || this.loginType === ie.WECHAT_OPEN || this.loginType === ie.WECHAT_PUBLIC;} }, { key: "loginType", get: function get() {return this._cache.getStore(this._cache.keys.loginTypeKey);} }]);return me;}();var ye = /*#__PURE__*/function (_pe) {_inherits(ye, _pe);var _super5 = _createSuper(ye);function ye() {_classCallCheck(this, ye);return _super5.apply(this, arguments);}_createClass(ye, [{ key: "signIn", value: function () {var _signIn = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee13() {var _this$_cache$keys7, e, t, n, s, r, _e15;return _regenerator.default.wrap(function _callee13$(_context13) {while (1) {switch (_context13.prev = _context13.next) {case 0:this._cache.updatePersistence("local");_this$_cache$keys7 = this._cache.keys;e = _this$_cache$keys7.anonymousUuidKey;t = _this$_cache$keys7.refreshTokenKey;n = this._cache.getStore(e) || void 0;s = this._cache.getStore(t) || void 0;_context13.next = 8;return this._request.send("auth.signInAnonymously", { anonymous_uuid: n, refresh_token: s });case 8:r = _context13.sent;if (!(r.uuid && r.refresh_token)) {_context13.next = 20;break;}this._setAnonymousUUID(r.uuid);this.setRefreshToken(r.refresh_token);_context13.next = 14;return this._request.refreshAccessToken();case 14:Z(te);Z(se, { env: this.config.env, loginType: ie.ANONYMOUS, persistence: "local" });_e15 = new me(this.config.env);_context13.next = 19;return _e15.user.refresh();case 19:return _context13.abrupt("return", _e15);case 20:throw new Error("匿名登录失败");case 21:case "end":return _context13.stop();}}}, _callee13, this);}));function signIn() {return _signIn.apply(this, arguments);}return signIn;}() }, { key: "linkAndRetrieveDataWithTicket", value: function () {var _linkAndRetrieveDataWithTicket = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee14(e) {var _this$_cache$keys8, t, n, s, r, o;return _regenerator.default.wrap(function _callee14$(_context14) {while (1) {switch (_context14.prev = _context14.next) {case 0:_this$_cache$keys8 = this._cache.keys;t = _this$_cache$keys8.anonymousUuidKey;n = _this$_cache$keys8.refreshTokenKey;s = this._cache.getStore(t);r = this._cache.getStore(n);_context14.next = 7;return this._request.send("auth.linkAndRetrieveDataWithTicket", { anonymous_uuid: s, refresh_token: r, ticket: e });case 7:o = _context14.sent;if (!o.refresh_token) {_context14.next = 16;break;}this._clearAnonymousUUID();this.setRefreshToken(o.refresh_token);_context14.next = 13;return this._request.refreshAccessToken();case 13:Z(re, { env: this.config.env });Z(se, { loginType: ie.CUSTOM, persistence: "local" });return _context14.abrupt("return", { credential: { refreshToken: o.refresh_token } });case 16:throw new Error("匿名转化失败");case 17:case "end":return _context14.stop();}}}, _callee14, this);}));function linkAndRetrieveDataWithTicket(_x9) {return _linkAndRetrieveDataWithTicket.apply(this, arguments);}return linkAndRetrieveDataWithTicket;}() }, { key: "_setAnonymousUUID", value: function _setAnonymousUUID(e) {var _this$_cache$keys9 = this._cache.keys,t = _this$_cache$keys9.anonymousUuidKey,n = _this$_cache$keys9.loginTypeKey;this._cache.removeStore(t), this._cache.setStore(t, e), this._cache.setStore(n, ie.ANONYMOUS);} }, { key: "_clearAnonymousUUID", value: function _clearAnonymousUUID() {this._cache.removeStore(this._cache.keys.anonymousUuidKey);} }]);return ye;}(pe);var _e = /*#__PURE__*/function (_pe2) {_inherits(_e, _pe2);var _super6 = _createSuper(_e);function _e() {_classCallCheck(this, _e);return _super6.apply(this, arguments);}_createClass(_e, [{ key: "signIn", value: function () {var _signIn2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee15(e) {var t, n;return _regenerator.default.wrap(function _callee15$(_context15) {while (1) {switch (_context15.prev = _context15.next) {case 0:if (!("string" != typeof e)) {_context15.next = 2;break;}throw new Error("ticket must be a string");case 2:t = this._cache.keys.refreshTokenKey;_context15.next = 5;return this._request.send("auth.signInWithTicket", { ticket: e, refresh_token: this._cache.getStore(t) || "" });case 5:n = _context15.sent;if (!n.refresh_token) {_context15.next = 15;break;}this.setRefreshToken(n.refresh_token);_context15.next = 10;return this._request.refreshAccessToken();case 10:Z(te);Z(se, { env: this.config.env, loginType: ie.CUSTOM, persistence: this.config.persistence });_context15.next = 14;return this.refreshUserInfo();case 14:return _context15.abrupt("return", new me(this.config.env));case 15:throw new Error("自定义登录失败");case 16:case "end":return _context15.stop();}}}, _callee15, this);}));function signIn(_x10) {return _signIn2.apply(this, arguments);}return signIn;}() }]);return _e;}(pe);var we = /*#__PURE__*/function (_pe3) {_inherits(we, _pe3);var _super7 = _createSuper(we);function we() {_classCallCheck(this, we);return _super7.apply(this, arguments);}_createClass(we, [{ key: "signIn", value: function () {var _signIn3 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee16(e, t) {var n, s, r, o, i;return _regenerator.default.wrap(function _callee16$(_context16) {while (1) {switch (_context16.prev = _context16.next) {case 0:if (!("string" != typeof e)) {_context16.next = 2;break;}throw new Error("email must be a string");case 2:n = this._cache.keys.refreshTokenKey;_context16.next = 5;return this._request.send("auth.signIn", { loginType: "EMAIL", email: e, password: t, refresh_token: this._cache.getStore(n) || "" });case 5:s = _context16.sent;r = s.refresh_token;o = s.access_token;i = s.access_token_expire;if (!r) {_context16.next = 22;break;}this.setRefreshToken(r);if (!(o && i)) {_context16.next = 15;break;}this.setAccessToken(o, i);_context16.next = 17;break;case 15:_context16.next = 17;return this._request.refreshAccessToken();case 17:_context16.next = 19;return this.refreshUserInfo();case 19:Z(te);Z(se, { env: this.config.env, loginType: ie.EMAIL, persistence: this.config.persistence });return _context16.abrupt("return", new me(this.config.env));case 22:throw s.code ? new Error("\u90AE\u7BB1\u767B\u5F55\u5931\u8D25: [".concat(s.code, "] ").concat(s.message)) : new Error("邮箱登录失败");case 23:case "end":return _context16.stop();}}}, _callee16, this);}));function signIn(_x11, _x12) {return _signIn3.apply(this, arguments);}return signIn;}() }, { key: "activate", value: function () {var _activate = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee17(e) {return _regenerator.default.wrap(function _callee17$(_context17) {while (1) {switch (_context17.prev = _context17.next) {case 0:return _context17.abrupt("return", this._request.send("auth.activateEndUserMail", { token: e }));case 1:case "end":return _context17.stop();}}}, _callee17, this);}));function activate(_x13) {return _activate.apply(this, arguments);}return activate;}() }, { key: "resetPasswordWithToken", value: function () {var _resetPasswordWithToken = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee18(e, t) {return _regenerator.default.wrap(function _callee18$(_context18) {while (1) {switch (_context18.prev = _context18.next) {case 0:return _context18.abrupt("return", this._request.send("auth.resetPasswordWithToken", { token: e, newPassword: t }));case 1:case "end":return _context18.stop();}}}, _callee18, this);}));function resetPasswordWithToken(_x14, _x15) {return _resetPasswordWithToken.apply(this, arguments);}return resetPasswordWithToken;}() }]);return we;}(pe);var ke = /*#__PURE__*/function (_pe4) {_inherits(ke, _pe4);var _super8 = _createSuper(ke);function ke() {_classCallCheck(this, ke);return _super8.apply(this, arguments);}_createClass(ke, [{ key: "signIn", value: function () {var _signIn4 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee19(e, t) {var n, s, r, o, i;return _regenerator.default.wrap(function _callee19$(_context19) {while (1) {switch (_context19.prev = _context19.next) {case 0:if (!("string" != typeof e)) {_context19.next = 2;break;}throw new Error("username must be a string");case 2:"string" != typeof t && (t = "", console.warn("password is empty"));n = this._cache.keys.refreshTokenKey;_context19.next = 6;return this._request.send("auth.signIn", { loginType: ie.USERNAME, username: e, password: t, refresh_token: this._cache.getStore(n) || "" });case 6:s = _context19.sent;r = s.refresh_token;o = s.access_token_expire;i = s.access_token;if (!r) {_context19.next = 23;break;}this.setRefreshToken(r);if (!(i && o)) {_context19.next = 16;break;}this.setAccessToken(i, o);_context19.next = 18;break;case 16:_context19.next = 18;return this._request.refreshAccessToken();case 18:_context19.next = 20;return this.refreshUserInfo();case 20:Z(te);Z(se, { env: this.config.env, loginType: ie.USERNAME, persistence: this.config.persistence });return _context19.abrupt("return", new me(this.config.env));case 23:throw s.code ? new Error("\u7528\u6237\u540D\u5BC6\u7801\u767B\u5F55\u5931\u8D25: [".concat(s.code, "] ").concat(s.message)) : new Error("用户名密码登录失败");case 24:case "end":return _context19.stop();}}}, _callee19, this);}));function signIn(_x16, _x17) {return _signIn4.apply(this, arguments);}return signIn;}() }]);return ke;}(pe);var Se = /*#__PURE__*/function () {function Se(e) {_classCallCheck(this, Se);this.config = e, this._cache = J(e.env), this._request = fe(e.env), this._onAnonymousConverted = this._onAnonymousConverted.bind(this), this._onLoginTypeChanged = this._onLoginTypeChanged.bind(this), Q(se, this._onLoginTypeChanged);}_createClass(Se, [{ key: "anonymousAuthProvider", value: function anonymousAuthProvider() {return new ye(this.config);} }, { key: "customAuthProvider", value: function customAuthProvider() {return new _e(this.config);} }, { key: "emailAuthProvider", value: function emailAuthProvider() {return new we(this.config);} }, { key: "usernameAuthProvider", value: function usernameAuthProvider() {return new ke(this.config);} }, { key: "signInAnonymously", value: function () {var _signInAnonymously = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee20() {return _regenerator.default.wrap(function _callee20$(_context20) {while (1) {switch (_context20.prev = _context20.next) {case 0:return _context20.abrupt("return", new ye(this.config).signIn());case 1:case "end":return _context20.stop();}}}, _callee20, this);}));function signInAnonymously() {return _signInAnonymously.apply(this, arguments);}return signInAnonymously;}() }, { key: "signInWithEmailAndPassword", value: function () {var _signInWithEmailAndPassword = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee21(e, t) {return _regenerator.default.wrap(function _callee21$(_context21) {while (1) {switch (_context21.prev = _context21.next) {case 0:return _context21.abrupt("return", new we(this.config).signIn(e, t));case 1:case "end":return _context21.stop();}}}, _callee21, this);}));function signInWithEmailAndPassword(_x18, _x19) {return _signInWithEmailAndPassword.apply(this, arguments);}return signInWithEmailAndPassword;}() }, { key: "signInWithUsernameAndPassword", value: function signInWithUsernameAndPassword(e, t) {return new ke(this.config).signIn(e, t);} }, { key: "linkAndRetrieveDataWithTicket", value: function () {var _linkAndRetrieveDataWithTicket2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee22(e) {return _regenerator.default.wrap(function _callee22$(_context22) {while (1) {switch (_context22.prev = _context22.next) {case 0:this._anonymousAuthProvider || (this._anonymousAuthProvider = new ye(this.config)), Q(re, this._onAnonymousConverted);_context22.next = 3;return this._anonymousAuthProvider.linkAndRetrieveDataWithTicket(e);case 3:return _context22.abrupt("return", _context22.sent);case 4:case "end":return _context22.stop();}}}, _callee22, this);}));function linkAndRetrieveDataWithTicket(_x20) {return _linkAndRetrieveDataWithTicket2.apply(this, arguments);}return linkAndRetrieveDataWithTicket;}() }, { key: "signOut", value: function () {var _signOut = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee23() {var _this$_cache$keys10, e, t, n, s, r;return _regenerator.default.wrap(function _callee23$(_context23) {while (1) {switch (_context23.prev = _context23.next) {case 0:if (!(this.loginType === ie.ANONYMOUS)) {_context23.next = 2;break;}throw new Error("匿名用户不支持登出操作");case 2:_this$_cache$keys10 = this._cache.keys, e = _this$_cache$keys10.refreshTokenKey, t = _this$_cache$keys10.accessTokenKey, n = _this$_cache$keys10.accessTokenExpireKey, s = this._cache.getStore(e);if (s) {_context23.next = 5;break;}return _context23.abrupt("return");case 5:_context23.next = 7;return this._request.send("auth.logout", { refresh_token: s });case 7:r = _context23.sent;return _context23.abrupt("return", (this._cache.removeStore(e), this._cache.removeStore(t), this._cache.removeStore(n), Z(te), Z(se, { env: this.config.env, loginType: ie.NULL, persistence: this.config.persistence }), r));case 9:case "end":return _context23.stop();}}}, _callee23, this);}));function signOut() {return _signOut.apply(this, arguments);}return signOut;}() }, { key: "signUpWithEmailAndPassword", value: function () {var _signUpWithEmailAndPassword = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee24(e, t) {return _regenerator.default.wrap(function _callee24$(_context24) {while (1) {switch (_context24.prev = _context24.next) {case 0:return _context24.abrupt("return", this._request.send("auth.signUpWithEmailAndPassword", { email: e, password: t }));case 1:case "end":return _context24.stop();}}}, _callee24, this);}));function signUpWithEmailAndPassword(_x21, _x22) {return _signUpWithEmailAndPassword.apply(this, arguments);}return signUpWithEmailAndPassword;}() }, { key: "sendPasswordResetEmail", value: function () {var _sendPasswordResetEmail = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee25(e) {return _regenerator.default.wrap(function _callee25$(_context25) {while (1) {switch (_context25.prev = _context25.next) {case 0:return _context25.abrupt("return", this._request.send("auth.sendPasswordResetEmail", { email: e }));case 1:case "end":return _context25.stop();}}}, _callee25, this);}));function sendPasswordResetEmail(_x23) {return _sendPasswordResetEmail.apply(this, arguments);}return sendPasswordResetEmail;}() }, { key: "onLoginStateChanged", value: function onLoginStateChanged(e) {var _this11 = this;Q(te, function () {var t = _this11.hasLoginState();e.call(_this11, t);});var t = this.hasLoginState();e.call(this, t);} }, { key: "onLoginStateExpired", value: function onLoginStateExpired(e) {Q(ne, e.bind(this));} }, { key: "onAccessTokenRefreshed", value: function onAccessTokenRefreshed(e) {Q(oe, e.bind(this));} }, { key: "onAnonymousConverted", value: function onAnonymousConverted(e) {Q(re, e.bind(this));} }, { key: "onLoginTypeChanged", value: function onLoginTypeChanged(e) {var _this12 = this;Q(se, function () {var t = _this12.hasLoginState();e.call(_this12, t);});} }, { key: "getAccessToken", value: function () {var _getAccessToken2 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee26() {return _regenerator.default.wrap(function _callee26$(_context26) {while (1) {switch (_context26.prev = _context26.next) {case 0:_context26.next = 2;return this._request.getAccessToken();case 2:_context26.t0 = _context26.sent.accessToken;_context26.t1 = this.config.env;return _context26.abrupt("return", { accessToken: _context26.t0, env: _context26.t1 });case 5:case "end":return _context26.stop();}}}, _callee26, this);}));function getAccessToken() {return _getAccessToken2.apply(this, arguments);}return getAccessToken;}() }, { key: "hasLoginState", value: function hasLoginState() {var e = this._cache.keys.refreshTokenKey;return this._cache.getStore(e) ? new me(this.config.env) : null;} }, { key: "isUsernameRegistered", value: function () {var _isUsernameRegistered = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee27(e) {var _yield$this$_request$5, t;return _regenerator.default.wrap(function _callee27$(_context27) {while (1) {switch (_context27.prev = _context27.next) {case 0:if (!("string" != typeof e)) {_context27.next = 2;break;}throw new Error("username must be a string");case 2:_context27.next = 4;return this._request.send("auth.isUsernameRegistered", { username: e });case 4:_yield$this$_request$5 = _context27.sent;t = _yield$this$_request$5.data;return _context27.abrupt("return", t && t.isRegistered);case 7:case "end":return _context27.stop();}}}, _callee27, this);}));function isUsernameRegistered(_x24) {return _isUsernameRegistered.apply(this, arguments);}return isUsernameRegistered;}() }, { key: "getLoginState", value: function getLoginState() {return Promise.resolve(this.hasLoginState());} }, { key: "signInWithTicket", value: function () {var _signInWithTicket = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee28(e) {return _regenerator.default.wrap(function _callee28$(_context28) {while (1) {switch (_context28.prev = _context28.next) {case 0:return _context28.abrupt("return", new _e(this.config).signIn(e));case 1:case "end":return _context28.stop();}}}, _callee28, this);}));function signInWithTicket(_x25) {return _signInWithTicket.apply(this, arguments);}return signInWithTicket;}() }, { key: "shouldRefreshAccessToken", value: function shouldRefreshAccessToken(e) {this._request._shouldRefreshAccessTokenHook = e.bind(this);} }, { key: "getUserInfo", value: function getUserInfo() {return this._request.send("auth.getUserInfo", {}).then(function (e) {return e.code ? e : _objectSpread(_objectSpread({}, e.data), {}, { requestId: e.seqId });});} }, { key: "getAuthHeader", value: function getAuthHeader() {var _this$_cache$keys11 = this._cache.keys,e = _this$_cache$keys11.refreshTokenKey,t = _this$_cache$keys11.accessTokenKey,n = this._cache.getStore(e);return { "x-cloudbase-credentials": this._cache.getStore(t) + "/@@/" + n };} }, { key: "_onAnonymousConverted", value: function _onAnonymousConverted(e) {var t = e.data.env;t === this.config.env && this._cache.updatePersistence(this.config.persistence);} }, { key: "_onLoginTypeChanged", value: function _onLoginTypeChanged(e) {var _e$data = e.data,t = _e$data.loginType,n = _e$data.persistence,s = _e$data.env;s === this.config.env && (this._cache.updatePersistence(n), this._cache.setStore(this._cache.keys.loginTypeKey, t));} }, { key: "currentUser", get: function get() {var e = this.hasLoginState();return e && e.user || null;} }, { key: "loginType", get: function get() {return this._cache.getStore(this._cache.keys.loginTypeKey);} }]);return Se;}();var ve = function ve(e, t) {t = t || F();var n = fe(this.config.env),s = e.cloudPath,r = e.filePath,o = e.onUploadProgress,_e$fileType = e.fileType,i = _e$fileType === void 0 ? "image" : _e$fileType;return n.send("storage.getUploadMetadata", { path: s }).then(function (e) {var _e$data2 = e.data,a = _e$data2.url,c = _e$data2.authorization,u = _e$data2.token,h = _e$data2.fileId,l = _e$data2.cosFileId,d = e.requestId,f = { key: s, signature: c, "x-cos-meta-fileid": l, success_action_status: "201", "x-cos-security-token": u };n.upload({ url: a, data: f, file: r, name: s, fileType: i, onUploadProgress: o }).then(function (e) {201 === e.statusCode ? t(null, { fileID: h, requestId: d }) : t(new Error("STORAGE_REQUEST_FAIL: ".concat(e.data)));}).catch(function (e) {t(e);});}).catch(function (e) {t(e);}), t.promise;},Te = function Te(e, t) {t = t || F();var n = fe(this.config.env),s = e.cloudPath;return n.send("storage.getUploadMetadata", { path: s }).then(function (e) {t(null, e);}).catch(function (e) {t(e);}), t.promise;},Pe = function Pe(_ref5, t) {var e = _ref5.fileList;if (t = t || F(), !e || !Array.isArray(e)) return { code: "INVALID_PARAM", message: "fileList必须是非空的数组" };var _iterator3 = _createForOfIteratorHelper(e),_step3;try {for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {var _t6 = _step3.value;if (!_t6 || "string" != typeof _t6) return { code: "INVALID_PARAM", message: "fileList的元素必须是非空的字符串" };}} catch (err) {_iterator3.e(err);} finally {_iterator3.f();}var n = { fileid_list: e };return fe(this.config.env).send("storage.batchDeleteFile", n).then(function (e) {e.code ? t(null, e) : t(null, { fileList: e.data.delete_list, requestId: e.requestId });}).catch(function (e) {t(e);}), t.promise;},Ae = function Ae(_ref6, t) {var e = _ref6.fileList;t = t || F(), e && Array.isArray(e) || t(null, { code: "INVALID_PARAM", message: "fileList必须是非空的数组" });var n = [];var _iterator4 = _createForOfIteratorHelper(e),_step4;try {for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {var _s6 = _step4.value;"object" == typeof _s6 ? (_s6.hasOwnProperty("fileID") && _s6.hasOwnProperty("maxAge") || t(null, { code: "INVALID_PARAM", message: "fileList的元素必须是包含fileID和maxAge的对象" }), n.push({ fileid: _s6.fileID, max_age: _s6.maxAge })) : "string" == typeof _s6 ? n.push({ fileid: _s6 }) : t(null, { code: "INVALID_PARAM", message: "fileList的元素必须是字符串" });}} catch (err) {_iterator4.e(err);} finally {_iterator4.f();}var s = { file_list: n };return fe(this.config.env).send("storage.batchGetDownloadUrl", s).then(function (e) {e.code ? t(null, e) : t(null, { fileList: e.data.download_list, requestId: e.requestId });}).catch(function (e) {t(e);}), t.promise;},Ie = /*#__PURE__*/function () {var _ref8 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee29(_ref7, t) {var e, n, s, r;return _regenerator.default.wrap(function _callee29$(_context29) {while (1) {switch (_context29.prev = _context29.next) {case 0:e = _ref7.fileID;_context29.next = 3;return Ae.call(this, { fileList: [{ fileID: e, maxAge: 600 }] });case 3:n = _context29.sent.fileList[0];if (!("SUCCESS" !== n.code)) {_context29.next = 6;break;}return _context29.abrupt("return", t ? t(n) : new Promise(function (e) {e(n);}));case 6:s = fe(this.config.env);r = n.download_url;if (!(r = encodeURI(r), !t)) {_context29.next = 10;break;}return _context29.abrupt("return", s.download({ url: r }));case 10:_context29.t0 = t;_context29.next = 13;return s.download({ url: r });case 13:_context29.t1 = _context29.sent;(0, _context29.t0)(_context29.t1);case 15:case "end":return _context29.stop();}}}, _callee29, this);}));return function Ie(_x26, _x27) {return _ref8.apply(this, arguments);};}(),Ee = function Ee(_ref9, o) {var e = _ref9.name,t = _ref9.data,n = _ref9.query,s = _ref9.parse,r = _ref9.search;var i = o || F();var a;try {a = t ? JSON.stringify(t) : "";} catch (e) {return Promise.reject(e);}if (!e) return Promise.reject(new Error("函数名不能为空"));var c = { inQuery: n, parse: s, search: r, function_name: e, request_data: a };return fe(this.config.env).send("functions.invokeFunction", c).then(function (e) {if (e.code) i(null, e);else {var _t7 = e.data.response_data;if (s) i(null, { result: _t7, requestId: e.requestId });else try {_t7 = JSON.parse(e.data.response_data), i(null, { result: _t7, requestId: e.requestId });} catch (e) {i(new Error("response data must be json"));}}return i.promise;}).catch(function (e) {i(e);}), i.promise;},be = { timeout: 15e3, persistence: "session" },Oe = {};var Ue = /*#__PURE__*/function () {function Ue(e) {_classCallCheck(this, Ue);this.config = e || this.config, this.authObj = void 0;}_createClass(Ue, [{ key: "init", value: function init(e) {switch (j.adapter || (this.requestClient = new j.adapter.reqClass({ timeout: e.timeout || 5e3, timeoutMsg: "\u8BF7\u6C42\u5728".concat((e.timeout || 5e3) / 1e3, "s\u5185\u672A\u5B8C\u6210\uFF0C\u5DF2\u4E2D\u65AD") })), this.config = _objectSpread(_objectSpread({}, be), e), !0) {case this.config.timeout > 6e5:console.warn("timeout大于可配置上限[10分钟]，已重置为上限数值"), this.config.timeout = 6e5;break;case this.config.timeout < 100:console.warn("timeout小于可配置下限[100ms]，已重置为下限数值"), this.config.timeout = 100;}return new Ue(this.config);} }, { key: "auth", value: function auth() {var _ref10 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref10.persistence;if (this.authObj) return this.authObj;var t = e || j.adapter.primaryStorage || be.persistence;var n;return t !== this.config.persistence && (this.config.persistence = t), function (e) {var t = e.env;z[t] = new W(e), V[t] = new W(_objectSpread(_objectSpread({}, e), {}, { persistence: "local" }));}(this.config), n = this.config, de[n.env] = new le(n), this.authObj = new Se(this.config), this.authObj;} }, { key: "on", value: function on(e, t) {return Q.apply(this, [e, t]);} }, { key: "off", value: function off(e, t) {return ee.apply(this, [e, t]);} }, { key: "callFunction", value: function callFunction(e, t) {return Ee.apply(this, [e, t]);} }, { key: "deleteFile", value: function deleteFile(e, t) {return Pe.apply(this, [e, t]);} }, { key: "getTempFileURL", value: function getTempFileURL(e, t) {return Ae.apply(this, [e, t]);} }, { key: "downloadFile", value: function downloadFile(e, t) {return Ie.apply(this, [e, t]);} }, { key: "uploadFile", value: function uploadFile(e, t) {return ve.apply(this, [e, t]);} }, { key: "getUploadMetadata", value: function getUploadMetadata(e, t) {return Te.apply(this, [e, t]);} }, { key: "registerExtension", value: function registerExtension(e) {Oe[e.name] = e;} }, { key: "invokeExtension", value: function () {var _invokeExtension = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee30(e, t) {var n;return _regenerator.default.wrap(function _callee30$(_context30) {while (1) {switch (_context30.prev = _context30.next) {case 0:n = Oe[e];if (n) {_context30.next = 3;break;}throw Error("\u6269\u5C55".concat(e, " \u5FC5\u987B\u5148\u6CE8\u518C"));case 3:_context30.next = 5;return n.invoke(t, this);case 5:return _context30.abrupt("return", _context30.sent);case 6:case "end":return _context30.stop();}}}, _callee30, this);}));function invokeExtension(_x28, _x29) {return _invokeExtension.apply(this, arguments);}return invokeExtension;}() }, { key: "useAdapters", value: function useAdapters(e) {var _ref11 = $(e) || {},t = _ref11.adapter,n = _ref11.runtime;t && (j.adapter = t), n && (j.runtime = n);} }]);return Ue;}();var Ce = new Ue();function xe(e, t, n) {void 0 === n && (n = {});var s = /\?/.test(t),r = "";for (var o in n) {"" === r ? !s && (t += "?") : r += "&", r += o + "=" + encodeURIComponent(n[o]);}return /^http(s)?:\/\//.test(t += r) ? t : "" + e + t;}var De = /*#__PURE__*/function () {function De() {_classCallCheck(this, De);}_createClass(De, [{ key: "post", value: function post(e) {var t = e.url,n = e.data,s = e.headers;return new Promise(function (e, r) {U.request({ url: xe("https:", t), data: n, method: "POST", header: s, success: function success(t) {e(t);}, fail: function fail(e) {r(e);} });});} }, { key: "upload", value: function upload(e) {return new Promise(function (t, n) {var s = e.url,r = e.file,o = e.data,i = e.headers,a = e.fileType,c = U.uploadFile({ url: xe("https:", s), name: "file", formData: Object.assign({}, o), filePath: r, fileType: a, header: i, success: function success(e) {var n = { statusCode: e.statusCode, data: e.data || {} };200 === e.statusCode && o.success_action_status && (n.statusCode = parseInt(o.success_action_status, 10)), t(n);}, fail: function fail(e) {u && "mp-alipay" === h && console.warn("支付宝小程序开发工具上传腾讯云时无法准确判断是否上传成功，请使用真机测试"), n(new Error(e.errMsg || "uploadFile:fail"));} });"function" == typeof e.onUploadProgress && c && "function" == typeof c.onProgressUpdate && c.onProgressUpdate(function (t) {e.onUploadProgress({ loaded: t.totalBytesSent, total: t.totalBytesExpectedToSend });});});} }]);return De;}();var Re = { setItem: function setItem(e, t) {U.setStorageSync(e, t);}, getItem: function getItem(e) {return U.getStorageSync(e);}, removeItem: function removeItem(e) {U.removeStorageSync(e);}, clear: function clear() {U.clearStorageSync();} };var qe = { genAdapter: function genAdapter() {return { root: {}, reqClass: De, localStorage: Re, primaryStorage: "local" };}, isMatch: function isMatch() {return !0;}, runtime: "uni_app" };Ce.useAdapters(qe);var Fe = Ce,Le = Fe.init;function Ne() {return { token: U.getStorageSync("uni_id_token") || U.getStorageSync("uniIdToken"), tokenExpired: U.getStorageSync("uni_id_token_expired") };}function Me() {if (!u || "h5" !== h) return;uni.getStorageSync("__LAST_DCLOUD_APPID") !== p && (uni.setStorageSync("__LAST_DCLOUD_APPID", p), console.warn("检测到当前项目与上次运行到此端口的项目不一致，自动清理uni-id保存的token信息（仅开发调试时生效）"), U.removeStorageSync("uni_id_token"), U.removeStorageSync("uniIdToken"), U.removeStorageSync("uni_id_token_expired"));}Fe.init = function (e) {e.env = e.spaceId;var t = Le.call(this, e);t.config.provider = "tencent", t.config.spaceId = e.spaceId;var n = t.auth;return t.auth = function (e) {var t = n.call(this, e);return ["linkAndRetrieveDataWithTicket", "signInAnonymously", "signOut", "getAccessToken", "getLoginState", "signInWithTicket", "getUserInfo"].forEach(function (e) {t[e] = T(t[e]).bind(t);}), t;}, t.customAuth = t.auth, t;};var $e = /*#__PURE__*/function (_C) {_inherits($e, _C);var _super9 = _createSuper($e);function $e() {_classCallCheck(this, $e);return _super9.apply(this, arguments);}_createClass($e, [{ key: "getAccessToken", value: function getAccessToken() {var _this13 = this;return new Promise(function (e, t) {var n = "Anonymous_Access_token";_this13.setAccessToken(n), e(n);});} }, { key: "setupRequest", value: function setupRequest(e, t) {var n = Object.assign({}, e, { spaceId: this.config.spaceId, timestamp: Date.now() }),s = { "Content-Type": "application/json" };"auth" !== t && (n.token = this.accessToken, s["x-basement-token"] = this.accessToken), s["x-serverless-sign"] = O.sign(n, this.config.clientSecret);var r = b(),o = r.APPID,i = r.PLATFORM,a = r.DEVICEID,c = r.CLIENT_SDK_VERSION;s["x-client-platform"] = i, s["x-client-appid"] = o, s["x-client-device-id"] = a, s["x-client-version"] = c;var _Ne = Ne(),u = _Ne.token;return s["x-client-token"] = u, { url: this.config.requestUrl, method: "POST", data: n, dataType: "json", header: JSON.parse(JSON.stringify(s)) };} }, { key: "uploadFileToOSS", value: function uploadFileToOSS(_ref12) {var _this14 = this;var e = _ref12.url,t = _ref12.formData,n = _ref12.name,s = _ref12.filePath,r = _ref12.fileType,o = _ref12.onUploadProgress;return new Promise(function (i, a) {var c = _this14.adapter.uploadFile({ url: e, formData: t, name: n, filePath: s, fileType: r, success: function success(e) {e && e.statusCode < 400 ? i(e) : a(new P({ code: "UPLOAD_FAILED", message: "文件上传失败" }));}, fail: function fail(e) {a(new P({ code: e.code || "UPLOAD_FAILED", message: e.message || e.errMsg || "文件上传失败" }));} });"function" == typeof o && c && "function" == typeof c.onProgressUpdate && c.onProgressUpdate(function (e) {o({ loaded: e.totalBytesSent, total: e.totalBytesExpectedToSend });});});} }, { key: "uploadFile", value: function uploadFile(_ref13) {var _this15 = this;var e = _ref13.filePath,t = _ref13.cloudPath,_ref13$fileType = _ref13.fileType,n = _ref13$fileType === void 0 ? "image" : _ref13$fileType,s = _ref13.onUploadProgress;if (!t) throw new P({ code: "CLOUDPATH_REQUIRED", message: "cloudPath不可为空" });var r;return this.getOSSUploadOptionsFromPath({ cloudPath: t }).then(function (t) {var _t$result = t.result,o = _t$result.url,i = _t$result.formData,a = _t$result.name,c = _t$result.fileUrl;r = c;var u = { url: o, formData: i, name: a, filePath: e, fileType: n };return _this15.uploadFileToOSS(Object.assign({}, u, { onUploadProgress: s }));}).then(function () {return _this15.reportOSSUpload({ cloudPath: t });}).then(function (t) {return new Promise(function (n, s) {t.success ? n({ success: !0, filePath: e, fileID: r }) : s(new P({ code: "UPLOAD_FAILED", message: "文件上传失败" }));});});} }]);return $e;}(C);var je = { init: function init(e) {var t = new $e(e),n = { signInAnonymously: function signInAnonymously() {return t.authorize();}, getLoginState: function getLoginState() {return Promise.resolve(!1);} };return t.auth = function () {return n;}, t.customAuth = t.auth, t;} };var Ke;function Be(_ref14) {var e = _ref14.data;Ke || (Ke = b());var t = JSON.parse(JSON.stringify(e || {}));if (Object.assign(t, { clientInfo: Ke }), !t.uniIdToken) {var _Ne2 = Ne(),_e16 = _Ne2.token;_e16 && (t.uniIdToken = _e16);}return t;}function He(_ref15) {var _this16 = this;var e = _ref15.name,t = _ref15.data;var n = this.localAddress,s = this.localPort,r = { aliyun: "aliyun", tencent: "tcb" }[this.config.provider],o = this.config.spaceId,i = "http://".concat(n, ":").concat(s, "/system/check-function"),a = "http://".concat(n, ":").concat(s, "/cloudfunctions/").concat(e);return new Promise(function (t, n) {U.request({ method: "POST", url: i, data: { name: e, platform: h, provider: r, spaceId: o }, timeout: 3e3, success: function success(e) {t(e);}, fail: function fail() {t({ data: { code: "NETWORK_ERROR", message: "连接本地调试服务失败，请检查客户端是否和主机在同一局域网下，自动切换为已部署的云函数。" } });} });}).then(function () {var _ref16 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref16.data;var _ref17 = e || {},t = _ref17.code,n = _ref17.message;return { code: 0 === t ? 0 : t || "SYS_ERR", message: n || "SYS_ERR" };}).then(function (_ref18) {var n = _ref18.code,s = _ref18.message;if (0 !== n) {switch (n) {case "MODULE_ENCRYPTED":console.error("\u6B64\u4E91\u51FD\u6570\uFF08".concat(e, "\uFF09\u4F9D\u8D56\u52A0\u5BC6\u516C\u5171\u6A21\u5757\u4E0D\u53EF\u672C\u5730\u8C03\u8BD5\uFF0C\u81EA\u52A8\u5207\u6362\u4E3A\u4E91\u7AEF\u5DF2\u90E8\u7F72\u7684\u4E91\u51FD\u6570"));break;case "FUNCTION_ENCRYPTED":console.error("\u6B64\u4E91\u51FD\u6570\uFF08".concat(e, "\uFF09\u5DF2\u52A0\u5BC6\u4E0D\u53EF\u672C\u5730\u8C03\u8BD5\uFF0C\u81EA\u52A8\u5207\u6362\u4E3A\u4E91\u7AEF\u5DF2\u90E8\u7F72\u7684\u4E91\u51FD\u6570"));break;case "ACTION_ENCRYPTED":console.error(s || "需要访问加密的uni-clientDB-action，自动切换为云端环境");break;case "NETWORK_ERROR":{var _e17 = "连接本地调试服务失败，请检查客户端是否和主机在同一局域网下";throw console.error(_e17), new Error(_e17);}case "SWITCH_TO_CLOUD":break;default:{var _e18 = "\u68C0\u6D4B\u672C\u5730\u8C03\u8BD5\u670D\u52A1\u51FA\u73B0\u9519\u8BEF\uFF1A".concat(s, "\uFF0C\u8BF7\u68C0\u67E5\u7F51\u7EDC\u73AF\u5883\u6216\u91CD\u542F\u5BA2\u6237\u7AEF\u518D\u8BD5");throw console.error(_e18), new Error(_e18);}}return _this16._originCallFunction({ name: e, data: t });}return new Promise(function (e, n) {var s = Be.call(_this16, { data: t });U.request({ method: "POST", url: a, data: { provider: r, platform: h, param: s }, success: function success() {var _ref19 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},t = _ref19.statusCode,s = _ref19.data;return !t || t >= 400 ? n(new P({ code: s.code || "SYS_ERR", message: s.message || "request:fail" })) : e({ result: s });}, fail: function fail(e) {n(new P({ code: e.code || e.errCode || "SYS_ERR", message: e.message || e.errMsg || "request:fail" }));} });});});}var We = [{ rule: /fc_function_not_found|FUNCTION_NOT_FOUND/, content: "，云函数[{functionName}]在云端不存在，请检查此云函数名称是否正确以及该云函数是否已上传到服务空间", mode: "append" }];var ze = /[\\^$.*+?()[\]{}|]/g,Ve = RegExp(ze.source);function Je(e, t, n) {return e.replace(new RegExp((s = t) && Ve.test(s) ? s.replace(ze, "\\$&") : s, "g"), n);var s;}function Ye(_ref20) {var e = _ref20.functionName,t = _ref20.result,n = _ref20.logPvd;if (this.config.useDebugFunction && t && t.requestId) {var _s7 = JSON.stringify({ spaceId: this.config.spaceId, functionName: e, requestId: t.requestId });console.log("[".concat(n, "-request]").concat(_s7, "[/").concat(n, "-request]"));}}function Xe(e) {var t = e.callFunction,n = function n(_n4) {var _this17 = this;var s = _n4.name;_n4.data = Be.call(e, { data: _n4.data });var r = { aliyun: "aliyun", tencent: "tcb" }[this.config.provider];return t.call(this, _n4).then(function (e) {return Ye.call(_this17, { functionName: s, result: e, logPvd: r }), Promise.resolve(e);}, function (e) {return Ye.call(_this17, { functionName: s, result: e, logPvd: r }), e && e.message && (e.message = function () {var _ref21 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},_ref21$message = _ref21.message,e = _ref21$message === void 0 ? "" : _ref21$message,_ref21$extraInfo = _ref21.extraInfo,t = _ref21$extraInfo === void 0 ? {} : _ref21$extraInfo,_ref21$formatter = _ref21.formatter,n = _ref21$formatter === void 0 ? [] : _ref21$formatter;for (var _s8 = 0; _s8 < n.length; _s8++) {var _n$_s = n[_s8],_r3 = _n$_s.rule,_o2 = _n$_s.content,i = _n$_s.mode,_a = e.match(_r3);if (!_a) continue;var _c = _o2;for (var _e19 = 1; _e19 < _a.length; _e19++) {_c = Je(_c, "{$".concat(_e19, "}"), _a[_e19]);}for (var _e20 in t) {_c = Je(_c, "{".concat(_e20, "}"), t[_e20]);}switch (i) {case "replace":return _c;case "append":default:return e + _c;}}return e;}({ message: "[".concat(_n4.name, "]: ").concat(e.message), formatter: We, extraInfo: { functionName: s } })), Promise.reject(e);});};e.callFunction = function (t) {var s;return u && e.debugInfo && !e.debugInfo.forceRemote && d ? (e._originCallFunction || (e._originCallFunction = n), s = He.call(this, t)) : s = n.call(this, t), Object.defineProperty(s, "result", { get: function get() {return console.warn("当前返回结果为Promise类型，不可直接访问其result属性，详情请参考：https://uniapp.dcloud.net.cn/uniCloud/faq?id=promise"), {};} }), s;};}var Ge = Symbol("CLIENT_DB_INTERNAL");function Qe(e, t) {return e.then = "DoNotReturnProxyWithAFunctionNamedThen", e._internalType = Ge, e.__ob__ = void 0, new Proxy(e, { get: function get(e, n, s) {return n in e || "string" != typeof n ? e[n] : t.get(e, n, s);} });}function Ze(e) {switch (o(e)) {case "array":return e.map(function (e) {return Ze(e);});case "object":return e._internalType === Ge || Object.keys(e).forEach(function (t) {e[t] = Ze(e[t]);}), e;case "regexp":return { $regexp: { source: e.source, flags: e.flags } };case "date":return { $date: e.toISOString() };default:return e;}}function et(e) {e.database = function (t) {if (t && Object.keys(t).length > 0) return e.init(t).database();if (this._database) return this._database;var n = {};var s = {};function r(_ref22) {var t = _ref22.action,r = _ref22.command,o = _ref22.multiCommand;return S(v("database", "invoke")).then(function () {return e.callFunction({ name: "DCloud-clientDB", data: { action: t, command: r, multiCommand: o } });}).then(function (e) {var _e$result = e.result,t = _e$result.code,r = _e$result.message,o = _e$result.token,i = _e$result.tokenExpired,_e$result$systemInfo = _e$result.systemInfo,c = _e$result$systemInfo === void 0 ? [] : _e$result$systemInfo;if (c) for (var _e21 = 0; _e21 < c.length; _e21++) {var _c$_e = c[_e21],_t8 = _c$_e.level,_n5 = _c$_e.message,_s9 = _c$_e.detail,_r4 = console["app-plus" === h && "warn" === _t8 ? "error" : _t8] || console.log;var _o3 = "[System Info]" + _n5;_s9 && (_o3 = "".concat(_o3, "\n\u8BE6\u7EC6\u4FE1\u606F\uFF1A").concat(_s9)), _r4(_o3);}if (t) {var _e22 = new a(r, t);return s.error && s.error.forEach(function (t) {t(_e22);}), Promise.reject(_e22);}o && i && (!function () {var _ref23 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref23.token,t = _ref23.tokenExpired;e && U.setStorageSync("uni_id_token", e), t && U.setStorageSync("uni_id_token_expired", t);}({ token: o, tokenExpired: i }), n.refreshToken && n.refreshToken.forEach(function (e) {e({ token: o, tokenExpired: i });}), s.refreshToken && s.refreshToken.forEach(function (e) {e({ token: o, tokenExpired: i });}));var u = e.result.affectedDocs;return "number" == typeof u && Object.defineProperty(e.result, "affectedDocs", { get: function get() {return console.warn("affectedDocs不再推荐使用，请使用inserted/deleted/updated/data.length替代"), u;} }), S(v("database", "success"), e).then(function () {return S(v("database", "complete"), e);}).then(function () {return Promise.resolve(e);});}, function (e) {var t = new a(e.message, e.code || "SYSTEM_ERROR");return s.error && s.error.forEach(function (e) {e(t);}), /fc_function_not_found|FUNCTION_NOT_FOUND/g.test(e.message) && console.warn("clientDB未初始化，请在web控制台保存一次schema以开启clientDB"), S(v("database", "fail"), e).then(function () {return S(v("database", "complete"), e);}).then(function () {return Promise.reject(e);});});}this.isDefault && (s = m("_globalUniCloudDatabaseCallback"));var o = /*#__PURE__*/function () {function o(e, t) {_classCallCheck(this, o);this.content = e, this.prevStage = t, this.udb = null;}_createClass(o, [{ key: "toJSON", value: function toJSON() {var e = this;var t = [e.content];for (; e.prevStage;) {e = e.prevStage, t.push(e.content);}return { $db: t.reverse().map(function (e) {return { $method: e.$method, $param: Ze(e.$param) };}) };} }, { key: "getAction", value: function getAction() {var e = this.toJSON().$db.find(function (e) {return "action" === e.$method;});return e && e.$param && e.$param[0];} }, { key: "getCommand", value: function getCommand() {return { $db: this.toJSON().$db.filter(function (e) {return "action" !== e.$method;}) };} }, { key: "get", value: function get() {return this._send("get", Array.from(arguments));} }, { key: "add", value: function add() {return this._send("add", Array.from(arguments));} }, { key: "remove", value: function remove() {return this._send("remove", Array.from(arguments));} }, { key: "update", value: function update() {return this._send("update", Array.from(arguments));} }, { key: "end", value: function end() {return this._send("end", Array.from(arguments));} }, { key: "set", value: function set() {throw new Error("clientDB禁止使用set方法");} }, { key: "_send", value: function _send(e, t) {var n = this.getAction(),s = this.getCommand();return s.$db.push({ $method: e, $param: Ze(t) }), r({ action: n, command: s });} }, { key: "useAggregate", get: function get() {var e = this,t = !1;for (; e.prevStage;) {e = e.prevStage;var _n6 = e.content.$method;if ("aggregate" === _n6 || "pipeline" === _n6) {t = !0;break;}}return t;} }, { key: "count", get: function get() {if (!this.useAggregate) return function () {return this._send("count", Array.from(arguments));};var e = this;return function () {return u({ $method: "count", $param: Ze(Array.from(arguments)) }, e);};} }, { key: "multiSend", get: function get() {} }]);return o;}();var i = ["db.Geo", "db.command", "command.aggregate"];function c(e, t) {return i.indexOf("".concat(e, ".").concat(t)) > -1;}function u(e, t) {return Qe(new o(e, t), { get: function get(e, t) {var n = "db";return e && e.content && (n = e.content.$method), c(n, t) ? u({ $method: t }, e) : function () {return u({ $method: t, $param: Ze(Array.from(arguments)) }, e);};} });}function l(_ref24) {var e = _ref24.path,t = _ref24.method;return /*#__PURE__*/function () {function _class2() {_classCallCheck(this, _class2);this.param = Array.from(arguments);}_createClass(_class2, [{ key: "toJSON", value: function toJSON() {return { $newDb: [].concat(_toConsumableArray(e.map(function (e) {return { $method: e };})), [{ $method: t, $param: this.param }]) };} }]);return _class2;}();}var d = { auth: { on: function on(e, t) {n[e] = n[e] || [], n[e].indexOf(t) > -1 || n[e].push(t);}, off: function off(e, t) {n[e] = n[e] || [];var s = n[e].indexOf(t);-1 !== s && n[e].splice(s, 1);} }, on: function on(e, t) {s[e] = s[e] || [], s[e].indexOf(t) > -1 || s[e].push(t);}, off: function off(e, t) {s[e] = s[e] || [];var n = s[e].indexOf(t);-1 !== n && s[e].splice(n, 1);}, env: Qe({}, { get: function get(e, t) {return { $env: t };} }), Geo: Qe({}, { get: function get(e, t) {return l({ path: ["Geo"], method: t });} }), getCloudEnv: function getCloudEnv(e) {if ("string" != typeof e || !e.trim()) throw new Error("getCloudEnv参数错误");return { $env: e.replace("$cloudEnv_", "") };}, multiSend: function multiSend() {var e = Array.from(arguments);return r({ multiCommand: e.map(function (e) {var t = e.getAction(),n = e.getCommand();if ("getTemp" !== n.$db[n.$db.length - 1].$method) throw new Error("multiSend只支持子命令内使用getTemp");return { action: t, command: n };}) }).then(function (t) {for (var _n7 = 0; _n7 < e.length; _n7++) {var _s10 = e[_n7];_s10.udb && "function" == typeof _s10.udb.setResult && _s10.udb.setResult(t.result.dataList[_n7]);}return Promise.resolve(t);}, function (t) {for (var _n8 = 0; _n8 < e.length; _n8++) {var _s11 = e[_n8];_s11.udb && "function" == typeof _s11.udb.setResult && _s11.udb.setResult(t);}return Promise.reject(t);});}, get serverDate() {return l({ path: [], method: "serverDate" });}, get RegExp() {return l({ path: [], method: "RegExp" });} },f = Qe(d, { get: function get(e, t) {return c("db", t) ? u({ $method: t }) : function () {return u({ $method: t, $param: Ze(Array.from(arguments)) });};} });return this._database = f, f;};}var tt;var nt = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",st = /^(?:[A-Za-z\d+/]{4})*?(?:[A-Za-z\d+/]{2}(?:==)?|[A-Za-z\d+/]{3}=?)?$/;function rt() {var e = Ne().token || "",t = e.split(".");if (!e || 3 !== t.length) return { uid: null, role: [], permission: [], tokenExpired: 0 };var n;try {n = JSON.parse((s = t[1], decodeURIComponent(tt(s).split("").map(function (e) {return "%" + ("00" + e.charCodeAt(0).toString(16)).slice(-2);}).join(""))));} catch (e) {throw new Error("获取当前用户信息出错，详细错误信息为：" + e.message);}var s;return n.tokenExpired = 1e3 * n.exp, delete n.exp, delete n.iat, n;}tt = "function" != typeof atob ? function (e) {if (e = String(e).replace(/[\t\n\f\r ]+/g, ""), !st.test(e)) throw new Error("Failed to execute 'atob' on 'Window': The string to be decoded is not correctly encoded.");var t;e += "==".slice(2 - (3 & e.length));for (var n, s, r = "", o = 0; o < e.length;) {t = nt.indexOf(e.charAt(o++)) << 18 | nt.indexOf(e.charAt(o++)) << 12 | (n = nt.indexOf(e.charAt(o++))) << 6 | (s = nt.indexOf(e.charAt(o++))), r += 64 === n ? String.fromCharCode(t >> 16 & 255) : 64 === s ? String.fromCharCode(t >> 16 & 255, t >> 8 & 255) : String.fromCharCode(t >> 16 & 255, t >> 8 & 255, 255 & t);}return r;} : atob;var ot = t(n(function (e, t) {Object.defineProperty(t, "__esModule", { value: !0 });var n = "chooseAndUploadFile:ok",s = "chooseAndUploadFile:fail";function r(e, t) {return e.tempFiles.forEach(function (e, n) {e.name || (e.name = e.path.substring(e.path.lastIndexOf("/") + 1)), t && (e.fileType = t), e.cloudPath = Date.now() + "_" + n + e.name.substring(e.name.lastIndexOf("."));}), e.tempFilePaths || (e.tempFilePaths = e.tempFiles.map(function (e) {return e.path;})), e;}function o(e, t, _ref25) {var s = _ref25.onChooseFile,r = _ref25.onUploadProgress;return t.then(function (e) {if (s) {var _t9 = s(e);if (void 0 !== _t9) return Promise.resolve(_t9).then(function (t) {return void 0 === t ? e : t;});}return e;}).then(function (t) {return !1 === t ? { errMsg: n, tempFilePaths: [], tempFiles: [] } : function (e, t) {var s = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 5;var r = arguments.length > 3 ? arguments[3] : undefined;(t = Object.assign({}, t)).errMsg = n;var o = t.tempFiles,i = o.length;var a = 0;return new Promise(function (n) {for (; a < s;) {c();}function c() {var s = a++;if (s >= i) return void (!o.find(function (e) {return !e.url && !e.errMsg;}) && n(t));var u = o[s];e.uploadFile({ filePath: u.path, cloudPath: u.cloudPath, fileType: u.fileType, onUploadProgress: function onUploadProgress(e) {e.index = s, e.tempFile = u, e.tempFilePath = u.path, r && r(e);} }).then(function (e) {u.url = e.fileID, s < i && c();}).catch(function (e) {u.errMsg = e.errMsg || e.message, s < i && c();});}});}(e, t, 5, r);});}t.initChooseAndUploadFile = function (e) {return function () {var t = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { type: "all" };return "image" === t.type ? o(e, function (e) {var t = e.count,n = e.sizeType,_e$sourceType = e.sourceType,o = _e$sourceType === void 0 ? ["album", "camera"] : _e$sourceType,i = e.extension;return new Promise(function (e, a) {uni.chooseImage({ count: t, sizeType: n, sourceType: o, extension: i, success: function success(t) {e(r(t, "image"));}, fail: function fail(e) {a({ errMsg: e.errMsg.replace("chooseImage:fail", s) });} });});}(t), t) : "video" === t.type ? o(e, function (e) {var t = e.camera,n = e.compressed,o = e.maxDuration,_e$sourceType2 = e.sourceType,i = _e$sourceType2 === void 0 ? ["album", "camera"] : _e$sourceType2,a = e.extension;return new Promise(function (e, c) {uni.chooseVideo({ camera: t, compressed: n, maxDuration: o, sourceType: i, extension: a, success: function success(t) {var n = t.tempFilePath,s = t.duration,o = t.size,i = t.height,a = t.width;e(r({ errMsg: "chooseVideo:ok", tempFilePaths: [n], tempFiles: [{ name: t.tempFile && t.tempFile.name || "", path: n, size: o, type: t.tempFile && t.tempFile.type || "", width: a, height: i, duration: s, fileType: "video", cloudPath: "" }] }, "video"));}, fail: function fail(e) {c({ errMsg: e.errMsg.replace("chooseVideo:fail", s) });} });});}(t), t) : o(e, function (e) {var t = e.count,n = e.extension;return new Promise(function (e, o) {var i = uni.chooseFile;if ("undefined" != typeof wx && "function" == typeof wx.chooseMessageFile && (i = wx.chooseMessageFile), "function" != typeof i) return o({ errMsg: s + " 请指定 type 类型，该平台仅支持选择 image 或 video。" });i({ type: "all", count: t, extension: n, success: function success(t) {e(r(t));}, fail: function fail(e) {o({ errMsg: e.errMsg.replace("chooseFile:fail", s) });} });});}(t), t);};};}));var it = "manual";function at(e) {return { props: { localdata: { type: Array, default: function _default() {return [];} }, options: { type: [Object, Array], default: function _default() {return {};} }, spaceInfo: { type: Object, default: function _default() {return {};} }, collection: { type: [String, Array], default: "" }, action: { type: String, default: "" }, field: { type: String, default: "" }, orderby: { type: String, default: "" }, where: { type: [String, Object], default: "" }, pageData: { type: String, default: "add" }, pageCurrent: { type: Number, default: 1 }, pageSize: { type: Number, default: 20 }, getcount: { type: [Boolean, String], default: !1 }, gettree: { type: [Boolean, String], default: !1 }, gettreepath: { type: [Boolean, String], default: !1 }, startwith: { type: String, default: "" }, limitlevel: { type: Number, default: 10 }, groupby: { type: String, default: "" }, groupField: { type: String, default: "" }, distinct: { type: [Boolean, String], default: !1 }, foreignKey: { type: String, default: "" }, loadtime: { type: String, default: "auto" }, manual: { type: Boolean, default: !1 } }, data: function data() {return { mixinDatacomLoading: !1, mixinDatacomHasMore: !1, mixinDatacomResData: [], mixinDatacomErrorMessage: "", mixinDatacomPage: {} };}, created: function created() {var _this18 = this;this.mixinDatacomPage = { current: this.pageCurrent, size: this.pageSize, count: 0 }, this.$watch(function () {var e = [];return ["pageCurrent", "pageSize", "localdata", "collection", "action", "field", "orderby", "where", "getont", "getcount", "gettree", "groupby", "groupField", "distinct"].forEach(function (t) {e.push(_this18[t]);}), e;}, function (e, t) {if (_this18.loadtime === it) return;var n = !1;var s = [];for (var _r5 = 2; _r5 < e.length; _r5++) {e[_r5] !== t[_r5] && (s.push(e[_r5]), n = !0);}e[0] !== t[0] && (_this18.mixinDatacomPage.current = _this18.pageCurrent), _this18.mixinDatacomPage.size = _this18.pageSize, _this18.onMixinDatacomPropsChange(n, s);});}, methods: { onMixinDatacomPropsChange: function onMixinDatacomPropsChange(e, t) {}, mixinDatacomEasyGet: function mixinDatacomEasyGet() {var _this19 = this;var _ref26 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},_ref26$getone = _ref26.getone,e = _ref26$getone === void 0 ? !1 : _ref26$getone,t = _ref26.success,n = _ref26.fail;this.mixinDatacomLoading || (this.mixinDatacomLoading = !0, this.mixinDatacomErrorMessage = "", this.mixinDatacomGet().then(function (n) {_this19.mixinDatacomLoading = !1;var _n$result = n.result,s = _n$result.data,r = _n$result.count;_this19.getcount && (_this19.mixinDatacomPage.count = r), _this19.mixinDatacomHasMore = s.length < _this19.pageSize;var o = e ? s.length ? s[0] : void 0 : s;_this19.mixinDatacomResData = o, t && t(o);}).catch(function (e) {_this19.mixinDatacomLoading = !1, _this19.mixinDatacomErrorMessage = e, n && n(e);}));}, mixinDatacomGet: function mixinDatacomGet() {var _n9;var t = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};var n = e.database(this.spaceInfo);var s = t.action || this.action;s && (n = n.action(s));var r = t.collection || this.collection;n = Array.isArray(r) ? (_n9 = n).collection.apply(_n9, _toConsumableArray(r)) : n.collection(r);var o = t.where || this.where;o && Object.keys(o).length && (n = n.where(o));var i = t.field || this.field;i && (n = n.field(i));var a = t.foreignKey || this.foreignKey;a && (n = n.foreignKey(a));var c = t.groupby || this.groupby;c && (n = n.groupBy(c));var u = t.groupField || this.groupField;u && (n = n.groupField(u));!0 === (void 0 !== t.distinct ? t.distinct : this.distinct) && (n = n.distinct());var h = t.orderby || this.orderby;h && (n = n.orderBy(h));var l = void 0 !== t.pageCurrent ? t.pageCurrent : this.mixinDatacomPage.current,d = void 0 !== t.pageSize ? t.pageSize : this.mixinDatacomPage.size,f = void 0 !== t.getcount ? t.getcount : this.getcount,p = void 0 !== t.gettree ? t.gettree : this.gettree,g = void 0 !== t.gettreepath ? t.gettreepath : this.gettreepath,m = { getCount: f },y = { limitLevel: void 0 !== t.limitlevel ? t.limitlevel : this.limitlevel, startWith: void 0 !== t.startwith ? t.startwith : this.startwith };return p && (m.getTree = y), g && (m.getTreePath = y), n = n.skip(d * (l - 1)).limit(d).get(m), n;} } };}function ct(_x30, _x31) {return _ct.apply(this, arguments);}function _ct() {_ct = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee32(e, t) {var n, _e27, s;return _regenerator.default.wrap(function _callee32$(_context32) {while (1) {switch (_context32.prev = _context32.next) {case 0:n = "http://".concat(e, ":").concat(t, "/system/ping");_context32.prev = 1;_context32.next = 4;return s = { url: n, timeout: 500 }, new Promise(function (e, t) {U.request(_objectSpread(_objectSpread({}, s), {}, { success: function success(t) {e(t);}, fail: function fail(e) {t(e);} }));});case 4:_e27 = _context32.sent;return _context32.abrupt("return", !(!_e27.data || 0 !== _e27.data.code));case 8:_context32.prev = 8;_context32.t0 = _context32["catch"](1);return _context32.abrupt("return", !1);case 11:case "end":return _context32.stop();}}}, _callee32, null, [[1, 8]]);}));return _ct.apply(this, arguments);}var ut = new ( /*#__PURE__*/function () {function _class3() {_classCallCheck(this, _class3);}_createClass(_class3, [{ key: "init", value: function init(e) {var t = {};var n = !1 !== e.debugFunction && u && ("h5" === h && navigator.userAgent.indexOf("HBuilderX") > 0 || "app-plus" === h);switch (e.provider) {case "tencent":t = Fe.init(Object.assign(e, { useDebugFunction: n }));break;case "aliyun":t = x.init(Object.assign(e, { useDebugFunction: n }));break;case "private":t = je.init(Object.assign(e, { useDebugFunction: n }));break;default:throw new Error("未提供正确的provider参数");}var s = l;u && s && !s.code && (t.debugInfo = s);var r = Promise.resolve();var o;o = 1, r = new Promise(function (e, t) {setTimeout(function () {e();}, o);}), t.isReady = !1, t.isDefault = !1;var i = t.auth();t.initUniCloud = r.then(function () {return i.getLoginState();}).then(function (e) {return e ? Promise.resolve() : i.signInAnonymously();}).then(function () {if (!u) return Promise.resolve();if (u && t.debugInfo) {var _t$debugInfo = t.debugInfo,_e23 = _t$debugInfo.address,_n10 = _t$debugInfo.servePort;return function () {var _ref27 = _asyncToGenerator( /*#__PURE__*/_regenerator.default.mark(function _callee31(e, t) {var n, _s12, _r6;return _regenerator.default.wrap(function _callee31$(_context31) {while (1) {switch (_context31.prev = _context31.next) {case 0:_s12 = 0;case 1:if (!(_s12 < e.length)) {_context31.next = 11;break;}_r6 = e[_s12];_context31.next = 5;return ct(_r6, t);case 5:if (!_context31.sent) {_context31.next = 8;break;}n = _r6;return _context31.abrupt("break", 11);case 8:_s12++;_context31.next = 1;break;case 11:return _context31.abrupt("return", { address: n, port: t });case 12:case "end":return _context31.stop();}}}, _callee31);}));return function (_x32, _x33) {return _ref27.apply(this, arguments);};}()(_e23, _n10);}}).then(function () {var _ref28 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},e = _ref28.address,n = _ref28.port;if (!u) return Promise.resolve();if (e) t.localAddress = e, t.localPort = n;else if (t.debugInfo) {var _e24 = console["app-plus" === h ? "error" : "warn"];var _n11 = "";"remote" === t.debugInfo.initialLaunchType ? (t.debugInfo.forceRemote = !0, _n11 = "当前客户端和HBuilderX不在同一局域网下（或其他网络原因无法连接HBuilderX），uniCloud本地调试服务不对当前客户端生效。\n- 如果不使用uniCloud本地调试服务，请直接忽略此信息。\n- 如需使用uniCloud本地调试服务，请将客户端与主机连接到同一局域网下并重新运行到客户端。\n- 如果在HBuilderX开启的状态下切换过网络环境，请重启HBuilderX后再试\n- 检查系统防火墙是否拦截了HBuilderX自带的nodejs") : _n11 = "无法连接uniCloud本地调试服务，请检查当前客户端是否与主机在同一局域网下。\n- 如需使用uniCloud本地调试服务，请将客户端与主机连接到同一局域网下并重新运行到客户端。\n- 如果在HBuilderX开启的状态下切换过网络环境，请重启HBuilderX后再试\n- 检查系统防火墙是否拦截了HBuilderX自带的nodejs", "h5" === h && (_n11 += "\n- 部分浏览器开启节流模式之后访问本地地址受限，请检查是否启用了节流模式"), _e24(_n11);}}).then(function () {Me(), t.isReady = !0;}), Xe(t), function (e) {var t = e.uploadFile;e.uploadFile = function (e) {var _this20 = this;var n;return n = this.isReady ? Promise.resolve() : this.initUniCloud, n.then(function () {return t.call(_this20, e);});};}(t), et(t), function (e) {e.getCurrentUserInfo = rt, e.chooseAndUploadFile = ot.initChooseAndUploadFile(e), Object.assign(e, { get mixinDatacom() {return at(e);} });}(t);return ["callFunction", "uploadFile", "deleteFile", "getTempFileURL", "downloadFile", "chooseAndUploadFile"].forEach(function (e) {t[e] && (t[e] = T(t[e], e));}), t.init = this.init, t;} }]);return _class3;}())();(function () {{var e = d;var t = {};if (1 === e.length) t = e[0], ut = ut.init(t), ut.isDefault = !0;else {var _t10 = ["auth", "callFunction", "uploadFile", "deleteFile", "getTempFileURL", "downloadFile", "database", "getCurrentUSerInfo"];var _n12;_n12 = e && e.length > 0 ? "应用有多个服务空间，请通过uniCloud.init方法指定要使用的服务空间" : f ? "应用未关联服务空间，请在uniCloud目录右键关联服务空间" : "uni-app cli项目内使用uniCloud需要使用HBuilderX的运行菜单运行项目，且需要在uniCloud目录关联服务空间", _t10.forEach(function (e) {ut[e] = function () {return console.error(_n12), Promise.reject(new P({ code: "SYS_ERR", message: _n12 }));};});}Object.assign(ut, { get mixinDatacom() {return at(ut);} }), ut.addInterceptor = w, ut.removeInterceptor = k, u && "h5" === h && (window.uniCloud = ut);}})();var ht = ut;var _default2 = ht;exports.default = _default2;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../webpack/buildin/global.js */ 2), __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
@@ -10053,9 +9969,9 @@ if (hadRuntime) {
 
 /***/ }),
 /* 36 */
-/*!***********************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/pages.json?{"type":"stat"} ***!
-  \***********************************************************************/
+/*!*********************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/pages.json?{"type":"stat"} ***!
+  \*********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10064,9 +9980,9 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
 /***/ }),
 /* 37 */
-/*!*****************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/common/timeFormat.js ***!
-  \*****************************************************************/
+/*!***************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/common/timeFormat.js ***!
+  \***************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10165,9 +10081,9 @@ timeFormat;exports.default = _default;
 /* 76 */,
 /* 77 */,
 /* 78 */
-/*!************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/index.js ***!
-  \************************************************************************/
+/*!**********************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/index.js ***!
+  \**********************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10175,9 +10091,9 @@ module.exports = __webpack_require__(/*! ./lib/axios */ 79);
 
 /***/ }),
 /* 79 */
-/*!****************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/axios.js ***!
-  \****************************************************************************/
+/*!**************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/axios.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10191,11 +10107,11 @@ var mergeConfig = __webpack_require__(/*! ./core/mergeConfig */ 104);
 var defaults = __webpack_require__(/*! ./defaults */ 87);
 
 /**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */
+                                       * Create an instance of Axios
+                                       *
+                                       * @param {Object} defaultConfig The default config for the instance
+                                       * @return {Axios} A new instance of Axios
+                                       */
 function createInstance(defaultConfig) {
   var context = new Axios(defaultConfig);
   var instance = bind(Axios.prototype.request, context);
@@ -10240,12 +10156,11 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-
 /***/ }),
 /* 80 */
-/*!****************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/utils.js ***!
-  \****************************************************************************/
+/*!**************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/utils.js ***!
+  \**************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10259,108 +10174,108 @@ var bind = __webpack_require__(/*! ./helpers/bind */ 81);
 var toString = Object.prototype.toString;
 
 /**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
+                                           * Determine if a value is an Array
+                                           *
+                                           * @param {Object} val The value to test
+                                           * @returns {boolean} True if value is an Array, otherwise false
+                                           */
 function isArray(val) {
   return Array.isArray(val);
 }
 
 /**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */
+   * Determine if a value is undefined
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if the value is undefined, otherwise false
+   */
 function isUndefined(val) {
   return typeof val === 'undefined';
 }
 
 /**
- * Determine if a value is a Buffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Buffer, otherwise false
- */
+   * Determine if a value is a Buffer
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Buffer, otherwise false
+   */
 function isBuffer(val) {
-  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
-    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor) &&
+  typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
 }
 
 /**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */
+   * Determine if a value is an ArrayBuffer
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+   */
 function isArrayBuffer(val) {
   return toString.call(val) === '[object ArrayBuffer]';
 }
 
 /**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */
+   * Determine if a value is a FormData
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is an FormData, otherwise false
+   */
 function isFormData(val) {
   return toString.call(val) === '[object FormData]';
 }
 
 /**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */
+   * Determine if a value is a view on an ArrayBuffer
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+   */
 function isArrayBufferView(val) {
   var result;
-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+  if (typeof ArrayBuffer !== 'undefined' && ArrayBuffer.isView) {
     result = ArrayBuffer.isView(val);
   } else {
-    result = (val) && (val.buffer) && (isArrayBuffer(val.buffer));
+    result = val && val.buffer && isArrayBuffer(val.buffer);
   }
   return result;
 }
 
 /**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
+   * Determine if a value is a String
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a String, otherwise false
+   */
 function isString(val) {
   return typeof val === 'string';
 }
 
 /**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
+   * Determine if a value is a Number
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Number, otherwise false
+   */
 function isNumber(val) {
   return typeof val === 'number';
 }
 
 /**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
+   * Determine if a value is an Object
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is an Object, otherwise false
+   */
 function isObject(val) {
   return val !== null && typeof val === 'object';
 }
 
 /**
- * Determine if a value is a plain Object
- *
- * @param {Object} val The value to test
- * @return {boolean} True if value is a plain Object, otherwise false
- */
+   * Determine if a value is a plain Object
+   *
+   * @param {Object} val The value to test
+   * @return {boolean} True if value is a plain Object, otherwise false
+   */
 function isPlainObject(val) {
   if (toString.call(val) !== '[object Object]') {
     return false;
@@ -10371,114 +10286,114 @@ function isPlainObject(val) {
 }
 
 /**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
+   * Determine if a value is a Date
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Date, otherwise false
+   */
 function isDate(val) {
   return toString.call(val) === '[object Date]';
 }
 
 /**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
+   * Determine if a value is a File
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a File, otherwise false
+   */
 function isFile(val) {
   return toString.call(val) === '[object File]';
 }
 
 /**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
+   * Determine if a value is a Blob
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Blob, otherwise false
+   */
 function isBlob(val) {
   return toString.call(val) === '[object Blob]';
 }
 
 /**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */
+   * Determine if a value is a Function
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Function, otherwise false
+   */
 function isFunction(val) {
   return toString.call(val) === '[object Function]';
 }
 
 /**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */
+   * Determine if a value is a Stream
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a Stream, otherwise false
+   */
 function isStream(val) {
   return isObject(val) && isFunction(val.pipe);
 }
 
 /**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */
+   * Determine if a value is a URLSearchParams object
+   *
+   * @param {Object} val The value to test
+   * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+   */
 function isURLSearchParams(val) {
   return toString.call(val) === '[object URLSearchParams]';
 }
 
 /**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
+   * Trim excess whitespace off the beginning and end of a string
+   *
+   * @param {String} str The String to trim
+   * @returns {String} The String freed of excess whitespace
+   */
 function trim(str) {
   return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
 /**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- * nativescript
- *  navigator.product -> 'NativeScript' or 'NS'
- */
+   * Determine if we're running in a standard browser environment
+   *
+   * This allows axios to run in a web worker, and react-native.
+   * Both environments support XMLHttpRequest, but not fully standard globals.
+   *
+   * web workers:
+   *  typeof window -> undefined
+   *  typeof document -> undefined
+   *
+   * react-native:
+   *  navigator.product -> 'ReactNative'
+   * nativescript
+   *  navigator.product -> 'NativeScript' or 'NS'
+   */
 function isStandardBrowserEnv() {
   if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
-                                           navigator.product === 'NativeScript' ||
-                                           navigator.product === 'NS')) {
+  navigator.product === 'NativeScript' ||
+  navigator.product === 'NS')) {
     return false;
   }
   return (
     typeof window !== 'undefined' &&
-    typeof document !== 'undefined'
-  );
+    typeof document !== 'undefined');
+
 }
 
 /**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
+   * Iterate over an Array or an Object invoking a function for each item.
+   *
+   * If `obj` is an Array callback will be called passing
+   * the value, index, and complete array for each item.
+   *
+   * If 'obj' is an Object callback will be called passing
+   * the value, key, and complete object for each property.
+   *
+   * @param {Object|Array} obj The object to iterate
+   * @param {Function} fn The callback to invoke for each item
+   */
 function forEach(obj, fn) {
   // Don't bother if no value provided
   if (obj === null || typeof obj === 'undefined') {
@@ -10507,23 +10422,23 @@ function forEach(obj, fn) {
 }
 
 /**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge(/* obj1, obj2, obj3, ... */) {
+   * Accepts varargs expecting each argument to be an object, then
+   * immutably merges the properties of each object and returns result.
+   *
+   * When multiple objects contain the same key the later object in
+   * the arguments list will take precedence.
+   *
+   * Example:
+   *
+   * ```js
+   * var result = merge({foo: 123}, {foo: 456});
+   * console.log(result.foo); // outputs 456
+   * ```
+   *
+   * @param {Object} obj1 Object to merge
+   * @returns {Object} Result of all merge properties
+   */
+function merge() /* obj1, obj2, obj3, ... */{
   var result = {};
   function assignValue(val, key) {
     if (isPlainObject(result[key]) && isPlainObject(val)) {
@@ -10544,13 +10459,13 @@ function merge(/* obj1, obj2, obj3, ... */) {
 }
 
 /**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */
+   * Extends object a by mutably adding to it the properties of object b.
+   *
+   * @param {Object} a The object to be extended
+   * @param {Object} b The object to copy properties from
+   * @param {Object} thisArg The object to bind function to
+   * @return {Object} The resulting value of object a
+   */
 function extend(a, b, thisArg) {
   forEach(b, function assignValue(val, key) {
     if (thisArg && typeof val === 'function') {
@@ -10563,11 +10478,11 @@ function extend(a, b, thisArg) {
 }
 
 /**
- * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
- *
- * @param {string} content with BOM
- * @return {string} content value without BOM
- */
+   * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+   *
+   * @param {string} content with BOM
+   * @return {string} content value without BOM
+   */
 function stripBOM(content) {
   if (content.charCodeAt(0) === 0xFEFF) {
     content = content.slice(1);
@@ -10597,15 +10512,13 @@ module.exports = {
   merge: merge,
   extend: extend,
   trim: trim,
-  stripBOM: stripBOM
-};
-
+  stripBOM: stripBOM };
 
 /***/ }),
 /* 81 */
-/*!***********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/bind.js ***!
-  \***********************************************************************************/
+/*!*********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/bind.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10622,12 +10535,11 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-
 /***/ }),
 /* 82 */
-/*!*********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/Axios.js ***!
-  \*********************************************************************************/
+/*!*******************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/Axios.js ***!
+  \*******************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10643,23 +10555,23 @@ var validator = __webpack_require__(/*! ../helpers/validator */ 105);
 
 var validators = validator.validators;
 /**
- * Create a new instance of Axios
- *
- * @param {Object} instanceConfig The default config for the instance
- */
+                                        * Create a new instance of Axios
+                                        *
+                                        * @param {Object} instanceConfig The default config for the instance
+                                        */
 function Axios(instanceConfig) {
   this.defaults = instanceConfig;
   this.interceptors = {
     request: new InterceptorManager(),
-    response: new InterceptorManager()
-  };
+    response: new InterceptorManager() };
+
 }
 
 /**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */
+   * Dispatch a request
+   *
+   * @param {Object} config The config specific for this request (merged with this.defaults)
+   */
 Axios.prototype.request = function request(configOrUrl, config) {
   /*eslint no-param-reassign:0*/
   // Allow for axios('example/url'[, config]) a la fetch API
@@ -10687,8 +10599,8 @@ Axios.prototype.request = function request(configOrUrl, config) {
     validator.assertOptions(transitional, {
       silentJSONParsing: validators.transitional(validators.boolean),
       forcedJSONParsing: validators.transitional(validators.boolean),
-      clarifyTimeoutError: validators.transitional(validators.boolean)
-    }, false);
+      clarifyTimeoutError: validators.transitional(validators.boolean) },
+    false);
   }
 
   // filter out skipped interceptors
@@ -10759,34 +10671,33 @@ Axios.prototype.getUri = function getUri(config) {
 // Provide aliases for supported request methods
 utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
   /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, config) {
+  Axios.prototype[method] = function (url, config) {
     return this.request(mergeConfig(config || {}, {
       method: method,
       url: url,
-      data: (config || {}).data
-    }));
+      data: (config || {}).data }));
+
   };
 });
 
 utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
   /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, data, config) {
+  Axios.prototype[method] = function (url, data, config) {
     return this.request(mergeConfig(config || {}, {
       method: method,
       url: url,
-      data: data
-    }));
+      data: data }));
+
   };
 });
 
 module.exports = Axios;
 
-
 /***/ }),
 /* 83 */
-/*!***************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/buildURL.js ***!
-  \***************************************************************************************/
+/*!*************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/buildURL.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10797,21 +10708,21 @@ var utils = __webpack_require__(/*! ./../utils */ 80);
 
 function encode(val) {
   return encodeURIComponent(val).
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
+  replace(/%3A/gi, ':').
+  replace(/%24/g, '$').
+  replace(/%2C/gi, ',').
+  replace(/%20/g, '+').
+  replace(/%5B/gi, '[').
+  replace(/%5D/gi, ']');
 }
 
 /**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */
+   * Build a URL by appending params to the end
+   *
+   * @param {string} url The base of the url (e.g., http://www.google.com)
+   * @param {object} [params] The params to be appended
+   * @returns {string} The formatted url
+   */
 module.exports = function buildURL(url, params, paramsSerializer) {
   /*eslint no-param-reassign:0*/
   if (!params) {
@@ -10862,12 +10773,11 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-
 /***/ }),
 /* 84 */
-/*!**********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/InterceptorManager.js ***!
-  \**********************************************************************************************/
+/*!********************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/InterceptorManager.js ***!
+  \********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10881,28 +10791,28 @@ function InterceptorManager() {
 }
 
 /**
- * Add a new interceptor to the stack
- *
- * @param {Function} fulfilled The function to handle `then` for a `Promise`
- * @param {Function} rejected The function to handle `reject` for a `Promise`
- *
- * @return {Number} An ID used to remove interceptor later
- */
+   * Add a new interceptor to the stack
+   *
+   * @param {Function} fulfilled The function to handle `then` for a `Promise`
+   * @param {Function} rejected The function to handle `reject` for a `Promise`
+   *
+   * @return {Number} An ID used to remove interceptor later
+   */
 InterceptorManager.prototype.use = function use(fulfilled, rejected, options) {
   this.handlers.push({
     fulfilled: fulfilled,
     rejected: rejected,
     synchronous: options ? options.synchronous : false,
-    runWhen: options ? options.runWhen : null
-  });
+    runWhen: options ? options.runWhen : null });
+
   return this.handlers.length - 1;
 };
 
 /**
- * Remove an interceptor from the stack
- *
- * @param {Number} id The ID that was returned by `use`
- */
+    * Remove an interceptor from the stack
+    *
+    * @param {Number} id The ID that was returned by `use`
+    */
 InterceptorManager.prototype.eject = function eject(id) {
   if (this.handlers[id]) {
     this.handlers[id] = null;
@@ -10910,13 +10820,13 @@ InterceptorManager.prototype.eject = function eject(id) {
 };
 
 /**
- * Iterate over all the registered interceptors
- *
- * This method is particularly useful for skipping over any
- * interceptors that may have become `null` calling `eject`.
- *
- * @param {Function} fn The function to call for each interceptor
- */
+    * Iterate over all the registered interceptors
+    *
+    * This method is particularly useful for skipping over any
+    * interceptors that may have become `null` calling `eject`.
+    *
+    * @param {Function} fn The function to call for each interceptor
+    */
 InterceptorManager.prototype.forEach = function forEach(fn) {
   utils.forEach(this.handlers, function forEachHandler(h) {
     if (h !== null) {
@@ -10927,12 +10837,11 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-
 /***/ }),
 /* 85 */
-/*!*******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/dispatchRequest.js ***!
-  \*******************************************************************************************/
+/*!*****************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/dispatchRequest.js ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10946,8 +10855,8 @@ var defaults = __webpack_require__(/*! ../defaults */ 87);
 var Cancel = __webpack_require__(/*! ../cancel/Cancel */ 102);
 
 /**
- * Throws a `Cancel` if cancellation has been requested.
- */
+                                           * Throws a `Cancel` if cancellation has been requested.
+                                           */
 function throwIfCancellationRequested(config) {
   if (config.cancelToken) {
     config.cancelToken.throwIfRequested();
@@ -10959,11 +10868,11 @@ function throwIfCancellationRequested(config) {
 }
 
 /**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */
+   * Dispatch a request to the server using the configured adapter.
+   *
+   * @param {object} config The config that is to be used for the request
+   * @returns {Promise} The Promise to be fulfilled
+   */
 module.exports = function dispatchRequest(config) {
   throwIfCancellationRequested(config);
 
@@ -10972,25 +10881,25 @@ module.exports = function dispatchRequest(config) {
 
   // Transform request data
   config.data = transformData.call(
-    config,
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
+  config,
+  config.data,
+  config.headers,
+  config.transformRequest);
+
 
   // Flatten headers
   config.headers = utils.merge(
-    config.headers.common || {},
-    config.headers[config.method] || {},
-    config.headers
-  );
+  config.headers.common || {},
+  config.headers[config.method] || {},
+  config.headers);
+
 
   utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
+  ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+  function cleanHeaderConfig(method) {
+    delete config.headers[method];
+  });
+
 
   var adapter = config.adapter || defaults.adapter;
 
@@ -10999,11 +10908,11 @@ module.exports = function dispatchRequest(config) {
 
     // Transform response data
     response.data = transformData.call(
-      config,
-      response.data,
-      response.headers,
-      config.transformResponse
-    );
+    config,
+    response.data,
+    response.headers,
+    config.transformResponse);
+
 
     return response;
   }, function onAdapterRejection(reason) {
@@ -11013,11 +10922,11 @@ module.exports = function dispatchRequest(config) {
       // Transform response data
       if (reason && reason.response) {
         reason.response.data = transformData.call(
-          config,
-          reason.response.data,
-          reason.response.headers,
-          config.transformResponse
-        );
+        config,
+        reason.response.data,
+        reason.response.headers,
+        config.transformResponse);
+
       }
     }
 
@@ -11025,12 +10934,11 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-
 /***/ }),
 /* 86 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/transformData.js ***!
-  \*****************************************************************************************/
+/*!***************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/transformData.js ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11041,13 +10949,13 @@ var utils = __webpack_require__(/*! ./../utils */ 80);
 var defaults = __webpack_require__(/*! ../defaults */ 87);
 
 /**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
+                                        * Transform the data for a request or a response
+                                        *
+                                        * @param {Object|String} data The data to be transformed
+                                        * @param {Array} headers The headers for the request or response
+                                        * @param {Array|Function} fns A single function or Array of functions
+                                        * @returns {*} The resulting transformed data
+                                        */
 module.exports = function transformData(data, headers, fns) {
   var context = this || defaults;
   /*eslint no-param-reassign:0*/
@@ -11058,12 +10966,11 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-
 /***/ }),
 /* 87 */
-/*!*************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/defaults/index.js ***!
-  \*************************************************************************************/
+/*!***********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/defaults/index.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11076,8 +10983,8 @@ var enhanceError = __webpack_require__(/*! ../core/enhanceError */ 91);
 var transitionalDefaults = __webpack_require__(/*! ./transitional */ 92);
 
 var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
+  'Content-Type': 'application/x-www-form-urlencoded' };
+
 
 function setContentTypeIfUnset(headers, value) {
   if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
@@ -11123,12 +11030,12 @@ var defaults = {
     normalizeHeaderName(headers, 'Content-Type');
 
     if (utils.isFormData(data) ||
-      utils.isArrayBuffer(data) ||
-      utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
-    ) {
+    utils.isArrayBuffer(data) ||
+    utils.isBuffer(data) ||
+    utils.isStream(data) ||
+    utils.isFile(data) ||
+    utils.isBlob(data))
+    {
       return data;
     }
     if (utils.isArrayBufferView(data)) {
@@ -11138,7 +11045,7 @@ var defaults = {
       setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
       return data.toString();
     }
-    if (utils.isObject(data) || (headers && headers['Content-Type'] === 'application/json')) {
+    if (utils.isObject(data) || headers && headers['Content-Type'] === 'application/json') {
       setContentTypeIfUnset(headers, 'application/json');
       return stringifySafely(data);
     }
@@ -11151,7 +11058,7 @@ var defaults = {
     var forcedJSONParsing = transitional && transitional.forcedJSONParsing;
     var strictJSONParsing = !silentJSONParsing && this.responseType === 'json';
 
-    if (strictJSONParsing || (forcedJSONParsing && utils.isString(data) && data.length)) {
+    if (strictJSONParsing || forcedJSONParsing && utils.isString(data) && data.length) {
       try {
         return JSON.parse(data);
       } catch (e) {
@@ -11168,9 +11075,9 @@ var defaults = {
   }],
 
   /**
-   * A timeout in milliseconds to abort a request. If set to 0 (default) a
-   * timeout is not created.
-   */
+       * A timeout in milliseconds to abort a request. If set to 0 (default) a
+       * timeout is not created.
+       */
   timeout: 0,
 
   xsrfCookieName: 'XSRF-TOKEN',
@@ -11185,10 +11092,10 @@ var defaults = {
 
   headers: {
     common: {
-      'Accept': 'application/json, text/plain, */*'
-    }
-  }
-};
+      'Accept': 'application/json, text/plain, */*' } } };
+
+
+
 
 utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
   defaults.headers[method] = {};
@@ -11199,8 +11106,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 });
 
 module.exports = defaults;
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/node-libs-browser/mock/process.js */ 88)))
 
 /***/ }),
 /* 88 */
@@ -11561,9 +11467,9 @@ var substr = 'ab'.substr(-1) === 'b'
 
 /***/ }),
 /* 90 */
-/*!**************************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
-  \**************************************************************************************************/
+/*!************************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/normalizeHeaderName.js ***!
+  \************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11581,12 +11487,11 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-
 /***/ }),
 /* 91 */
-/*!****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/enhanceError.js ***!
-  \****************************************************************************************/
+/*!**************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/enhanceError.js ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11594,15 +11499,15 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */
+               * Update an Error with the specified config, error code, and response.
+               *
+               * @param {Error} error The error to update.
+               * @param {Object} config The config.
+               * @param {string} [code] The error code (for example, 'ECONNABORTED').
+               * @param {Object} [request] The request.
+               * @param {Object} [response] The response.
+               * @returns {Error} The error.
+               */
 module.exports = function enhanceError(error, config, code, request, response) {
   error.config = config;
   if (code) {
@@ -11629,18 +11534,17 @@ module.exports = function enhanceError(error, config, code, request, response) {
       // Axios
       config: this.config,
       code: this.code,
-      status: this.response && this.response.status ? this.response.status : null
-    };
+      status: this.response && this.response.status ? this.response.status : null };
+
   };
   return error;
 };
 
-
 /***/ }),
 /* 92 */
-/*!********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/defaults/transitional.js ***!
-  \********************************************************************************************/
+/*!******************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/defaults/transitional.js ***!
+  \******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11650,15 +11554,13 @@ module.exports = function enhanceError(error, config, code, request, response) {
 module.exports = {
   silentJSONParsing: true,
   forcedJSONParsing: true,
-  clarifyTimeoutError: false
-};
-
+  clarifyTimeoutError: false };
 
 /***/ }),
 /* 93 */
-/*!***********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/adapters/xhr.js ***!
-  \***********************************************************************************/
+/*!*********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/adapters/xhr.js ***!
+  \*********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11717,16 +11619,16 @@ module.exports = function xhrAdapter(config) {
       }
       // Prepare the response
       var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !responseType || responseType === 'text' ||  responseType === 'json' ?
-        request.responseText : request.response;
+      var responseData = !responseType || responseType === 'text' || responseType === 'json' ?
+      request.responseText : request.response;
       var response = {
         data: responseData,
         status: request.status,
         statusText: request.statusText,
         headers: responseHeaders,
         config: config,
-        request: request
-      };
+        request: request };
+
 
       settle(function _resolve(value) {
         resolve(value);
@@ -11793,10 +11695,10 @@ module.exports = function xhrAdapter(config) {
         timeoutErrorMessage = config.timeoutErrorMessage;
       }
       reject(createError(
-        timeoutErrorMessage,
-        config,
-        transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
-        request));
+      timeoutErrorMessage,
+      config,
+      transitional.clarifyTimeoutError ? 'ETIMEDOUT' : 'ECONNABORTED',
+      request));
 
       // Clean up request
       request = null;
@@ -11808,8 +11710,8 @@ module.exports = function xhrAdapter(config) {
     if (utils.isStandardBrowserEnv()) {
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
-        cookies.read(config.xsrfCookieName) :
-        undefined;
+      cookies.read(config.xsrfCookieName) :
+      undefined;
 
       if (xsrfValue) {
         requestHeaders[config.xsrfHeaderName] = xsrfValue;
@@ -11852,11 +11754,11 @@ module.exports = function xhrAdapter(config) {
     if (config.cancelToken || config.signal) {
       // Handle cancellation
       // eslint-disable-next-line func-names
-      onCanceled = function(cancel) {
+      onCanceled = function onCanceled(cancel) {
         if (!request) {
           return;
         }
-        reject(!cancel || (cancel && cancel.type) ? new Cancel('canceled') : cancel);
+        reject(!cancel || cancel && cancel.type ? new Cancel('canceled') : cancel);
         request.abort();
         request = null;
       };
@@ -11876,12 +11778,11 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-
 /***/ }),
 /* 94 */
-/*!**********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/settle.js ***!
-  \**********************************************************************************/
+/*!********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/settle.js ***!
+  \********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11891,33 +11792,32 @@ module.exports = function xhrAdapter(config) {
 var createError = __webpack_require__(/*! ./createError */ 95);
 
 /**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
+                                             * Resolve or reject a Promise based on response status.
+                                             *
+                                             * @param {Function} resolve A function that resolves the promise.
+                                             * @param {Function} reject A function that rejects the promise.
+                                             * @param {object} response The response.
+                                             */
 module.exports = function settle(resolve, reject, response) {
   var validateStatus = response.config.validateStatus;
   if (!response.status || !validateStatus || validateStatus(response.status)) {
     resolve(response);
   } else {
     reject(createError(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
+    'Request failed with status code ' + response.status,
+    response.config,
+    null,
+    response.request,
+    response));
+
   }
 };
 
-
 /***/ }),
 /* 95 */
-/*!***************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/createError.js ***!
-  \***************************************************************************************/
+/*!*************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/createError.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11927,26 +11827,25 @@ module.exports = function settle(resolve, reject, response) {
 var enhanceError = __webpack_require__(/*! ./enhanceError */ 91);
 
 /**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
- */
+                                               * Create an Error with the specified message, config, error code, request and response.
+                                               *
+                                               * @param {string} message The error message.
+                                               * @param {Object} config The config.
+                                               * @param {string} [code] The error code (for example, 'ECONNABORTED').
+                                               * @param {Object} [request] The request.
+                                               * @param {Object} [response] The response.
+                                               * @returns {Error} The created error.
+                                               */
 module.exports = function createError(message, config, code, request, response) {
   var error = new Error(message);
   return enhanceError(error, config, code, request, response);
 };
 
-
 /***/ }),
 /* 96 */
-/*!**************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/cookies.js ***!
-  \**************************************************************************************/
+/*!************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/cookies.js ***!
+  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11955,62 +11854,60 @@ module.exports = function createError(message, config, code, request, response) 
 
 var utils = __webpack_require__(/*! ./../utils */ 80);
 
-module.exports = (
-  utils.isStandardBrowserEnv() ?
+module.exports =
+utils.isStandardBrowserEnv() ?
 
-  // Standard browser envs support document.cookie
-    (function standardBrowserEnv() {
-      return {
-        write: function write(name, value, expires, path, domain, secure) {
-          var cookie = [];
-          cookie.push(name + '=' + encodeURIComponent(value));
+// Standard browser envs support document.cookie
+function standardBrowserEnv() {
+  return {
+    write: function write(name, value, expires, path, domain, secure) {
+      var cookie = [];
+      cookie.push(name + '=' + encodeURIComponent(value));
 
-          if (utils.isNumber(expires)) {
-            cookie.push('expires=' + new Date(expires).toGMTString());
-          }
+      if (utils.isNumber(expires)) {
+        cookie.push('expires=' + new Date(expires).toGMTString());
+      }
 
-          if (utils.isString(path)) {
-            cookie.push('path=' + path);
-          }
+      if (utils.isString(path)) {
+        cookie.push('path=' + path);
+      }
 
-          if (utils.isString(domain)) {
-            cookie.push('domain=' + domain);
-          }
+      if (utils.isString(domain)) {
+        cookie.push('domain=' + domain);
+      }
 
-          if (secure === true) {
-            cookie.push('secure');
-          }
+      if (secure === true) {
+        cookie.push('secure');
+      }
 
-          document.cookie = cookie.join('; ');
-        },
+      document.cookie = cookie.join('; ');
+    },
 
-        read: function read(name) {
-          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-          return (match ? decodeURIComponent(match[3]) : null);
-        },
+    read: function read(name) {
+      var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+      return match ? decodeURIComponent(match[3]) : null;
+    },
 
-        remove: function remove(name) {
-          this.write(name, '', Date.now() - 86400000);
-        }
-      };
-    })() :
+    remove: function remove(name) {
+      this.write(name, '', Date.now() - 86400000);
+    } };
 
-  // Non standard browser env (web workers, react-native) lack needed support.
-    (function nonStandardBrowserEnv() {
-      return {
-        write: function write() {},
-        read: function read() { return null; },
-        remove: function remove() {}
-      };
-    })()
-);
+}() :
 
+// Non standard browser env (web workers, react-native) lack needed support.
+function nonStandardBrowserEnv() {
+  return {
+    write: function write() {},
+    read: function read() {return null;},
+    remove: function remove() {} };
+
+}();
 
 /***/ }),
 /* 97 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/buildFullPath.js ***!
-  \*****************************************************************************************/
+/*!***************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/buildFullPath.js ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12021,14 +11918,14 @@ var isAbsoluteURL = __webpack_require__(/*! ../helpers/isAbsoluteURL */ 98);
 var combineURLs = __webpack_require__(/*! ../helpers/combineURLs */ 99);
 
 /**
- * Creates a new URL by combining the baseURL with the requestedURL,
- * only when the requestedURL is not already an absolute URL.
- * If the requestURL is absolute, this function returns the requestedURL untouched.
- *
- * @param {string} baseURL The base URL
- * @param {string} requestedURL Absolute or relative URL to combine
- * @returns {string} The combined full path
- */
+                                                      * Creates a new URL by combining the baseURL with the requestedURL,
+                                                      * only when the requestedURL is not already an absolute URL.
+                                                      * If the requestURL is absolute, this function returns the requestedURL untouched.
+                                                      *
+                                                      * @param {string} baseURL The base URL
+                                                      * @param {string} requestedURL Absolute or relative URL to combine
+                                                      * @returns {string} The combined full path
+                                                      */
 module.exports = function buildFullPath(baseURL, requestedURL) {
   if (baseURL && !isAbsoluteURL(requestedURL)) {
     return combineURLs(baseURL, requestedURL);
@@ -12036,12 +11933,11 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-
 /***/ }),
 /* 98 */
-/*!********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
-  \********************************************************************************************/
+/*!******************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/isAbsoluteURL.js ***!
+  \******************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12049,11 +11945,11 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
 
 
 /**
- * Determines whether the specified URL is absolute
- *
- * @param {string} url The URL to test
- * @returns {boolean} True if the specified URL is absolute, otherwise false
- */
+               * Determines whether the specified URL is absolute
+               *
+               * @param {string} url The URL to test
+               * @returns {boolean} True if the specified URL is absolute, otherwise false
+               */
 module.exports = function isAbsoluteURL(url) {
   // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
   // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
@@ -12061,12 +11957,11 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 };
 
-
 /***/ }),
 /* 99 */
-/*!******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/combineURLs.js ***!
-  \******************************************************************************************/
+/*!****************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/combineURLs.js ***!
+  \****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12074,24 +11969,23 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
+               * Creates a new URL by combining the specified URLs
+               *
+               * @param {string} baseURL The base URL
+               * @param {string} relativeURL The relative URL
+               * @returns {string} The combined URL
+               */
 module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
+  return relativeURL ?
+  baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '') :
+  baseURL;
 };
-
 
 /***/ }),
 /* 100 */
-/*!*******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/parseHeaders.js ***!
-  \*******************************************************************************************/
+/*!*****************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/parseHeaders.js ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12103,32 +11997,32 @@ var utils = __webpack_require__(/*! ./../utils */ 80);
 // Headers whose duplicates are ignored by node
 // c.f. https://nodejs.org/api/http.html#http_message_headers
 var ignoreDuplicateOf = [
-  'age', 'authorization', 'content-length', 'content-type', 'etag',
-  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
-  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
-  'referer', 'retry-after', 'user-agent'
-];
+'age', 'authorization', 'content-length', 'content-type', 'etag',
+'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+'referer', 'retry-after', 'user-agent'];
+
 
 /**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */
+                                          * Parse headers into an object
+                                          *
+                                          * ```
+                                          * Date: Wed, 27 Aug 2014 08:58:49 GMT
+                                          * Content-Type: application/json
+                                          * Connection: keep-alive
+                                          * Transfer-Encoding: chunked
+                                          * ```
+                                          *
+                                          * @param {String} headers Headers needing to be parsed
+                                          * @returns {Object} Headers parsed into an object
+                                          */
 module.exports = function parseHeaders(headers) {
   var parsed = {};
   var key;
   var val;
   var i;
 
-  if (!headers) { return parsed; }
+  if (!headers) {return parsed;}
 
   utils.forEach(headers.split('\n'), function parser(line) {
     i = line.indexOf(':');
@@ -12150,12 +12044,11 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-
 /***/ }),
 /* 101 */
-/*!**********************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
-  \**********************************************************************************************/
+/*!********************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/isURLSameOrigin.js ***!
+  \********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12164,77 +12057,75 @@ module.exports = function parseHeaders(headers) {
 
 var utils = __webpack_require__(/*! ./../utils */ 80);
 
-module.exports = (
-  utils.isStandardBrowserEnv() ?
+module.exports =
+utils.isStandardBrowserEnv() ?
 
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-    (function standardBrowserEnv() {
-      var msie = /(msie|trident)/i.test(navigator.userAgent);
-      var urlParsingNode = document.createElement('a');
-      var originURL;
+// Standard browser envs have full support of the APIs needed to test
+// whether the request URL is of the same origin as current location.
+function standardBrowserEnv() {
+  var msie = /(msie|trident)/i.test(navigator.userAgent);
+  var urlParsingNode = document.createElement('a');
+  var originURL;
 
-      /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-      function resolveURL(url) {
-        var href = url;
+  /**
+                 * Parse a URL to discover it's components
+                 *
+                 * @param {String} url The URL to be parsed
+                 * @returns {Object}
+                 */
+  function resolveURL(url) {
+    var href = url;
 
-        if (msie) {
-        // IE needs attribute set twice to normalize properties
-          urlParsingNode.setAttribute('href', href);
-          href = urlParsingNode.href;
-        }
+    if (msie) {
+      // IE needs attribute set twice to normalize properties
+      urlParsingNode.setAttribute('href', href);
+      href = urlParsingNode.href;
+    }
 
-        urlParsingNode.setAttribute('href', href);
+    urlParsingNode.setAttribute('href', href);
 
-        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-        return {
-          href: urlParsingNode.href,
-          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-          host: urlParsingNode.host,
-          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-          hostname: urlParsingNode.hostname,
-          port: urlParsingNode.port,
-          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
-            urlParsingNode.pathname :
-            '/' + urlParsingNode.pathname
-        };
-      }
+    // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+    return {
+      href: urlParsingNode.href,
+      protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+      host: urlParsingNode.host,
+      search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+      hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+      hostname: urlParsingNode.hostname,
+      port: urlParsingNode.port,
+      pathname: urlParsingNode.pathname.charAt(0) === '/' ?
+      urlParsingNode.pathname :
+      '/' + urlParsingNode.pathname };
 
-      originURL = resolveURL(window.location.href);
+  }
 
-      /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */
-      return function isURLSameOrigin(requestURL) {
-        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
-        return (parsed.protocol === originURL.protocol &&
-            parsed.host === originURL.host);
-      };
-    })() :
+  originURL = resolveURL(window.location.href);
 
-  // Non standard browser envs (web workers, react-native) lack needed support.
-    (function nonStandardBrowserEnv() {
-      return function isURLSameOrigin() {
-        return true;
-      };
-    })()
-);
+  /**
+                                                * Determine if a URL shares the same origin as the current location
+                                                *
+                                                * @param {String} requestURL The URL to test
+                                                * @returns {boolean} True if URL shares the same origin, otherwise false
+                                                */
+  return function isURLSameOrigin(requestURL) {
+    var parsed = utils.isString(requestURL) ? resolveURL(requestURL) : requestURL;
+    return parsed.protocol === originURL.protocol &&
+    parsed.host === originURL.host;
+  };
+}() :
 
+// Non standard browser envs (web workers, react-native) lack needed support.
+function nonStandardBrowserEnv() {
+  return function isURLSameOrigin() {
+    return true;
+  };
+}();
 
 /***/ }),
 /* 102 */
-/*!************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/cancel/Cancel.js ***!
-  \************************************************************************************/
+/*!**********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/cancel/Cancel.js ***!
+  \**********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12242,11 +12133,11 @@ module.exports = (
 
 
 /**
- * A `Cancel` is an object that is thrown when an operation is canceled.
- *
- * @class
- * @param {string=} message The message.
- */
+               * A `Cancel` is an object that is thrown when an operation is canceled.
+               *
+               * @class
+               * @param {string=} message The message.
+               */
 function Cancel(message) {
   this.message = message;
 }
@@ -12259,12 +12150,11 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-
 /***/ }),
 /* 103 */
-/*!**************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/cancel/isCancel.js ***!
-  \**************************************************************************************/
+/*!************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/cancel/isCancel.js ***!
+  \************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12275,12 +12165,11 @@ module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-
 /***/ }),
 /* 104 */
-/*!***************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/core/mergeConfig.js ***!
-  \***************************************************************************************/
+/*!*************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/core/mergeConfig.js ***!
+  \*************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12290,13 +12179,13 @@ module.exports = function isCancel(value) {
 var utils = __webpack_require__(/*! ../utils */ 80);
 
 /**
- * Config-specific merge-function which creates a new config-object
- * by merging two configuration objects together.
- *
- * @param {Object} config1
- * @param {Object} config2
- * @returns {Object} New object resulting from merging config2 to config1
- */
+                                  * Config-specific merge-function which creates a new config-object
+                                  * by merging two configuration objects together.
+                                  *
+                                  * @param {Object} config1
+                                  * @param {Object} config2
+                                  * @returns {Object} New object resulting from merging config2 to config1
+                                  */
 module.exports = function mergeConfig(config1, config2) {
   // eslint-disable-next-line no-param-reassign
   config2 = config2 || {};
@@ -12373,24 +12262,23 @@ module.exports = function mergeConfig(config1, config2) {
     'cancelToken': defaultToConfig2,
     'socketPath': defaultToConfig2,
     'responseEncoding': defaultToConfig2,
-    'validateStatus': mergeDirectKeys
-  };
+    'validateStatus': mergeDirectKeys };
+
 
   utils.forEach(Object.keys(config1).concat(Object.keys(config2)), function computeConfigValue(prop) {
     var merge = mergeMap[prop] || mergeDeepProperties;
     var configValue = merge(prop);
-    (utils.isUndefined(configValue) && merge !== mergeDirectKeys) || (config[prop] = configValue);
+    utils.isUndefined(configValue) && merge !== mergeDirectKeys || (config[prop] = configValue);
   });
 
   return config;
 };
 
-
 /***/ }),
 /* 105 */
-/*!****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/validator.js ***!
-  \****************************************************************************************/
+/*!**************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/validator.js ***!
+  \**************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12402,7 +12290,7 @@ var VERSION = __webpack_require__(/*! ../env/data */ 106).version;
 var validators = {};
 
 // eslint-disable-next-line func-names
-['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function(type, i) {
+['object', 'boolean', 'number', 'function', 'string', 'symbol'].forEach(function (type, i) {
   validators[type] = function validator(thing) {
     return typeof thing === type || 'a' + (i < 1 ? 'n ' : ' ') + type;
   };
@@ -12411,19 +12299,19 @@ var validators = {};
 var deprecatedWarnings = {};
 
 /**
- * Transitional option validator
- * @param {function|boolean?} validator - set to false if the transitional option has been removed
- * @param {string?} version - deprecated version / removed since version
- * @param {string?} message - some message with additional info
- * @returns {function}
- */
+                              * Transitional option validator
+                              * @param {function|boolean?} validator - set to false if the transitional option has been removed
+                              * @param {string?} version - deprecated version / removed since version
+                              * @param {string?} message - some message with additional info
+                              * @returns {function}
+                              */
 validators.transitional = function transitional(validator, version, message) {
   function formatMessage(opt, desc) {
     return '[Axios v' + VERSION + '] Transitional option \'' + opt + '\'' + desc + (message ? '. ' + message : '');
   }
 
   // eslint-disable-next-line func-names
-  return function(value, opt, opts) {
+  return function (value, opt, opts) {
     if (validator === false) {
       throw new Error(formatMessage(opt, ' has been removed' + (version ? ' in ' + version : '')));
     }
@@ -12432,11 +12320,11 @@ validators.transitional = function transitional(validator, version, message) {
       deprecatedWarnings[opt] = true;
       // eslint-disable-next-line no-console
       console.warn(
-        formatMessage(
-          opt,
-          ' has been deprecated since v' + version + ' and will be removed in the near future'
-        )
-      );
+      formatMessage(
+      opt,
+      ' has been deprecated since v' + version + ' and will be removed in the near future'));
+
+
     }
 
     return validator ? validator(value, opt, opts) : true;
@@ -12444,11 +12332,11 @@ validators.transitional = function transitional(validator, version, message) {
 };
 
 /**
- * Assert object's properties type
- * @param {object} options
- * @param {object} schema
- * @param {boolean?} allowUnknown
- */
+    * Assert object's properties type
+    * @param {object} options
+    * @param {object} schema
+    * @param {boolean?} allowUnknown
+    */
 
 function assertOptions(options, schema, allowUnknown) {
   if (typeof options !== 'object') {
@@ -12475,27 +12363,24 @@ function assertOptions(options, schema, allowUnknown) {
 
 module.exports = {
   assertOptions: assertOptions,
-  validators: validators
-};
-
+  validators: validators };
 
 /***/ }),
 /* 106 */
-/*!*******************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/env/data.js ***!
-  \*******************************************************************************/
+/*!*****************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/env/data.js ***!
+  \*****************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
 module.exports = {
-  "version": "0.26.1"
-};
+  "version": "0.26.1" };
 
 /***/ }),
 /* 107 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/cancel/CancelToken.js ***!
-  \*****************************************************************************************/
+/*!***************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/cancel/CancelToken.js ***!
+  \***************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12505,11 +12390,11 @@ module.exports = {
 var Cancel = __webpack_require__(/*! ./Cancel */ 102);
 
 /**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */
+                                   * A `CancelToken` is an object that can be used to request cancellation of an operation.
+                                   *
+                                   * @class
+                                   * @param {Function} executor The executor function.
+                                   */
 function CancelToken(executor) {
   if (typeof executor !== 'function') {
     throw new TypeError('executor must be a function.');
@@ -12524,7 +12409,7 @@ function CancelToken(executor) {
   var token = this;
 
   // eslint-disable-next-line func-names
-  this.promise.then(function(cancel) {
+  this.promise.then(function (cancel) {
     if (!token._listeners) return;
 
     var i;
@@ -12537,10 +12422,10 @@ function CancelToken(executor) {
   });
 
   // eslint-disable-next-line func-names
-  this.promise.then = function(onfulfilled) {
+  this.promise.then = function (onfulfilled) {
     var _resolve;
     // eslint-disable-next-line func-names
-    var promise = new Promise(function(resolve) {
+    var promise = new Promise(function (resolve) {
       token.subscribe(resolve);
       _resolve = resolve;
     }).then(onfulfilled);
@@ -12564,8 +12449,8 @@ function CancelToken(executor) {
 }
 
 /**
- * Throws a `Cancel` if cancellation has been requested.
- */
+   * Throws a `Cancel` if cancellation has been requested.
+   */
 CancelToken.prototype.throwIfRequested = function throwIfRequested() {
   if (this.reason) {
     throw this.reason;
@@ -12573,8 +12458,8 @@ CancelToken.prototype.throwIfRequested = function throwIfRequested() {
 };
 
 /**
- * Subscribe to the cancel signal
- */
+    * Subscribe to the cancel signal
+    */
 
 CancelToken.prototype.subscribe = function subscribe(listener) {
   if (this.reason) {
@@ -12590,8 +12475,8 @@ CancelToken.prototype.subscribe = function subscribe(listener) {
 };
 
 /**
- * Unsubscribe from the cancel signal
- */
+    * Unsubscribe from the cancel signal
+    */
 
 CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
   if (!this._listeners) {
@@ -12604,9 +12489,9 @@ CancelToken.prototype.unsubscribe = function unsubscribe(listener) {
 };
 
 /**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */
+    * Returns an object that contains a new `CancelToken` and a function that, when called,
+    * cancels the `CancelToken`.
+    */
 CancelToken.source = function source() {
   var cancel;
   var token = new CancelToken(function executor(c) {
@@ -12614,18 +12499,17 @@ CancelToken.source = function source() {
   });
   return {
     token: token,
-    cancel: cancel
-  };
+    cancel: cancel };
+
 };
 
 module.exports = CancelToken;
 
-
 /***/ }),
 /* 108 */
-/*!*************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/spread.js ***!
-  \*************************************************************************************/
+/*!***********************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/spread.js ***!
+  \***********************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12633,37 +12517,36 @@ module.exports = CancelToken;
 
 
 /**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */
+               * Syntactic sugar for invoking a function and expanding an array for arguments.
+               *
+               * Common use case would be to use `Function.prototype.apply`.
+               *
+               *  ```js
+               *  function f(x, y, z) {}
+               *  var args = [1, 2, 3];
+               *  f.apply(null, args);
+               *  ```
+               *
+               * With `spread` this example can be re-written.
+               *
+               *  ```js
+               *  spread(function(x, y, z) {})([1, 2, 3]);
+               *  ```
+               *
+               * @param {Function} callback
+               * @returns {Function}
+               */
 module.exports = function spread(callback) {
   return function wrap(arr) {
     return callback.apply(null, arr);
   };
 };
 
-
 /***/ }),
 /* 109 */
-/*!*******************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/axios/lib/helpers/isAxiosError.js ***!
-  \*******************************************************************************************/
+/*!*****************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \*****************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12673,19 +12556,538 @@ module.exports = function spread(callback) {
 var utils = __webpack_require__(/*! ./../utils */ 80);
 
 /**
- * Determines whether the payload is an error thrown by Axios
- *
- * @param {*} payload The value to test
- * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
- */
+                                    * Determines whether the payload is an error thrown by Axios
+                                    *
+                                    * @param {*} payload The value to test
+                                    * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+                                    */
 module.exports = function isAxiosError(payload) {
-  return utils.isObject(payload) && (payload.isAxiosError === true);
+  return utils.isObject(payload) && payload.isAxiosError === true;
 };
 
+/***/ }),
+/* 110 */
+/*!*************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/common/formdata.js ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _mimeMap = _interopRequireDefault(__webpack_require__(/*! ./mimeMap.js */ 111));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function _toConsumableArray(arr) {return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();}function _nonIterableSpread() {throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");}function _unsupportedIterableToArray(o, minLen) {if (!o) return;if (typeof o === "string") return _arrayLikeToArray(o, minLen);var n = Object.prototype.toString.call(o).slice(8, -1);if (n === "Object" && o.constructor) n = o.constructor.name;if (n === "Map" || n === "Set") return Array.from(o);if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);}function _iterableToArray(iter) {if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);}function _arrayWithoutHoles(arr) {if (Array.isArray(arr)) return _arrayLikeToArray(arr);}function _arrayLikeToArray(arr, len) {if (len == null || len > arr.length) len = arr.length;for (var i = 0, arr2 = new Array(len); i < len; i++) {arr2[i] = arr[i];}return arr2;}
+
+function FormData() {
+  var fileManager = wx.getFileSystemManager();
+  var data = {};
+  var files = [];
+
+  this.append = function (name, value) {
+    data[name] = value;
+    return true;
+  };
+
+  this.appendFile = function (name, path, fileName) {
+    var buffer = fileManager.readFileSync(path);
+    if (Object.prototype.toString.call(buffer).indexOf("ArrayBuffer") < 0) {
+      return false;
+    }
+
+    if (!fileName) {
+      fileName = getFileNameFromPath(path);
+    }
+
+    files.push({
+      name: name,
+      buffer: buffer,
+      fileName: fileName });
+
+    return true;
+  };
+
+  this.getData = function () {return convert(data, files);};
+}
+
+function getFileNameFromPath(path) {
+  var idx = path.lastIndexOf("/");
+  return path.substr(idx + 1);
+}
+
+function convert(data, files) {
+  var boundaryKey = 'wxmpFormBoundary' + randString(); // 数据分割符，一般是随机的字符串
+  var boundary = '--' + boundaryKey;
+  var endBoundary = boundary + '--';
+
+  var postArray = [];
+  //拼接参数
+  if (data && Object.prototype.toString.call(data) == "[object Object]") {
+    for (var key in data) {
+      postArray = postArray.concat(formDataArray(boundary, key, data[key]));
+    }
+  }
+  //拼接文件
+  if (files && Object.prototype.toString.call(files) == "[object Array]") {
+    for (var i in files) {
+      var file = files[i];
+      postArray = postArray.concat(formDataArray(boundary, file.name, file.buffer, file.fileName));
+    }
+  }
+  //结尾
+  var endBoundaryArray = [];
+  endBoundaryArray.push.apply(endBoundaryArray, _toConsumableArray(endBoundary.toUtf8Bytes()));
+  postArray = postArray.concat(endBoundaryArray);
+  return {
+    contentType: 'multipart/form-data; boundary=' + boundaryKey,
+    buffer: new Uint8Array(postArray).buffer };
+
+}
+
+function randString() {
+  var res = "";
+  for (var i = 0; i < 17; i++) {
+    var n = parseInt(Math.random() * 62);
+    if (n <= 9) {
+      res += n;
+    } else if (n <= 35) {
+      res += String.fromCharCode(n + 55);
+    } else {
+      res += String.fromCharCode(n + 61);
+    }
+  }
+  return res;
+}
+
+function formDataArray(boundary, name, value, fileName) {var _dataArray, _dataArray2, _dataArray3;
+  var dataString = '';
+  var isFile = !!fileName;
+
+  dataString += boundary + '\r\n';
+  dataString += 'Content-Disposition: form-data; name="' + name + '"';
+  if (isFile) {
+    dataString += '; filename="' + fileName + '"' + '\r\n';
+    dataString += 'Content-Type: ' + getFileMime(fileName) + '\r\n\r\n';
+  } else {
+    dataString += '\r\n\r\n';
+    dataString += value;
+  }
+
+  var dataArray = [];
+  (_dataArray = dataArray).push.apply(_dataArray, _toConsumableArray(dataString.toUtf8Bytes()));
+
+  if (isFile) {
+    var fileArray = new Uint8Array(value);
+    dataArray = dataArray.concat(Array.prototype.slice.call(fileArray));
+  }
+  (_dataArray2 = dataArray).push.apply(_dataArray2, _toConsumableArray("\r".toUtf8Bytes()));
+  (_dataArray3 = dataArray).push.apply(_dataArray3, _toConsumableArray("\n".toUtf8Bytes()));
+
+  return dataArray;
+}
+
+function getFileMime(fileName) {
+  var idx = fileName.lastIndexOf(".");
+  var mime = _mimeMap.default[fileName.substr(idx)];
+  return mime ? mime : "application/octet-stream";
+}
+
+String.prototype.toUtf8Bytes = function () {
+  var str = this;
+  var bytes = [];
+  for (var i = 0; i < str.length; i++) {
+    bytes.push.apply(bytes, _toConsumableArray(str.utf8CodeAt(i)));
+    if (str.codePointAt(i) > 0xffff) {
+      i++;
+    }
+  }
+  return bytes;
+};
+
+String.prototype.utf8CodeAt = function (i) {
+  var str = this;
+  var out = [],
+  p = 0;
+  var c = str.charCodeAt(i);
+  if (c < 128) {
+    out[p++] = c;
+  } else if (c < 2048) {
+    out[p++] = c >> 6 | 192;
+    out[p++] = c & 63 | 128;
+  } else if (
+  (c & 0xFC00) == 0xD800 && i + 1 < str.length &&
+  (str.charCodeAt(i + 1) & 0xFC00) == 0xDC00) {
+    // Surrogate Pair
+    c = 0x10000 + ((c & 0x03FF) << 10) + (str.charCodeAt(++i) & 0x03FF);
+    out[p++] = c >> 18 | 240;
+    out[p++] = c >> 12 & 63 | 128;
+    out[p++] = c >> 6 & 63 | 128;
+    out[p++] = c & 63 | 128;
+  } else {
+    out[p++] = c >> 12 | 224;
+    out[p++] = c >> 6 & 63 | 128;
+    out[p++] = c & 63 | 128;
+  }
+  return out;
+};var _default =
+
+
+FormData;exports.default = _default;
 
 /***/ }),
-/* 110 */,
-/* 111 */,
+/* 111 */
+/*!************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/common/mimeMap.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _mimeMap;function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var mimeMap = (_mimeMap = {
+  "0.001": "application/x-001",
+  "0.323": "text/h323",
+  "0.907": "drawing/907",
+  ".acp": "audio/x-mei-aac",
+  ".aif": "audio/aiff",
+  ".aiff": "audio/aiff",
+  ".asa": "text/asa",
+  ".asp": "text/asp",
+  ".au": "audio/basic",
+  ".awf": "application/vnd.adobe.workflow",
+  ".bmp": "application/x-bmp",
+  ".c4t": "application/x-c4t",
+  ".cal": "application/x-cals",
+  ".cdf": "application/x-netcdf",
+  ".cel": "application/x-cel",
+  ".cg4": "application/x-g4",
+  ".cit": "application/x-cit",
+  ".cml": "text/xml",
+  ".cmx": "application/x-cmx",
+  ".crl": "application/pkix-crl",
+  ".csi": "application/x-csi",
+  ".cut": "application/x-cut",
+  ".dbm": "application/x-dbm",
+  ".dcd": "text/xml",
+  ".der": "application/x-x509-ca-cert",
+  ".dib": "application/x-dib",
+  ".doc": "application/msword",
+  ".drw": "application/x-drw",
+  ".dwf": "Model/vnd.dwf",
+  ".dwg": "application/x-dwg",
+  ".dxf": "application/x-dxf",
+  ".emf": "application/x-emf",
+  ".ent": "text/xml",
+  ".eps": "application/x-ps",
+  ".etd": "application/x-ebx",
+  ".fax": "image/fax",
+  ".fif": "application/fractals",
+  ".frm": "application/x-frm",
+  ".gbr": "application/x-gbr",
+  ".gif": "image/gif",
+  ".gp4": "application/x-gp4",
+  ".hmr": "application/x-hmr",
+  ".hpl": "application/x-hpl",
+  ".hrf": "application/x-hrf",
+  ".htc": "text/x-component",
+  ".html": "text/html",
+  ".htx": "text/html",
+  ".ico": "image/x-icon",
+  ".iff": "application/x-iff",
+  ".igs": "application/x-igs",
+  ".img": "application/x-img",
+  ".isp": "application/x-internet-signup",
+  ".java": "java/*",
+  ".jpe": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".jpg": "application/x-jpg",
+  ".jsp": "text/html",
+  ".lar": "application/x-laplayer-reg",
+  ".lavs": "audio/x-liquid-secure",
+  ".lmsff": "audio/x-la-lms",
+  ".ltr": "application/x-ltr",
+  ".m2v": "video/x-mpeg",
+  ".m4e": "video/mpeg4",
+  ".man": "application/x-troff-man",
+  ".mdb": "application/msaccess",
+  ".mfp": "application/x-shockwave-flash",
+  ".mhtml": "message/rfc822",
+  ".mid": "audio/mid",
+  ".mil": "application/x-mil",
+  ".mnd": "audio/x-musicnet-download",
+  ".mocha": "application/x-javascript",
+  ".mp1": "audio/mp1",
+  ".mp2v": "video/mpeg",
+  ".mp4": "video/mpeg4",
+  ".mpd": "application/vnd.ms-project",
+  ".mpeg": "video/mpg",
+  ".mpga": "audio/rn-mpeg",
+  ".mps": "video/x-mpeg",
+  ".mpv": "video/mpg",
+  ".mpw": "application/vnd.ms-project",
+  ".mtx": "text/xml",
+  ".net": "image/pnetvue",
+  ".nws": "message/rfc822",
+  ".out": "application/x-out",
+  ".p12": "application/x-pkcs12",
+  ".p7c": "application/pkcs7-mime",
+  ".p7r": "application/x-pkcs7-certreqresp",
+  ".pc5": "application/x-pc5",
+  ".pcl": "application/x-pcl",
+  ".pdf": "application/pdf",
+  ".pdx": "application/vnd.adobe.pdx",
+  ".pgl": "application/x-pgl",
+  ".pko": "application/vnd.ms-pki.pko",
+  ".plg": "text/html",
+  ".plt": "application/x-plt",
+  ".png": "application/x-png",
+  ".ppa": "application/vnd.ms-powerpoint",
+  ".pps": "application/vnd.ms-powerpoint",
+  ".ppt": "application/x-ppt",
+  ".prf": "application/pics-rules",
+  ".prt": "application/x-prt",
+  ".ps": "application/postscript",
+  ".pwz": "application/vnd.ms-powerpoint",
+  ".ra": "audio/vnd.rn-realaudio",
+  ".ras": "application/x-ras",
+  ".rdf": "text/xml",
+  ".red": "application/x-red",
+  ".rjs": "application/vnd.rn-realsystem-rjs",
+  ".rlc": "application/x-rlc",
+  ".rm": "application/vnd.rn-realmedia",
+  ".rmi": "audio/mid",
+  ".rmm": "audio/x-pn-realaudio",
+  ".rms": "application/vnd.rn-realmedia-secure",
+  ".rmx": "application/vnd.rn-realsystem-rmx",
+  ".rp": "image/vnd.rn-realpix",
+  ".rsml": "application/vnd.rn-rsml",
+  ".rtf": "application/msword",
+  ".rv": "video/vnd.rn-realvideo",
+  ".sat": "application/x-sat",
+  ".sdw": "application/x-sdw",
+  ".slb": "application/x-slb",
+  ".slk": "drawing/x-slk",
+  ".smil": "application/smil",
+  ".snd": "audio/basic",
+  ".sor": "text/plain",
+  ".spl": "application/futuresplash",
+  ".ssm": "application/streamingmedia",
+  ".stl": "application/vnd.ms-pki.stl",
+  ".sty": "application/x-sty",
+  ".swf": "application/x-shockwave-flash",
+  ".tg4": "application/x-tg4",
+  ".tif": "image/tiff",
+  ".tiff": "image/tiff",
+  ".top": "drawing/x-top",
+  ".tsd": "text/xml",
+  ".uin": "application/x-icq",
+  ".vcf": "text/x-vcard",
+  ".vdx": "application/vnd.visio",
+  ".vpg": "application/x-vpeg005",
+  ".vsd": "application/x-vsd",
+  ".vst": "application/vnd.visio",
+  ".vsw": "application/vnd.visio",
+  ".vtx": "application/vnd.visio",
+  ".wav": "audio/wav",
+  ".wb1": "application/x-wb1",
+  ".wb3": "application/x-wb3",
+  ".wiz": "application/msword",
+  ".wk4": "application/x-wk4",
+  ".wks": "application/x-wks",
+  ".wma": "audio/x-ms-wma",
+  ".wmf": "application/x-wmf",
+  ".wmv": "video/x-ms-wmv",
+  ".wmz": "application/x-ms-wmz",
+  ".wpd": "application/x-wpd",
+  ".wpl": "application/vnd.ms-wpl",
+  ".wr1": "application/x-wr1",
+  ".wrk": "application/x-wrk",
+  ".ws2": "application/x-ws",
+  ".wsdl": "text/xml",
+  ".xdp": "application/vnd.adobe.xdp",
+  ".xfd": "application/vnd.adobe.xfd",
+  ".xhtml": "text/html",
+  ".xls": "application/x-xls",
+  ".xml": "text/xml",
+  ".xq": "text/xml",
+  ".xquery": "text/xml",
+  ".xsl": "text/xml",
+  ".xwd": "application/x-xwd",
+  ".sis": "application/vnd.symbian.install",
+  ".x_t": "application/x-x_t",
+  ".apk": "application/vnd.android.package-archive",
+  "0.301": "application/x-301",
+  "0.906": "application/x-906",
+  ".a11": "application/x-a11",
+  ".ai": "application/postscript",
+  ".aifc": "audio/aiff",
+  ".anv": "application/x-anv",
+  ".asf": "video/x-ms-asf",
+  ".asx": "video/x-ms-asf",
+  ".avi": "video/avi",
+  ".biz": "text/xml",
+  ".bot": "application/x-bot",
+  ".c90": "application/x-c90",
+  ".cat": "application/vnd.ms-pki.seccat",
+  ".cdr": "application/x-cdr",
+  ".cer": "application/x-x509-ca-cert",
+  ".cgm": "application/x-cgm",
+  ".class": "java/*",
+  ".cmp": "application/x-cmp",
+  ".cot": "application/x-cot",
+  ".crt": "application/x-x509-ca-cert",
+  ".css": "text/css",
+  ".dbf": "application/x-dbf",
+  ".dbx": "application/x-dbx",
+  ".dcx": "application/x-dcx",
+  ".dgn": "application/x-dgn",
+  ".dll": "application/x-msdownload",
+  ".dot": "application/msword",
+  ".dtd": "text/xml" }, _defineProperty(_mimeMap, ".dwf",
+"application/x-dwf"), _defineProperty(_mimeMap,
+".dxb", "application/x-dxb"), _defineProperty(_mimeMap,
+".edn", "application/vnd.adobe.edn"), _defineProperty(_mimeMap,
+".eml", "message/rfc822"), _defineProperty(_mimeMap,
+".epi", "application/x-epi"), _defineProperty(_mimeMap, ".eps",
+"application/postscript"), _defineProperty(_mimeMap,
+".exe", "application/x-msdownload"), _defineProperty(_mimeMap,
+".fdf", "application/vnd.fdf"), _defineProperty(_mimeMap,
+".fo", "text/xml"), _defineProperty(_mimeMap,
+".g4", "application/x-g4"), _defineProperty(_mimeMap, ".tif",
+"image/tiff"), _defineProperty(_mimeMap,
+".gl2", "application/x-gl2"), _defineProperty(_mimeMap,
+".hgl", "application/x-hgl"), _defineProperty(_mimeMap,
+".hpg", "application/x-hpgl"), _defineProperty(_mimeMap,
+".hqx", "application/mac-binhex40"), _defineProperty(_mimeMap,
+".hta", "application/hta"), _defineProperty(_mimeMap,
+".htm", "text/html"), _defineProperty(_mimeMap,
+".htt", "text/webviewhtml"), _defineProperty(_mimeMap,
+".icb", "application/x-icb"), _defineProperty(_mimeMap, ".ico",
+"application/x-ico"), _defineProperty(_mimeMap,
+".ig4", "application/x-g4"), _defineProperty(_mimeMap,
+".iii", "application/x-iphone"), _defineProperty(_mimeMap,
+".ins", "application/x-internet-signup"), _defineProperty(_mimeMap,
+".IVF", "video/x-ivf"), _defineProperty(_mimeMap,
+".jfif", "image/jpeg"), _defineProperty(_mimeMap, ".jpe",
+"application/x-jpe"), _defineProperty(_mimeMap, ".jpg",
+"image/jpeg"), _defineProperty(_mimeMap,
+".js", "application/x-javascript"), _defineProperty(_mimeMap,
+".la1", "audio/x-liquid-file"), _defineProperty(_mimeMap,
+".latex", "application/x-latex"), _defineProperty(_mimeMap,
+".lbm", "application/x-lbm"), _defineProperty(_mimeMap,
+".ls", "application/x-javascript"), _defineProperty(_mimeMap,
+".m1v", "video/x-mpeg"), _defineProperty(_mimeMap,
+".m3u", "audio/mpegurl"), _defineProperty(_mimeMap,
+".mac", "application/x-mac"), _defineProperty(_mimeMap,
+".math", "text/xml"), _defineProperty(_mimeMap, ".mdb",
+"application/x-mdb"), _defineProperty(_mimeMap,
+".mht", "message/rfc822"), _defineProperty(_mimeMap,
+".mi", "application/x-mi"), _defineProperty(_mimeMap,
+".midi", "audio/mid"), _defineProperty(_mimeMap,
+".mml", "text/xml"), _defineProperty(_mimeMap,
+".mns", "audio/x-musicnet-stream"), _defineProperty(_mimeMap,
+".movie", "video/x-sgi-movie"), _defineProperty(_mimeMap,
+".mp2", "audio/mp2"), _defineProperty(_mimeMap,
+".mp3", "audio/mp3"), _defineProperty(_mimeMap,
+".mpa", "video/x-mpg"), _defineProperty(_mimeMap,
+".mpe", "video/x-mpeg"), _defineProperty(_mimeMap,
+".mpg", "video/mpg"), _defineProperty(_mimeMap,
+".mpp", "application/vnd.ms-project"), _defineProperty(_mimeMap,
+".mpt", "application/vnd.ms-project"), _defineProperty(_mimeMap,
+".mpv2", "video/mpeg"), _defineProperty(_mimeMap,
+".mpx", "application/vnd.ms-project"), _defineProperty(_mimeMap,
+".mxp", "application/x-mmxp"), _defineProperty(_mimeMap,
+".nrf", "application/x-nrf"), _defineProperty(_mimeMap,
+".odc", "text/x-ms-odc"), _defineProperty(_mimeMap,
+".p10", "application/pkcs10"), _defineProperty(_mimeMap,
+".p7b", "application/x-pkcs7-certificates"), _defineProperty(_mimeMap,
+".p7m", "application/pkcs7-mime"), _defineProperty(_mimeMap,
+".p7s", "application/pkcs7-signature"), _defineProperty(_mimeMap,
+".pci", "application/x-pci"), _defineProperty(_mimeMap,
+".pcx", "application/x-pcx"), _defineProperty(_mimeMap, ".pdf",
+"application/pdf"), _defineProperty(_mimeMap,
+".pfx", "application/x-pkcs12"), _defineProperty(_mimeMap,
+".pic", "application/x-pic"), _defineProperty(_mimeMap,
+".pl", "application/x-perl"), _defineProperty(_mimeMap,
+".pls", "audio/scpls"), _defineProperty(_mimeMap, ".png",
+"image/png"), _defineProperty(_mimeMap,
+".pot", "application/vnd.ms-powerpoint"), _defineProperty(_mimeMap,
+".ppm", "application/x-ppm"), _defineProperty(_mimeMap, ".ppt",
+"application/vnd.ms-powerpoint"), _defineProperty(_mimeMap,
+".pr", "application/x-pr"), _defineProperty(_mimeMap,
+".prn", "application/x-prn"), _defineProperty(_mimeMap, ".ps",
+"application/x-ps"), _defineProperty(_mimeMap,
+".ptn", "application/x-ptn"), _defineProperty(_mimeMap,
+".r3t", "text/vnd.rn-realtext3d"), _defineProperty(_mimeMap,
+".ram", "audio/x-pn-realaudio"), _defineProperty(_mimeMap,
+".rat", "application/rat-file"), _defineProperty(_mimeMap,
+".rec", "application/vnd.rn-recording"), _defineProperty(_mimeMap,
+".rgb", "application/x-rgb"), _defineProperty(_mimeMap,
+".rjt", "application/vnd.rn-realsystem-rjt"), _defineProperty(_mimeMap,
+".rle", "application/x-rle"), _defineProperty(_mimeMap,
+".rmf", "application/vnd.adobe.rmf"), _defineProperty(_mimeMap,
+".rmj", "application/vnd.rn-realsystem-rmj"), _defineProperty(_mimeMap,
+".rmp", "application/vnd.rn-rn_music_package"), _defineProperty(_mimeMap,
+".rmvb", "application/vnd.rn-realmedia-vbr"), _defineProperty(_mimeMap,
+".rnx", "application/vnd.rn-realplayer"), _defineProperty(_mimeMap,
+".rpm", "audio/x-pn-realaudio-plugin"), _defineProperty(_mimeMap,
+".rt", "text/vnd.rn-realtext"), _defineProperty(_mimeMap, ".rtf",
+"application/x-rtf"), _defineProperty(_mimeMap,
+".sam", "application/x-sam"), _defineProperty(_mimeMap,
+".sdp", "application/sdp"), _defineProperty(_mimeMap,
+".sit", "application/x-stuffit"), _defineProperty(_mimeMap,
+".sld", "application/x-sld"), _defineProperty(_mimeMap,
+".smi", "application/smil"), _defineProperty(_mimeMap,
+".smk", "application/x-smk"), _defineProperty(_mimeMap,
+".sol", "text/plain"), _defineProperty(_mimeMap,
+".spc", "application/x-pkcs7-certificates"), _defineProperty(_mimeMap,
+".spp", "text/xml"), _defineProperty(_mimeMap,
+".sst", "application/vnd.ms-pki.certstore"), _defineProperty(_mimeMap,
+".stm", "text/html"), _defineProperty(_mimeMap,
+".svg", "text/xml"), _defineProperty(_mimeMap,
+".tdf", "application/x-tdf"), _defineProperty(_mimeMap,
+".tga", "application/x-tga"), _defineProperty(_mimeMap, ".tif",
+"application/x-tif"), _defineProperty(_mimeMap,
+".tld", "text/xml"), _defineProperty(_mimeMap,
+".torrent", "application/x-bittorrent"), _defineProperty(_mimeMap,
+".txt", "text/plain"), _defineProperty(_mimeMap,
+".uls", "text/iuls"), _defineProperty(_mimeMap,
+".vda", "application/x-vda"), _defineProperty(_mimeMap,
+".vml", "text/xml"), _defineProperty(_mimeMap, ".vsd",
+"application/vnd.visio"), _defineProperty(_mimeMap,
+".vss", "application/vnd.visio"), _defineProperty(_mimeMap, ".vst",
+"application/x-vst"), _defineProperty(_mimeMap,
+".vsx", "application/vnd.visio"), _defineProperty(_mimeMap,
+".vxml", "text/xml"), _defineProperty(_mimeMap,
+".wax", "audio/x-ms-wax"), _defineProperty(_mimeMap,
+".wb2", "application/x-wb2"), _defineProperty(_mimeMap,
+".wbmp", "image/vnd.wap.wbmp"), _defineProperty(_mimeMap,
+".wk3", "application/x-wk3"), _defineProperty(_mimeMap,
+".wkq", "application/x-wkq"), _defineProperty(_mimeMap,
+".wm", "video/x-ms-wm"), _defineProperty(_mimeMap,
+".wmd", "application/x-ms-wmd"), _defineProperty(_mimeMap,
+".wml", "text/vnd.wap.wml"), _defineProperty(_mimeMap,
+".wmx", "video/x-ms-wmx"), _defineProperty(_mimeMap,
+".wp6", "application/x-wp6"), _defineProperty(_mimeMap,
+".wpg", "application/x-wpg"), _defineProperty(_mimeMap,
+".wq1", "application/x-wq1"), _defineProperty(_mimeMap,
+".wri", "application/x-wri"), _defineProperty(_mimeMap,
+".ws", "application/x-ws"), _defineProperty(_mimeMap,
+".wsc", "text/scriptlet"), _defineProperty(_mimeMap,
+".wvx", "video/x-ms-wvx"), _defineProperty(_mimeMap,
+".xdr", "text/xml"), _defineProperty(_mimeMap,
+".xfdf", "application/vnd.adobe.xfdf"), _defineProperty(_mimeMap, ".xls",
+"application/vnd.ms-excel"), _defineProperty(_mimeMap,
+".xlw", "application/x-xlw"), _defineProperty(_mimeMap,
+".xpl", "audio/scpls"), _defineProperty(_mimeMap,
+".xql", "text/xml"), _defineProperty(_mimeMap,
+".xsd", "text/xml"), _defineProperty(_mimeMap,
+".xslt", "text/xml"), _defineProperty(_mimeMap,
+".x_b", "application/x-x_b"), _defineProperty(_mimeMap,
+".sisx", "application/vnd.symbian.install"), _defineProperty(_mimeMap,
+".ipa", "application/vnd.iphone"), _defineProperty(_mimeMap,
+".xap", "application/x-silverlight-app"), _defineProperty(_mimeMap,
+".zip", "application/x-zip-compressed"), _mimeMap);var _default =
+
+mimeMap;exports.default = _default;
+
+/***/ }),
 /* 112 */,
 /* 113 */,
 /* 114 */,
@@ -12729,10 +13131,12 @@ module.exports = function isAxiosError(payload) {
 /* 152 */,
 /* 153 */,
 /* 154 */,
-/* 155 */
-/*!************************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/uni_modules/uni-icons/components/uni-icons/icons.js ***!
-  \************************************************************************************************/
+/* 155 */,
+/* 156 */,
+/* 157 */
+/*!**********************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/uni_modules/uni-icons/components/uni-icons/icons.js ***!
+  \**********************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -12870,8 +13274,6 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
   "shop": "\uE609" };exports.default = _default;
 
 /***/ }),
-/* 156 */,
-/* 157 */,
 /* 158 */,
 /* 159 */,
 /* 160 */,
@@ -12884,40 +13286,36 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 /* 167 */,
 /* 168 */,
 /* 169 */,
-/* 170 */
-/*!*******************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/mixins/form.js ***!
-  \*******************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 170 */,
+/* 171 */,
+/* 172 */
+/*!*****************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/form.js ***!
+  \*****************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ 16);
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 15);var _default =
 
+{
+  computed: {
+    $form: function $form() {
+      return _utils.getParent.call(this, "ClForm", [
+      "labelWidth",
+      "labelPosition",
+      "showMessage",
+      "model",
+      "validateOnValueChange",
+      "disabled"]);
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-    computed: {
-        $form() {
-            return _utils__WEBPACK_IMPORTED_MODULE_0__["getParent"].call(this, "ClForm", [
-                "labelWidth",
-                "labelPosition",
-                "showMessage",
-                "model",
-                "validateOnValueChange",
-                "disabled"
-            ]);
-        },
+    },
 
-        isDisabled() {
-            return this.$form ? (this.$form.disabled || this.disabled) : this.disabled
-        }
-    }
-});
+    isDisabled: function isDisabled() {
+      return this.$form ? this.$form.disabled || this.disabled : this.disabled;
+    } } };exports.default = _default;
 
 /***/ }),
-/* 171 */,
-/* 172 */,
 /* 173 */,
 /* 174 */,
 /* 175 */,
@@ -12933,33 +13331,34 @@ __webpack_require__.r(__webpack_exports__);
 /* 185 */,
 /* 186 */,
 /* 187 */,
-/* 188 */
-/*!*****************************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/utils/async-validator.js ***!
-  \*****************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 188 */,
+/* 189 */,
+/* 190 */
+/*!***************************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/utils/async-validator.js ***!
+  \***************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* WEBPACK VAR INJECTION */(function(process) {function _extends() {
-	_extends =
-		Object.assign ||
-		function(target) {
-			for (var i = 1; i < arguments.length; i++) {
-				var source = arguments[i];
+/* WEBPACK VAR INJECTION */(function(process) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function _extends() {
+  _extends =
+  Object.assign ||
+  function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
 
-				for (var key in source) {
-					if (Object.prototype.hasOwnProperty.call(source, key)) {
-						target[key] = source[key];
-					}
-				}
-			}
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
 
-			return target;
-		};
+    return target;
+  };
 
-	return _extends.apply(this, arguments);
+  return _extends.apply(this, arguments);
 }
 
 /* eslint no-console:0 */
@@ -12967,1441 +13366,1435 @@ var formatRegExp = /%[sdj%]/g;
 var warning = function warning() {}; // don't print warning message when in production env or node runtime
 
 if (
-	typeof process !== 'undefined' &&
-	Object({"NODE_ENV":"development","VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","BASE_URL":"/"}) &&
-	"development" !== 'production' &&
-	typeof window !== 'undefined' &&
-	typeof document !== 'undefined'
-) {
-	warning = function warning(type, errors) {
-		if (typeof console !== 'undefined' && console.warn) {
-			if (
-				errors.every(function(e) {
-					return typeof e === 'string';
-				})
-			) {
-				console.warn(type, errors);
-			}
-		}
-	};
+typeof process !== 'undefined' &&
+Object({"VUE_APP_NAME":"萝卜书房项目","VUE_APP_PLATFORM":"mp-weixin","NODE_ENV":"development","BASE_URL":"/"}) &&
+"development" !== 'production' &&
+typeof window !== 'undefined' &&
+typeof document !== 'undefined')
+{
+  warning = function warning(type, errors) {
+    if (typeof console !== 'undefined' && console.warn) {
+      if (
+      errors.every(function (e) {
+        return typeof e === 'string';
+      }))
+      {
+        console.warn(type, errors);
+      }
+    }
+  };
 }
 
 function convertFieldsError(errors) {
-	if (!errors || !errors.length) return null;
-	var fields = {};
-	errors.forEach(function(error) {
-		var field = error.field;
-		fields[field] = fields[field] || [];
-		fields[field].push(error);
-	});
-	return fields;
+  if (!errors || !errors.length) return null;
+  var fields = {};
+  errors.forEach(function (error) {
+    var field = error.field;
+    fields[field] = fields[field] || [];
+    fields[field].push(error);
+  });
+  return fields;
 }
 function format() {
-	for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-		args[_key] = arguments[_key];
-	}
+  for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+    args[_key] = arguments[_key];
+  }
 
-	var i = 1;
-	var f = args[0];
-	var len = args.length;
+  var i = 1;
+  var f = args[0];
+  var len = args.length;
 
-	if (typeof f === 'function') {
-		return f.apply(null, args.slice(1));
-	}
+  if (typeof f === 'function') {
+    return f.apply(null, args.slice(1));
+  }
 
-	if (typeof f === 'string') {
-		var str = String(f).replace(formatRegExp, function(x) {
-			if (x === '%%') {
-				return '%';
-			}
+  if (typeof f === 'string') {
+    var str = String(f).replace(formatRegExp, function (x) {
+      if (x === '%%') {
+        return '%';
+      }
 
-			if (i >= len) {
-				return x;
-			}
+      if (i >= len) {
+        return x;
+      }
 
-			switch (x) {
-				case '%s':
-					return String(args[i++]);
+      switch (x) {
+        case '%s':
+          return String(args[i++]);
 
-				case '%d':
-					return Number(args[i++]);
+        case '%d':
+          return Number(args[i++]);
 
-				case '%j':
-					try {
-						return JSON.stringify(args[i++]);
-					} catch (_) {
-						return '[Circular]';
-					}
+        case '%j':
+          try {
+            return JSON.stringify(args[i++]);
+          } catch (_) {
+            return '[Circular]';
+          }
 
-					break;
+          break;
 
-				default:
-					return x;
-			}
-		});
+        default:
+          return x;}
 
-		for (var arg = args[i]; i < len; arg = args[++i]) {
-			str += ' ' + arg;
-		}
+    });
 
-		return str;
-	}
+    for (var arg = args[i]; i < len; arg = args[++i]) {
+      str += ' ' + arg;
+    }
 
-	return f;
+    return str;
+  }
+
+  return f;
 }
 
 function isNativeStringType(type) {
-	return (
-		type === 'string' ||
-		type === 'url' ||
-		type === 'hex' ||
-		type === 'email' ||
-		type === 'pattern'
-	);
+  return (
+    type === 'string' ||
+    type === 'url' ||
+    type === 'hex' ||
+    type === 'email' ||
+    type === 'pattern');
+
 }
 
 function isEmptyValue(value, type) {
-	if (value === undefined || value === null) {
-		return true;
-	}
+  if (value === undefined || value === null) {
+    return true;
+  }
 
-	if (type === 'array' && Array.isArray(value) && !value.length) {
-		return true;
-	}
+  if (type === 'array' && Array.isArray(value) && !value.length) {
+    return true;
+  }
 
-	if (isNativeStringType(type) && typeof value === 'string' && !value) {
-		return true;
-	}
+  if (isNativeStringType(type) && typeof value === 'string' && !value) {
+    return true;
+  }
 
-	return false;
+  return false;
 }
 
 function asyncParallelArray(arr, func, callback) {
-	var results = [];
-	var total = 0;
-	var arrLength = arr.length;
+  var results = [];
+  var total = 0;
+  var arrLength = arr.length;
 
-	function count(errors) {
-		results.push.apply(results, errors);
-		total++;
+  function count(errors) {
+    results.push.apply(results, errors);
+    total++;
 
-		if (total === arrLength) {
-			callback(results);
-		}
-	}
+    if (total === arrLength) {
+      callback(results);
+    }
+  }
 
-	arr.forEach(function(a) {
-		func(a, count);
-	});
+  arr.forEach(function (a) {
+    func(a, count);
+  });
 }
 
 function asyncSerialArray(arr, func, callback) {
-	var index = 0;
-	var arrLength = arr.length;
+  var index = 0;
+  var arrLength = arr.length;
 
-	function next(errors) {
-		if (errors && errors.length) {
-			callback(errors);
-			return;
-		}
+  function next(errors) {
+    if (errors && errors.length) {
+      callback(errors);
+      return;
+    }
 
-		var original = index;
-		index = index + 1;
+    var original = index;
+    index = index + 1;
 
-		if (original < arrLength) {
-			func(arr[original], next);
-		} else {
-			callback([]);
-		}
-	}
+    if (original < arrLength) {
+      func(arr[original], next);
+    } else {
+      callback([]);
+    }
+  }
 
-	next([]);
+  next([]);
 }
 
 function flattenObjArr(objArr) {
-	var ret = [];
-	Object.keys(objArr).forEach(function(k) {
-		ret.push.apply(ret, objArr[k]);
-	});
-	return ret;
+  var ret = [];
+  Object.keys(objArr).forEach(function (k) {
+    ret.push.apply(ret, objArr[k]);
+  });
+  return ret;
 }
 
 function asyncMap(objArr, option, func, callback) {
-	if (option.first) {
-		var _pending = new Promise(function(resolve, reject) {
-			var next = function next(errors) {
-				callback(errors);
-				return errors.length
-					? reject({
-							errors: errors,
-							fields: convertFieldsError(errors)
-					  })
-					: resolve();
-			};
+  if (option.first) {
+    var _pending = new Promise(function (resolve, reject) {
+      var next = function next(errors) {
+        callback(errors);
+        return errors.length ?
+        reject({
+          errors: errors,
+          fields: convertFieldsError(errors) }) :
 
-			var flattenArr = flattenObjArr(objArr);
-			asyncSerialArray(flattenArr, func, next);
-		});
+        resolve();
+      };
 
-		_pending['catch'](function(e) {
-			return e;
-		});
+      var flattenArr = flattenObjArr(objArr);
+      asyncSerialArray(flattenArr, func, next);
+    });
 
-		return _pending;
-	}
+    _pending['catch'](function (e) {
+      return e;
+    });
 
-	var firstFields = option.firstFields || [];
+    return _pending;
+  }
 
-	if (firstFields === true) {
-		firstFields = Object.keys(objArr);
-	}
+  var firstFields = option.firstFields || [];
 
-	var objArrKeys = Object.keys(objArr);
-	var objArrLength = objArrKeys.length;
-	var total = 0;
-	var results = [];
-	var pending = new Promise(function(resolve, reject) {
-		var next = function next(errors) {
-			results.push.apply(results, errors);
-			total++;
+  if (firstFields === true) {
+    firstFields = Object.keys(objArr);
+  }
 
-			if (total === objArrLength) {
-				callback(results);
-				return results.length
-					? reject({
-							errors: results,
-							fields: convertFieldsError(results)
-					  })
-					: resolve();
-			}
-		};
+  var objArrKeys = Object.keys(objArr);
+  var objArrLength = objArrKeys.length;
+  var total = 0;
+  var results = [];
+  var pending = new Promise(function (resolve, reject) {
+    var next = function next(errors) {
+      results.push.apply(results, errors);
+      total++;
 
-		objArrKeys.forEach(function(key) {
-			var arr = objArr[key];
+      if (total === objArrLength) {
+        callback(results);
+        return results.length ?
+        reject({
+          errors: results,
+          fields: convertFieldsError(results) }) :
 
-			if (firstFields.indexOf(key) !== -1) {
-				asyncSerialArray(arr, func, next);
-			} else {
-				asyncParallelArray(arr, func, next);
-			}
-		});
-	});
-	pending['catch'](function(e) {
-		return e;
-	});
-	return pending;
+        resolve();
+      }
+    };
+
+    objArrKeys.forEach(function (key) {
+      var arr = objArr[key];
+
+      if (firstFields.indexOf(key) !== -1) {
+        asyncSerialArray(arr, func, next);
+      } else {
+        asyncParallelArray(arr, func, next);
+      }
+    });
+  });
+  pending['catch'](function (e) {
+    return e;
+  });
+  return pending;
 }
 function complementError(rule) {
-	return function(oe) {
-		if (oe && oe.message) {
-			oe.field = oe.field || rule.fullField;
-			return oe;
-		}
+  return function (oe) {
+    if (oe && oe.message) {
+      oe.field = oe.field || rule.fullField;
+      return oe;
+    }
 
-		return {
-			message: typeof oe === 'function' ? oe() : oe,
-			field: oe.field || rule.fullField
-		};
-	};
+    return {
+      message: typeof oe === 'function' ? oe() : oe,
+      field: oe.field || rule.fullField };
+
+  };
 }
 function deepMerge(target, source) {
-	if (source) {
-		for (var s in source) {
-			if (source.hasOwnProperty(s)) {
-				var value = source[s];
+  if (source) {
+    for (var s in source) {
+      if (source.hasOwnProperty(s)) {
+        var value = source[s];
 
-				if (typeof value === 'object' && typeof target[s] === 'object') {
-					target[s] = _extends({}, target[s], {}, value);
-				} else {
-					target[s] = value;
-				}
-			}
-		}
-	}
+        if (typeof value === 'object' && typeof target[s] === 'object') {
+          target[s] = _extends({}, target[s], {}, value);
+        } else {
+          target[s] = value;
+        }
+      }
+    }
+  }
 
-	return target;
+  return target;
 }
 
 /**
- *  Rule for validating required fields.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating required fields.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function required(rule, value, source, errors, options, type) {
-	if (
-		rule.required &&
-		(!source.hasOwnProperty(rule.field) || isEmptyValue(value, type || rule.type))
-	) {
-		errors.push(format(options.messages.required, rule.fullField));
-	}
+  if (
+  rule.required && (
+  !source.hasOwnProperty(rule.field) || isEmptyValue(value, type || rule.type)))
+  {
+    errors.push(format(options.messages.required, rule.fullField));
+  }
 }
 
 /**
- *  Rule for validating whitespace.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating whitespace.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function whitespace(rule, value, source, errors, options) {
-	if (/^\s+$/.test(value) || value === '') {
-		errors.push(format(options.messages.whitespace, rule.fullField));
-	}
+  if (/^\s+$/.test(value) || value === '') {
+    errors.push(format(options.messages.whitespace, rule.fullField));
+  }
 }
 
 /* eslint max-len:0 */
 
 var pattern = {
-	// http://emailregex.com/
-	email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-	url: new RegExp(
-		'^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$',
-		'i'
-	),
-	hex: /^#?([a-f0-9]{6}|[a-f0-9]{3})$/i
-};
+  // http://emailregex.com/
+  email: /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+  url: new RegExp(
+  "^(?!mailto:)(?:(?:http|https|ftp)://|//)(?:\\S+(?::\\S*)?@)?(?:(?:(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}(?:\\.(?:[0-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))|(?:(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-*)*[a-z\\u00a1-\\uffff0-9]+)*(?:\\.(?:[a-z\\u00a1-\\uffff]{2,})))|localhost)(?::\\d{2,5})?(?:(/|\\?|#)[^\\s]*)?$",
+  'i'),
+
+  hex: /^#?([a-f0-9]{6}|[a-f0-9]{3})$/i };
+
 var types = {
-	integer: function integer(value) {
-		return types.number(value) && parseInt(value, 10) === value;
-	},
-	float: function float(value) {
-		return types.number(value) && !types.integer(value);
-	},
-	array: function array(value) {
-		return Array.isArray(value);
-	},
-	regexp: function regexp(value) {
-		if (value instanceof RegExp) {
-			return true;
-		}
+  integer: function integer(value) {
+    return types.number(value) && parseInt(value, 10) === value;
+  },
+  float: function float(value) {
+    return types.number(value) && !types.integer(value);
+  },
+  array: function array(value) {
+    return Array.isArray(value);
+  },
+  regexp: function regexp(value) {
+    if (value instanceof RegExp) {
+      return true;
+    }
 
-		try {
-			return !!new RegExp(value);
-		} catch (e) {
-			return false;
-		}
-	},
-	date: function date(value) {
-		return (
-			typeof value.getTime === 'function' &&
-			typeof value.getMonth === 'function' &&
-			typeof value.getYear === 'function'
-		);
-	},
-	number: function number(value) {
-		if (isNaN(value)) {
-			return false;
-		}
+    try {
+      return !!new RegExp(value);
+    } catch (e) {
+      return false;
+    }
+  },
+  date: function date(value) {
+    return (
+      typeof value.getTime === 'function' &&
+      typeof value.getMonth === 'function' &&
+      typeof value.getYear === 'function');
 
-		return typeof value === 'number';
-	},
-	object: function object(value) {
-		return typeof value === 'object' && !types.array(value);
-	},
-	method: function method(value) {
-		return typeof value === 'function';
-	},
-	email: function email(value) {
-		return typeof value === 'string' && !!value.match(pattern.email) && value.length < 255;
-	},
-	url: function url(value) {
-		return typeof value === 'string' && !!value.match(pattern.url);
-	},
-	hex: function hex(value) {
-		return typeof value === 'string' && !!value.match(pattern.hex);
-	}
-};
+  },
+  number: function number(value) {
+    if (isNaN(value)) {
+      return false;
+    }
+
+    return typeof value === 'number';
+  },
+  object: function object(value) {
+    return typeof value === 'object' && !types.array(value);
+  },
+  method: function method(value) {
+    return typeof value === 'function';
+  },
+  email: function email(value) {
+    return typeof value === 'string' && !!value.match(pattern.email) && value.length < 255;
+  },
+  url: function url(value) {
+    return typeof value === 'string' && !!value.match(pattern.url);
+  },
+  hex: function hex(value) {
+    return typeof value === 'string' && !!value.match(pattern.hex);
+  } };
+
 /**
- *  Rule for validating the type of a value.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+        *  Rule for validating the type of a value.
+        *
+        *  @param rule The validation rule.
+        *  @param value The value of the field on the source object.
+        *  @param source The source object being validated.
+        *  @param errors An array of errors that this rule may add
+        *  validation errors to.
+        *  @param options The validation options.
+        *  @param options.messages The validation messages.
+        */
 
 function type(rule, value, source, errors, options) {
-	if (rule.required && value === undefined) {
-		required(rule, value, source, errors, options);
-		return;
-	}
+  if (rule.required && value === undefined) {
+    required(rule, value, source, errors, options);
+    return;
+  }
 
-	var custom = [
-		'integer',
-		'float',
-		'array',
-		'regexp',
-		'object',
-		'method',
-		'email',
-		'number',
-		'date',
-		'url',
-		'hex'
-	];
-	var ruleType = rule.type;
+  var custom = [
+  'integer',
+  'float',
+  'array',
+  'regexp',
+  'object',
+  'method',
+  'email',
+  'number',
+  'date',
+  'url',
+  'hex'];
 
-	if (custom.indexOf(ruleType) > -1) {
-		if (!types[ruleType](value)) {
-			errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
-		} // straight typeof check
-	} else if (ruleType && typeof value !== rule.type) {
-		errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
-	}
+  var ruleType = rule.type;
+
+  if (custom.indexOf(ruleType) > -1) {
+    if (!types[ruleType](value)) {
+      errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
+    } // straight typeof check
+  } else if (ruleType && typeof value !== rule.type) {
+    errors.push(format(options.messages.types[ruleType], rule.fullField, rule.type));
+  }
 }
 
 /**
- *  Rule for validating minimum and maximum allowed values.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating minimum and maximum allowed values.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function range(rule, value, source, errors, options) {
-	var len = typeof rule.len === 'number';
-	var min = typeof rule.min === 'number';
-	var max = typeof rule.max === 'number'; // 正则匹配码点范围从U+010000一直到U+10FFFF的文字（补充平面Supplementary Plane）
+  var len = typeof rule.len === 'number';
+  var min = typeof rule.min === 'number';
+  var max = typeof rule.max === 'number'; // 正则匹配码点范围从U+010000一直到U+10FFFF的文字（补充平面Supplementary Plane）
 
-	var spRegexp = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
-	var val = value;
-	var key = null;
-	var num = typeof value === 'number';
-	var str = typeof value === 'string';
-	var arr = Array.isArray(value);
+  var spRegexp = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+  var val = value;
+  var key = null;
+  var num = typeof value === 'number';
+  var str = typeof value === 'string';
+  var arr = Array.isArray(value);
 
-	if (num) {
-		key = 'number';
-	} else if (str) {
-		key = 'string';
-	} else if (arr) {
-		key = 'array';
-	} // if the value is not of a supported type for range validation
-	// the validation rule rule should use the
-	// type property to also test for a particular type
+  if (num) {
+    key = 'number';
+  } else if (str) {
+    key = 'string';
+  } else if (arr) {
+    key = 'array';
+  } // if the value is not of a supported type for range validation
+  // the validation rule rule should use the
+  // type property to also test for a particular type
 
-	if (!key) {
-		return false;
-	}
+  if (!key) {
+    return false;
+  }
 
-	if (arr) {
-		val = value.length;
-	}
+  if (arr) {
+    val = value.length;
+  }
 
-	if (str) {
-		// 处理码点大于U+010000的文字length属性不准确的bug，如"𠮷𠮷𠮷".lenght !== 3
-		val = value.replace(spRegexp, '_').length;
-	}
+  if (str) {
+    // 处理码点大于U+010000的文字length属性不准确的bug，如"𠮷𠮷𠮷".lenght !== 3
+    val = value.replace(spRegexp, '_').length;
+  }
 
-	if (len) {
-		if (val !== rule.len) {
-			errors.push(format(options.messages[key].len, rule.fullField, rule.len));
-		}
-	} else if (min && !max && val < rule.min) {
-		errors.push(format(options.messages[key].min, rule.fullField, rule.min));
-	} else if (max && !min && val > rule.max) {
-		errors.push(format(options.messages[key].max, rule.fullField, rule.max));
-	} else if (min && max && (val < rule.min || val > rule.max)) {
-		errors.push(format(options.messages[key].range, rule.fullField, rule.min, rule.max));
-	}
+  if (len) {
+    if (val !== rule.len) {
+      errors.push(format(options.messages[key].len, rule.fullField, rule.len));
+    }
+  } else if (min && !max && val < rule.min) {
+    errors.push(format(options.messages[key].min, rule.fullField, rule.min));
+  } else if (max && !min && val > rule.max) {
+    errors.push(format(options.messages[key].max, rule.fullField, rule.max));
+  } else if (min && max && (val < rule.min || val > rule.max)) {
+    errors.push(format(options.messages[key].range, rule.fullField, rule.min, rule.max));
+  }
 }
 
 var ENUM = 'enum';
 /**
- *  Rule for validating a value exists in an enumerable list.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+                    *  Rule for validating a value exists in an enumerable list.
+                    *
+                    *  @param rule The validation rule.
+                    *  @param value The value of the field on the source object.
+                    *  @param source The source object being validated.
+                    *  @param errors An array of errors that this rule may add
+                    *  validation errors to.
+                    *  @param options The validation options.
+                    *  @param options.messages The validation messages.
+                    */
 
 function enumerable(rule, value, source, errors, options) {
-	rule[ENUM] = Array.isArray(rule[ENUM]) ? rule[ENUM] : [];
+  rule[ENUM] = Array.isArray(rule[ENUM]) ? rule[ENUM] : [];
 
-	if (rule[ENUM].indexOf(value) === -1) {
-		errors.push(format(options.messages[ENUM], rule.fullField, rule[ENUM].join(', ')));
-	}
+  if (rule[ENUM].indexOf(value) === -1) {
+    errors.push(format(options.messages[ENUM], rule.fullField, rule[ENUM].join(', ')));
+  }
 }
 
 /**
- *  Rule for validating a regular expression pattern.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param source The source object being validated.
- *  @param errors An array of errors that this rule may add
- *  validation errors to.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Rule for validating a regular expression pattern.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param source The source object being validated.
+   *  @param errors An array of errors that this rule may add
+   *  validation errors to.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function pattern$1(rule, value, source, errors, options) {
-	if (rule.pattern) {
-		if (rule.pattern instanceof RegExp) {
-			// if a RegExp instance is passed, reset `lastIndex` in case its `global`
-			// flag is accidentally set to `true`, which in a validation scenario
-			// is not necessary and the result might be misleading
-			rule.pattern.lastIndex = 0;
+  if (rule.pattern) {
+    if (rule.pattern instanceof RegExp) {
+      // if a RegExp instance is passed, reset `lastIndex` in case its `global`
+      // flag is accidentally set to `true`, which in a validation scenario
+      // is not necessary and the result might be misleading
+      rule.pattern.lastIndex = 0;
 
-			if (!rule.pattern.test(value)) {
-				errors.push(
-					format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern)
-				);
-			}
-		} else if (typeof rule.pattern === 'string') {
-			var _pattern = new RegExp(rule.pattern);
+      if (!rule.pattern.test(value)) {
+        errors.push(
+        format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern));
 
-			if (!_pattern.test(value)) {
-				errors.push(
-					format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern)
-				);
-			}
-		}
-	}
+      }
+    } else if (typeof rule.pattern === 'string') {
+      var _pattern = new RegExp(rule.pattern);
+
+      if (!_pattern.test(value)) {
+        errors.push(
+        format(options.messages.pattern.mismatch, rule.fullField, value, rule.pattern));
+
+      }
+    }
+  }
 }
 
 var rules = {
-	required: required,
-	whitespace: whitespace,
-	type: type,
-	range: range,
-	enum: enumerable,
-	pattern: pattern$1
-};
+  required: required,
+  whitespace: whitespace,
+  type: type,
+  range: range,
+  enum: enumerable,
+  pattern: pattern$1 };
+
 
 /**
- *  Performs validation for string types.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+                         *  Performs validation for string types.
+                         *
+                         *  @param rule The validation rule.
+                         *  @param value The value of the field on the source object.
+                         *  @param callback The callback function.
+                         *  @param source The source object being validated.
+                         *  @param options The validation options.
+                         *  @param options.messages The validation messages.
+                         */
 
 function string(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, 'string') && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, 'string') && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options, 'string');
+    rules.required(rule, value, source, errors, options, 'string');
 
-		if (!isEmptyValue(value, 'string')) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-			rules.pattern(rule, value, source, errors, options);
+    if (!isEmptyValue(value, 'string')) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+      rules.pattern(rule, value, source, errors, options);
 
-			if (rule.whitespace === true) {
-				rules.whitespace(rule, value, source, errors, options);
-			}
-		}
-	}
+      if (rule.whitespace === true) {
+        rules.whitespace(rule, value, source, errors, options);
+      }
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a function.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a function.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function method(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a number.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a number.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function number(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (value === '') {
-			value = undefined;
-		}
+  if (validate) {
+    if (value === '') {
+      value = undefined;
+    }
 
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a boolean.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a boolean.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function _boolean(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates the regular expression type.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates the regular expression type.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function regexp(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (!isEmptyValue(value)) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value)) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a number is an integer.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a number is an integer.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function integer(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a number is a floating point number.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a number is a floating point number.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function floatFn(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates an array.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates an array.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function array(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, 'array') && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, 'array') && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options, 'array');
+    rules.required(rule, value, source, errors, options, 'array');
 
-		if (!isEmptyValue(value, 'array')) {
-			rules.type(rule, value, source, errors, options);
-			rules.range(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value, 'array')) {
+      rules.type(rule, value, source, errors, options);
+      rules.range(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates an object.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates an object.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function object(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 var ENUM$1 = 'enum';
 /**
- *  Validates an enumerable list.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+                      *  Validates an enumerable list.
+                      *
+                      *  @param rule The validation rule.
+                      *  @param value The value of the field on the source object.
+                      *  @param callback The callback function.
+                      *  @param source The source object being validated.
+                      *  @param options The validation options.
+                      *  @param options.messages The validation messages.
+                      */
 
 function enumerable$1(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (value !== undefined) {
-			rules[ENUM$1](rule, value, source, errors, options);
-		}
-	}
+    if (value !== undefined) {
+      rules[ENUM$1](rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Validates a regular expression pattern.
- *
- *  Performs validation when a rule only contains
- *  a pattern property but is not declared as a string type.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Validates a regular expression pattern.
+   *
+   *  Performs validation when a rule only contains
+   *  a pattern property but is not declared as a string type.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function pattern$2(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, 'string') && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, 'string') && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (!isEmptyValue(value, 'string')) {
-			rules.pattern(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value, 'string')) {
+      rules.pattern(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 function date(rule, value, callback, source, options) {
-	// console.log('integer rule called %j', rule);
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field)); // console.log('validate on %s value', value);
+  // console.log('integer rule called %j', rule);
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field); // console.log('validate on %s value', value);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
+    rules.required(rule, value, source, errors, options);
 
-		if (!isEmptyValue(value)) {
-			var dateObject;
+    if (!isEmptyValue(value)) {
+      var dateObject;
 
-			if (typeof value === 'number') {
-				dateObject = new Date(value);
-			} else {
-				dateObject = value;
-			}
+      if (typeof value === 'number') {
+        dateObject = new Date(value);
+      } else {
+        dateObject = value;
+      }
 
-			rules.type(rule, dateObject, source, errors, options);
+      rules.type(rule, dateObject, source, errors, options);
 
-			if (dateObject) {
-				rules.range(rule, dateObject.getTime(), source, errors, options);
-			}
-		}
-	}
+      if (dateObject) {
+        rules.range(rule, dateObject.getTime(), source, errors, options);
+      }
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 function required$1(rule, value, callback, source, options) {
-	var errors = [];
-	var type = Array.isArray(value) ? 'array' : typeof value;
-	rules.required(rule, value, source, errors, options, type);
-	callback(errors);
+  var errors = [];
+  var type = Array.isArray(value) ? 'array' : typeof value;
+  rules.required(rule, value, source, errors, options, type);
+  callback(errors);
 }
 
 function type$1(rule, value, callback, source, options) {
-	var ruleType = rule.type;
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var ruleType = rule.type;
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value, ruleType) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value, ruleType) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options, ruleType);
+    rules.required(rule, value, source, errors, options, ruleType);
 
-		if (!isEmptyValue(value, ruleType)) {
-			rules.type(rule, value, source, errors, options);
-		}
-	}
+    if (!isEmptyValue(value, ruleType)) {
+      rules.type(rule, value, source, errors, options);
+    }
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 /**
- *  Performs validation for any type.
- *
- *  @param rule The validation rule.
- *  @param value The value of the field on the source object.
- *  @param callback The callback function.
- *  @param source The source object being validated.
- *  @param options The validation options.
- *  @param options.messages The validation messages.
- */
+   *  Performs validation for any type.
+   *
+   *  @param rule The validation rule.
+   *  @param value The value of the field on the source object.
+   *  @param callback The callback function.
+   *  @param source The source object being validated.
+   *  @param options The validation options.
+   *  @param options.messages The validation messages.
+   */
 
 function any(rule, value, callback, source, options) {
-	var errors = [];
-	var validate = rule.required || (!rule.required && source.hasOwnProperty(rule.field));
+  var errors = [];
+  var validate = rule.required || !rule.required && source.hasOwnProperty(rule.field);
 
-	if (validate) {
-		if (isEmptyValue(value) && !rule.required) {
-			return callback();
-		}
+  if (validate) {
+    if (isEmptyValue(value) && !rule.required) {
+      return callback();
+    }
 
-		rules.required(rule, value, source, errors, options);
-	}
+    rules.required(rule, value, source, errors, options);
+  }
 
-	callback(errors);
+  callback(errors);
 }
 
 var validators = {
-	string: string,
-	method: method,
-	number: number,
-	boolean: _boolean,
-	regexp: regexp,
-	integer: integer,
-	float: floatFn,
-	array: array,
-	object: object,
-	enum: enumerable$1,
-	pattern: pattern$2,
-	date: date,
-	url: type$1,
-	hex: type$1,
-	email: type$1,
-	required: required$1,
-	any: any
-};
+  string: string,
+  method: method,
+  number: number,
+  boolean: _boolean,
+  regexp: regexp,
+  integer: integer,
+  float: floatFn,
+  array: array,
+  object: object,
+  enum: enumerable$1,
+  pattern: pattern$2,
+  date: date,
+  url: type$1,
+  hex: type$1,
+  email: type$1,
+  required: required$1,
+  any: any };
+
 
 function newMessages() {
-	return {
-		default: 'Validation error on field %s',
-		required: '%s is required',
-		enum: '%s must be one of %s',
-		whitespace: '%s cannot be empty',
-		date: {
-			format: '%s date %s is invalid for format %s',
-			parse: '%s date could not be parsed, %s is invalid ',
-			invalid: '%s date %s is invalid'
-		},
-		types: {
-			string: '%s is not a %s',
-			method: '%s is not a %s (function)',
-			array: '%s is not an %s',
-			object: '%s is not an %s',
-			number: '%s is not a %s',
-			date: '%s is not a %s',
-			boolean: '%s is not a %s',
-			integer: '%s is not an %s',
-			float: '%s is not a %s',
-			regexp: '%s is not a valid %s',
-			email: '%s is not a valid %s',
-			url: '%s is not a valid %s',
-			hex: '%s is not a valid %s'
-		},
-		string: {
-			len: '%s must be exactly %s characters',
-			min: '%s must be at least %s characters',
-			max: '%s cannot be longer than %s characters',
-			range: '%s must be between %s and %s characters'
-		},
-		number: {
-			len: '%s must equal %s',
-			min: '%s cannot be less than %s',
-			max: '%s cannot be greater than %s',
-			range: '%s must be between %s and %s'
-		},
-		array: {
-			len: '%s must be exactly %s in length',
-			min: '%s cannot be less than %s in length',
-			max: '%s cannot be greater than %s in length',
-			range: '%s must be between %s and %s in length'
-		},
-		pattern: {
-			mismatch: '%s value %s does not match pattern %s'
-		},
-		clone: function clone() {
-			var cloned = JSON.parse(JSON.stringify(this));
-			cloned.clone = this.clone;
-			return cloned;
-		}
-	};
+  return {
+    default: 'Validation error on field %s',
+    required: '%s is required',
+    enum: '%s must be one of %s',
+    whitespace: '%s cannot be empty',
+    date: {
+      format: '%s date %s is invalid for format %s',
+      parse: '%s date could not be parsed, %s is invalid ',
+      invalid: '%s date %s is invalid' },
+
+    types: {
+      string: '%s is not a %s',
+      method: '%s is not a %s (function)',
+      array: '%s is not an %s',
+      object: '%s is not an %s',
+      number: '%s is not a %s',
+      date: '%s is not a %s',
+      boolean: '%s is not a %s',
+      integer: '%s is not an %s',
+      float: '%s is not a %s',
+      regexp: '%s is not a valid %s',
+      email: '%s is not a valid %s',
+      url: '%s is not a valid %s',
+      hex: '%s is not a valid %s' },
+
+    string: {
+      len: '%s must be exactly %s characters',
+      min: '%s must be at least %s characters',
+      max: '%s cannot be longer than %s characters',
+      range: '%s must be between %s and %s characters' },
+
+    number: {
+      len: '%s must equal %s',
+      min: '%s cannot be less than %s',
+      max: '%s cannot be greater than %s',
+      range: '%s must be between %s and %s' },
+
+    array: {
+      len: '%s must be exactly %s in length',
+      min: '%s cannot be less than %s in length',
+      max: '%s cannot be greater than %s in length',
+      range: '%s must be between %s and %s in length' },
+
+    pattern: {
+      mismatch: '%s value %s does not match pattern %s' },
+
+    clone: function clone() {
+      var cloned = JSON.parse(JSON.stringify(this));
+      cloned.clone = this.clone;
+      return cloned;
+    } };
+
 }
 var messages = newMessages();
 
 /**
- *  Encapsulates a validation schema.
- *
- *  @param descriptor An object declaring validation rules
- *  for this schema.
- */
+                               *  Encapsulates a validation schema.
+                               *
+                               *  @param descriptor An object declaring validation rules
+                               *  for this schema.
+                               */
 
 function Schema(descriptor) {
-	this.rules = null;
-	this._messages = messages;
-	this.define(descriptor);
+  this.rules = null;
+  this._messages = messages;
+  this.define(descriptor);
 }
 
 Schema.prototype = {
-	messages: function messages(_messages) {
-		if (_messages) {
-			this._messages = deepMerge(newMessages(), _messages);
-		}
+  messages: function messages(_messages) {
+    if (_messages) {
+      this._messages = deepMerge(newMessages(), _messages);
+    }
 
-		return this._messages;
-	},
-	define: function define(rules) {
-		if (!rules) {
-			throw new Error('Cannot configure a schema with no rules');
-		}
+    return this._messages;
+  },
+  define: function define(rules) {
+    if (!rules) {
+      throw new Error('Cannot configure a schema with no rules');
+    }
 
-		if (typeof rules !== 'object' || Array.isArray(rules)) {
-			throw new Error('Rules must be an object');
-		}
+    if (typeof rules !== 'object' || Array.isArray(rules)) {
+      throw new Error('Rules must be an object');
+    }
 
-		this.rules = {};
-		var z;
-		var item;
+    this.rules = {};
+    var z;
+    var item;
 
-		for (z in rules) {
-			if (rules.hasOwnProperty(z)) {
-				item = rules[z];
-				this.rules[z] = Array.isArray(item) ? item : [item];
-			}
-		}
-	},
-	validate: function validate(source_, o, oc) {
-		var _this = this;
+    for (z in rules) {
+      if (rules.hasOwnProperty(z)) {
+        item = rules[z];
+        this.rules[z] = Array.isArray(item) ? item : [item];
+      }
+    }
+  },
+  validate: function validate(source_, o, oc) {
+    var _this = this;
 
-		if (o === void 0) {
-			o = {};
-		}
+    if (o === void 0) {
+      o = {};
+    }
 
-		if (oc === void 0) {
-			oc = function oc() {};
-		}
+    if (oc === void 0) {
+      oc = function oc() {};
+    }
 
-		var source = source_;
-		var options = o;
-		var callback = oc;
+    var source = source_;
+    var options = o;
+    var callback = oc;
 
-		if (typeof options === 'function') {
-			callback = options;
-			options = {};
-		}
+    if (typeof options === 'function') {
+      callback = options;
+      options = {};
+    }
 
-		if (!this.rules || Object.keys(this.rules).length === 0) {
-			if (callback) {
-				callback();
-			}
+    if (!this.rules || Object.keys(this.rules).length === 0) {
+      if (callback) {
+        callback();
+      }
 
-			return Promise.resolve();
-		}
+      return Promise.resolve();
+    }
 
-		function complete(results) {
-			var i;
-			var errors = [];
-			var fields = {};
+    function complete(results) {
+      var i;
+      var errors = [];
+      var fields = {};
 
-			function add(e) {
-				if (Array.isArray(e)) {
-					var _errors;
+      function add(e) {
+        if (Array.isArray(e)) {
+          var _errors;
 
-					errors = (_errors = errors).concat.apply(_errors, e);
-				} else {
-					errors.push(e);
-				}
-			}
+          errors = (_errors = errors).concat.apply(_errors, e);
+        } else {
+          errors.push(e);
+        }
+      }
 
-			for (i = 0; i < results.length; i++) {
-				add(results[i]);
-			}
+      for (i = 0; i < results.length; i++) {
+        add(results[i]);
+      }
 
-			if (!errors.length) {
-				errors = null;
-				fields = null;
-			} else {
-				fields = convertFieldsError(errors);
-			}
+      if (!errors.length) {
+        errors = null;
+        fields = null;
+      } else {
+        fields = convertFieldsError(errors);
+      }
 
-			callback(errors, fields);
-		}
+      callback(errors, fields);
+    }
 
-		if (options.messages) {
-			var messages$1 = this.messages();
+    if (options.messages) {
+      var messages$1 = this.messages();
 
-			if (messages$1 === messages) {
-				messages$1 = newMessages();
-			}
+      if (messages$1 === messages) {
+        messages$1 = newMessages();
+      }
 
-			deepMerge(messages$1, options.messages);
-			options.messages = messages$1;
-		} else {
-			options.messages = this.messages();
-		}
+      deepMerge(messages$1, options.messages);
+      options.messages = messages$1;
+    } else {
+      options.messages = this.messages();
+    }
 
-		var arr;
-		var value;
-		var series = {};
-		var keys = options.keys || Object.keys(this.rules);
-		keys.forEach(function(z) {
-			arr = _this.rules[z];
-			value = source[z];
-			arr.forEach(function(r) {
-				var rule = r;
+    var arr;
+    var value;
+    var series = {};
+    var keys = options.keys || Object.keys(this.rules);
+    keys.forEach(function (z) {
+      arr = _this.rules[z];
+      value = source[z];
+      arr.forEach(function (r) {
+        var rule = r;
 
-				if (typeof rule.transform === 'function') {
-					if (source === source_) {
-						source = _extends({}, source);
-					}
+        if (typeof rule.transform === 'function') {
+          if (source === source_) {
+            source = _extends({}, source);
+          }
 
-					value = source[z] = rule.transform(value);
-				}
+          value = source[z] = rule.transform(value);
+        }
 
-				if (typeof rule === 'function') {
-					rule = {
-						validator: rule
-					};
-				} else {
-					rule = _extends({}, rule);
-				}
+        if (typeof rule === 'function') {
+          rule = {
+            validator: rule };
 
-				rule.validator = _this.getValidationMethod(rule);
-				rule.field = z;
-				rule.fullField = rule.fullField || z;
-				rule.type = _this.getType(rule);
+        } else {
+          rule = _extends({}, rule);
+        }
 
-				if (!rule.validator) {
-					return;
-				}
+        rule.validator = _this.getValidationMethod(rule);
+        rule.field = z;
+        rule.fullField = rule.fullField || z;
+        rule.type = _this.getType(rule);
 
-				series[z] = series[z] || [];
-				series[z].push({
-					rule: rule,
-					value: value,
-					source: source,
-					field: z
-				});
-			});
-		});
-		var errorFields = {};
-		return asyncMap(
-			series,
-			options,
-			function(data, doIt) {
-				var rule = data.rule;
-				var deep =
-					(rule.type === 'object' || rule.type === 'array') &&
-					(typeof rule.fields === 'object' || typeof rule.defaultField === 'object');
-				deep = deep && (rule.required || (!rule.required && data.value));
-				rule.field = data.field;
+        if (!rule.validator) {
+          return;
+        }
 
-				function addFullfield(key, schema) {
-					return _extends({}, schema, {
-						fullField: rule.fullField + '.' + key
-					});
-				}
+        series[z] = series[z] || [];
+        series[z].push({
+          rule: rule,
+          value: value,
+          source: source,
+          field: z });
 
-				function cb(e) {
-					if (e === void 0) {
-						e = [];
-					}
+      });
+    });
+    var errorFields = {};
+    return asyncMap(
+    series,
+    options,
+    function (data, doIt) {
+      var rule = data.rule;
+      var deep =
+      (rule.type === 'object' || rule.type === 'array') && (
+      typeof rule.fields === 'object' || typeof rule.defaultField === 'object');
+      deep = deep && (rule.required || !rule.required && data.value);
+      rule.field = data.field;
 
-					var errors = e;
+      function addFullfield(key, schema) {
+        return _extends({}, schema, {
+          fullField: rule.fullField + '.' + key });
 
-					if (!Array.isArray(errors)) {
-						errors = [errors];
-					}
+      }
 
-					if (!options.suppressWarning && errors.length) {
-						Schema.warning('async-validator:', errors);
-					}
+      function cb(e) {
+        if (e === void 0) {
+          e = [];
+        }
 
-					if (errors.length && rule.message) {
-						errors = [].concat(rule.message);
-					}
+        var errors = e;
 
-					errors = errors.map(complementError(rule));
+        if (!Array.isArray(errors)) {
+          errors = [errors];
+        }
 
-					if (options.first && errors.length) {
-						errorFields[rule.field] = 1;
-						return doIt(errors);
-					}
+        if (!options.suppressWarning && errors.length) {
+          Schema.warning('async-validator:', errors);
+        }
 
-					if (!deep) {
-						doIt(errors);
-					} else {
-						// if rule is required but the target object
-						// does not exist fail at the rule level and don't
-						// go deeper
-						if (rule.required && !data.value) {
-							if (rule.message) {
-								errors = [].concat(rule.message).map(complementError(rule));
-							} else if (options.error) {
-								errors = [
-									options.error(
-										rule,
-										format(options.messages.required, rule.field)
-									)
-								];
-							} else {
-								errors = [];
-							}
+        if (errors.length && rule.message) {
+          errors = [].concat(rule.message);
+        }
 
-							return doIt(errors);
-						}
+        errors = errors.map(complementError(rule));
 
-						var fieldsSchema = {};
+        if (options.first && errors.length) {
+          errorFields[rule.field] = 1;
+          return doIt(errors);
+        }
 
-						if (rule.defaultField) {
-							for (var k in data.value) {
-								if (data.value.hasOwnProperty(k)) {
-									fieldsSchema[k] = rule.defaultField;
-								}
-							}
-						}
+        if (!deep) {
+          doIt(errors);
+        } else {
+          // if rule is required but the target object
+          // does not exist fail at the rule level and don't
+          // go deeper
+          if (rule.required && !data.value) {
+            if (rule.message) {
+              errors = [].concat(rule.message).map(complementError(rule));
+            } else if (options.error) {
+              errors = [
+              options.error(
+              rule,
+              format(options.messages.required, rule.field))];
 
-						fieldsSchema = _extends({}, fieldsSchema, {}, data.rule.fields);
 
-						for (var f in fieldsSchema) {
-							if (fieldsSchema.hasOwnProperty(f)) {
-								var fieldSchema = Array.isArray(fieldsSchema[f])
-									? fieldsSchema[f]
-									: [fieldsSchema[f]];
-								fieldsSchema[f] = fieldSchema.map(addFullfield.bind(null, f));
-							}
-						}
+            } else {
+              errors = [];
+            }
 
-						var schema = new Schema(fieldsSchema);
-						schema.messages(options.messages);
+            return doIt(errors);
+          }
 
-						if (data.rule.options) {
-							data.rule.options.messages = options.messages;
-							data.rule.options.error = options.error;
-						}
+          var fieldsSchema = {};
 
-						schema.validate(data.value, data.rule.options || options, function(errs) {
-							var finalErrors = [];
+          if (rule.defaultField) {
+            for (var k in data.value) {
+              if (data.value.hasOwnProperty(k)) {
+                fieldsSchema[k] = rule.defaultField;
+              }
+            }
+          }
 
-							if (errors && errors.length) {
-								finalErrors.push.apply(finalErrors, errors);
-							}
+          fieldsSchema = _extends({}, fieldsSchema, {}, data.rule.fields);
 
-							if (errs && errs.length) {
-								finalErrors.push.apply(finalErrors, errs);
-							}
+          for (var f in fieldsSchema) {
+            if (fieldsSchema.hasOwnProperty(f)) {
+              var fieldSchema = Array.isArray(fieldsSchema[f]) ?
+              fieldsSchema[f] :
+              [fieldsSchema[f]];
+              fieldsSchema[f] = fieldSchema.map(addFullfield.bind(null, f));
+            }
+          }
 
-							doIt(finalErrors.length ? finalErrors : null);
-						});
-					}
-				}
+          var schema = new Schema(fieldsSchema);
+          schema.messages(options.messages);
 
-				var res;
+          if (data.rule.options) {
+            data.rule.options.messages = options.messages;
+            data.rule.options.error = options.error;
+          }
 
-				if (rule.asyncValidator) {
-					res = rule.asyncValidator(rule, data.value, cb, data.source, options);
-				} else if (rule.validator) {
-					res = rule.validator(rule, data.value, cb, data.source, options);
+          schema.validate(data.value, data.rule.options || options, function (errs) {
+            var finalErrors = [];
 
-					if (res === true) {
-						cb();
-					} else if (res === false) {
-						cb(rule.message || rule.field + ' fails');
-					} else if (res instanceof Array) {
-						cb(res);
-					} else if (res instanceof Error) {
-						cb(res.message);
-					}
-				}
+            if (errors && errors.length) {
+              finalErrors.push.apply(finalErrors, errors);
+            }
 
-				if (res && res.then) {
-					res.then(
-						function() {
-							return cb();
-						},
-						function(e) {
-							return cb(e);
-						}
-					);
-				}
-			},
-			function(results) {
-				complete(results);
-			}
-		);
-	},
-	getType: function getType(rule) {
-		if (rule.type === undefined && rule.pattern instanceof RegExp) {
-			rule.type = 'pattern';
-		}
+            if (errs && errs.length) {
+              finalErrors.push.apply(finalErrors, errs);
+            }
 
-		if (
-			typeof rule.validator !== 'function' &&
-			rule.type &&
-			!validators.hasOwnProperty(rule.type)
-		) {
-			throw new Error(format('Unknown rule type %s', rule.type));
-		}
+            doIt(finalErrors.length ? finalErrors : null);
+          });
+        }
+      }
 
-		return rule.type || 'string';
-	},
-	getValidationMethod: function getValidationMethod(rule) {
-		if (typeof rule.validator === 'function') {
-			return rule.validator;
-		}
+      var res;
 
-		var keys = Object.keys(rule);
-		var messageIndex = keys.indexOf('message');
+      if (rule.asyncValidator) {
+        res = rule.asyncValidator(rule, data.value, cb, data.source, options);
+      } else if (rule.validator) {
+        res = rule.validator(rule, data.value, cb, data.source, options);
 
-		if (messageIndex !== -1) {
-			keys.splice(messageIndex, 1);
-		}
+        if (res === true) {
+          cb();
+        } else if (res === false) {
+          cb(rule.message || rule.field + ' fails');
+        } else if (res instanceof Array) {
+          cb(res);
+        } else if (res instanceof Error) {
+          cb(res.message);
+        }
+      }
 
-		if (keys.length === 1 && keys[0] === 'required') {
-			return validators.required;
-		}
+      if (res && res.then) {
+        res.then(
+        function () {
+          return cb();
+        },
+        function (e) {
+          return cb(e);
+        });
 
-		return validators[this.getType(rule)] || false;
-	}
-};
+      }
+    },
+    function (results) {
+      complete(results);
+    });
+
+  },
+  getType: function getType(rule) {
+    if (rule.type === undefined && rule.pattern instanceof RegExp) {
+      rule.type = 'pattern';
+    }
+
+    if (
+    typeof rule.validator !== 'function' &&
+    rule.type &&
+    !validators.hasOwnProperty(rule.type))
+    {
+      throw new Error(format('Unknown rule type %s', rule.type));
+    }
+
+    return rule.type || 'string';
+  },
+  getValidationMethod: function getValidationMethod(rule) {
+    if (typeof rule.validator === 'function') {
+      return rule.validator;
+    }
+
+    var keys = Object.keys(rule);
+    var messageIndex = keys.indexOf('message');
+
+    if (messageIndex !== -1) {
+      keys.splice(messageIndex, 1);
+    }
+
+    if (keys.length === 1 && keys[0] === 'required') {
+      return validators.required;
+    }
+
+    return validators[this.getType(rule)] || false;
+  } };
+
 
 Schema.register = function register(type, validator) {
-	if (typeof validator !== 'function') {
-		throw new Error('Cannot register a validator by type, validator is not a function');
-	}
+  if (typeof validator !== 'function') {
+    throw new Error('Cannot register a validator by type, validator is not a function');
+  }
 
-	validators[type] = validator;
+  validators[type] = validator;
 };
 
 Schema.warning = warning;
-Schema.messages = messages;
+Schema.messages = messages;var _default =
 
-/* harmony default export */ __webpack_exports__["default"] = (Schema);
-//# sourceMappingURL=index.js.map
-
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
+Schema;exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/node-libs-browser/mock/process.js */ 88)))
 
 /***/ }),
-/* 189 */,
-/* 190 */,
 /* 191 */,
 /* 192 */,
 /* 193 */,
-/* 194 */
-/*!*********************************************************************************!*\
-  !*** /Users/renwentao/Downloads/06图书查阅(1)/node_modules/cl-uni/mixins/parent.js ***!
-  \*********************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/* 194 */,
+/* 195 */,
+/* 196 */
+/*!*******************************************************************!*\
+  !*** E:/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/parent.js ***!
+  \*******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _utils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../utils */ 16);
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 15);var _default =
 
+{
+  data: function data() {
+    return {
+      Parent: null };
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-    data() {
-        return {
-            Parent: null,
-        }
+  },
+
+  computed: {
+    parent: function parent() {
+      return this.getParent() || this.Parent || {};
     },
 
-    computed: {
-        parent() {
-            return this.getParent() || this.Parent || {};
-        },
+    hasParent: function hasParent() {
+      return !(0, _utils.isEmpty)(this.parent);
+    } },
 
-        hasParent() {
-            return !Object(_utils__WEBPACK_IMPORTED_MODULE_0__["isEmpty"])(this.parent)
-        }
-    },
 
-    mounted() {
-        this.Parent = this.getParent()
-    },
+  mounted: function mounted() {
+    this.Parent = this.getParent();
+  },
 
-    methods: {
-        getParent() {
-            if (!this.ComponentName) {
-                return null
-            }
+  methods: {
+    getParent: function getParent() {
+      if (!this.ComponentName) {
+        return null;
+      }
 
-            return _utils__WEBPACK_IMPORTED_MODULE_0__["getParent"].call(this, this.ComponentName, this.Keys)
-        }
-    }
-});
+      return _utils.getParent.call(this, this.ComponentName, this.Keys);
+    } } };exports.default = _default;
 
 /***/ })
 ]]);

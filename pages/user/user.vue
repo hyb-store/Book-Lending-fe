@@ -35,16 +35,15 @@
 						id: 1,
 						name: '个人信息',
 						icon: 'compose'
-					},{
+					}, {
 						id: 2,
 						name: '浏览历史',
 						icon: 'paperplane'
 					}],
 					[{
-							id: 11,
+							id: 3,
 							name: '我要借出',
-							icon: 'personadd',
-							openType: 'feedback'
+							icon: 'personadd'
 						},
 						{
 							id: 12,
@@ -66,6 +65,7 @@
 			//用户点击列表项
 			toPage(id) {
 				console.log(id)
+				
 				switch (id) {
 					case 1:
 						uni.navigateTo({
@@ -76,7 +76,7 @@
 							url: '../browsingHistory/browsingHistory'
 						});
 						break;
-					case 11:
+					case 3:
 						uni.navigateTo({
 							url: '../lend/lend'
 						});
