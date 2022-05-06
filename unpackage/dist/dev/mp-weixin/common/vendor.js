@@ -8647,9 +8647,20 @@ function resolveLocaleChain(locale) {
 /* 6 */,
 /* 7 */,
 /* 8 */,
-/* 9 */,
+/* 9 */
+/*!****************************************************************************!*\
+  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/common/constant.js ***!
+  \****************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
+
+/***/ }),
 /* 10 */,
-/* 11 */
+/* 11 */,
+/* 12 */
 /*!**********************************************************************************************************!*\
   !*** ./node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js ***!
   \**********************************************************************************************************/
@@ -8777,7 +8788,7 @@ function normalizeComponent (
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /*!**************************************************************************************!*\
   !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/index.js ***!
   \**************************************************************************************/
@@ -8785,11 +8796,11 @@ function normalizeComponent (
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });Object.defineProperty(exports, "Storage", { enumerable: true, get: function get() {return _storage.default;} });Object.defineProperty(exports, "Emitter", { enumerable: true, get: function get() {return _emitter.default;} });exports.default = void 0;var _storage = _interopRequireDefault(__webpack_require__(/*! ./utils/storage */ 13));
-var _emitter = _interopRequireDefault(__webpack_require__(/*! ./mixins/emitter */ 14));
-var _utils = __webpack_require__(/*! ./utils */ 15);
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });Object.defineProperty(exports, "Storage", { enumerable: true, get: function get() {return _storage.default;} });Object.defineProperty(exports, "Emitter", { enumerable: true, get: function get() {return _emitter.default;} });exports.default = void 0;var _storage = _interopRequireDefault(__webpack_require__(/*! ./utils/storage */ 14));
+var _emitter = _interopRequireDefault(__webpack_require__(/*! ./mixins/emitter */ 15));
+var _utils = __webpack_require__(/*! ./utils */ 16);
 
-__webpack_require__(/*! ./common */ 16);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+__webpack_require__(/*! ./common */ 17);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
 
 var install = function install(Vue) {var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
   // 默认配置数据
@@ -8815,7 +8826,7 @@ var install = function install(Vue) {var options = arguments.length > 1 && argum
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 13 */
+/* 14 */
 /*!**********************************************************************************************!*\
   !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/utils/storage.js ***!
   \**********************************************************************************************/
@@ -8881,7 +8892,7 @@ var install = function install(Vue) {var options = arguments.length > 1 && argum
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
-/* 14 */
+/* 15 */
 /*!***********************************************************************************************!*\
   !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/mixins/emitter.js ***!
   \***********************************************************************************************/
@@ -8923,7 +8934,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
     } } };exports.default = _default;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /*!********************************************************************************************!*\
   !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/utils/index.js ***!
   \********************************************************************************************/
@@ -9162,7 +9173,7 @@ function orderBy(list, key) {
 }
 
 /***/ }),
-/* 16 */
+/* 17 */
 /*!***************************************************************************************!*\
   !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/node_modules/cl-uni/common.js ***!
   \***************************************************************************************/
@@ -9182,23 +9193,12 @@ Promise.prototype.done = function (cb) {
 };
 
 /***/ }),
-/* 17 */,
 /* 18 */,
 /* 19 */,
 /* 20 */,
 /* 21 */,
 /* 22 */,
-/* 23 */
-/*!****************************************************************************!*\
-  !*** /Users/renwentao/Desktop/code/hyb/Book-Lending-fe/common/constant.js ***!
-  \****************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
-
-/***/ }),
+/* 23 */,
 /* 24 */,
 /* 25 */,
 /* 26 */,
@@ -12813,7 +12813,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 15);var _default =
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 16);var _default =
 
 {
   computed: {
@@ -14281,7 +14281,7 @@ Schema;exports.default = _default;
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 15);var _default =
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 16);var _default =
 
 {
   data: function data() {

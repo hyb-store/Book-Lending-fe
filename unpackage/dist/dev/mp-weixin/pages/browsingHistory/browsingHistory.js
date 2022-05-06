@@ -29,7 +29,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _browsingHistory_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./browsingHistory.vue?vue&type=script&lang=js& */ 68);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _browsingHistory_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _browsingHistory_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__[key]; }) }(__WEBPACK_IMPORT_KEY__));
 /* harmony import */ var _browsingHistory_vue_vue_type_style_index_0_id_0e323aa2_lang_scss_scoped_true___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./browsingHistory.vue?vue&type=style&index=0&id=0e323aa2&lang=scss&scoped=true& */ 70);
-/* harmony import */ var _Applications_HBuilderX_app_Contents_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 11);
+/* harmony import */ var _Applications_HBuilderX_app_Contents_HBuilderX_plugins_uniapp_cli_node_modules_dcloudio_vue_cli_plugin_uni_packages_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../../../../../Applications/HBuilderX.app/Contents/HBuilderX/plugins/uniapp-cli/node_modules/@dcloudio/vue-cli-plugin-uni/packages/vue-loader/lib/runtime/componentNormalizer.js */ 12);
 
 var renderjs
 
@@ -95,8 +95,23 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
-    uniLoadMore: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-load-more/components/uni-load-more/uni-load-more */ "uni_modules/uni-load-more/components/uni-load-more/uni-load-more").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue */ 176))
+    clTabs: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-tabs/cl-tabs */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-tabs/cl-tabs")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tabs/cl-tabs.vue */ 244))
+    },
+    clScroller: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-scroller/cl-scroller */ "node-modules/cl-uni/components/cl-scroller/cl-scroller").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-scroller/cl-scroller.vue */ 264))
+    },
+    clLoadingMask: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask */ "node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loading-mask/cl-loading-mask.vue */ 222))
+    },
+    clListItem: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-list-item/cl-list-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-list-item/cl-list-item")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-list-item/cl-list-item.vue */ 259))
+    },
+    clIcon: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-icon/cl-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-icon/cl-icon")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-icon/cl-icon.vue */ 205))
+    },
+    clLoadmore: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loadmore/cl-loadmore */ "node-modules/cl-uni/components/cl-loadmore/cl-loadmore").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loadmore/cl-loadmore.vue */ 249))
     }
   }
 } catch (e) {
@@ -153,7 +168,31 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0; //
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;} //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -172,19 +211,105 @@ __webpack_require__.r(__webpack_exports__);
 var _default =
 {
   data: function data() {
+    var labels = [
+    {
+      label: "热门",
+      value: 1,
+      loaded: true },
+
+    {
+      label: "猜你喜欢",
+      value: 2 }];
+
+
+
+    var list = labels.map(function (e) {
+      return _objectSpread(_objectSpread({},
+      e), {}, {
+        status: e.value,
+        data: [],
+        finished: false,
+        loading: false,
+        pagination: {
+          page: 1,
+          size: 20 } });
+
+
+    });
     return {
-      bookInfo: [] };
+      current: 0,
+      labels: labels,
+      list: list,
+      loading: true };
 
   },
   onLoad: function onLoad() {},
   onShow: function onShow() {
-    var array = uni.getStorageSync('bookHistory');
-    if (array.length > 50) {
-      array.splice(50);
-    }
-    this.bookInfo = array;
+
+  },
+  mounted: function mounted() {
+    this.refresh();
   },
   methods: {
+    onDown: function onDown() {var _this = this;
+      this.refresh({
+        page: 1 }).
+      done(function () {
+        _this.$refs["scroller-".concat(_this.current)][0].end();
+      });
+    },
+
+    onUp: function onUp() {var _this$list$this$curre =
+      this.list[this.current],pagination = _this$list$this$curre.pagination,finished = _this$list$this$curre.finished;
+
+      if (!finished) {
+        this.refresh({
+          page: pagination.page + 1 });
+
+      }
+    },
+    onChangeSwiper: function onChangeSwiper(e) {var _this2 = this;
+      this.current = e.detail.current;
+
+      if (!this.list[this.current].loaded) {
+        this.loading = true;
+        this.list[this.current].loaded = true;
+      }
+
+      setTimeout(function () {
+        _this2.refresh({
+          page: 1 });
+
+      }, 500);
+    },
+
+    refresh: function refresh() {var _this3 = this;var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var item = this.list[this.current];
+
+      var data = _objectSpread(_objectSpread({},
+      item.pagination), {}, {
+        status: item.status,
+        sort: "desc",
+        order: "createTime" },
+      params);
+
+
+      return new Promise(function (resolve) {
+        item.loading = true;
+
+        // console.log("Refresh");
+
+        setTimeout(function () {
+          item.data = new Array(data.page == 1 ? 10 : data.page * 10).fill(1);
+          item.pagination.page = data.page;
+          item.finished = false;
+          item.loading = false;
+          _this3.loading = false;
+          resolve();
+        }, 500);
+      });
+    },
+
     handleDetail: function handleDetail(e) {
       uni.navigateTo({
         url: '../bookDetail/bookDetail?pageInfo=' + JSON.stringify(e) });

@@ -37,7 +37,7 @@
 						icon: 'compose'
 					},{
 						id: 2,
-						name: '浏览历史',
+						name: '借书记录',
 						icon: 'paperplane'
 					}],
 					[{

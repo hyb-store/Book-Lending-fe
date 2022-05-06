@@ -16,6 +16,7 @@ export default {
 						},
 
 						success: (res) => {
+							console.log(res)
 							let userInfo = res.data.data.user
 							
 							uni.setStorageSync("user_info", userInfo)

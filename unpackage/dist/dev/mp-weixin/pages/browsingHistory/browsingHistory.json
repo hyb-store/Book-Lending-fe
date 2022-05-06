@@ -1,6 +1,11 @@
 {
-  "navigationBarTitleText": "浏览历史",
+  "navigationBarTitleText": "借书记录",
   "usingComponents": {
-    "uni-load-more": "/uni_modules/uni-load-more/components/uni-load-more/uni-load-more"
+    "cl-tabs": "/node-modules/cl-uni/components/cl-tabs/cl-tabs",
+    "cl-scroller": "/node-modules/cl-uni/components/cl-scroller/cl-scroller",
+    "cl-loading-mask": "/node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask",
+    "cl-list-item": "/node-modules/cl-uni/components/cl-list-item/cl-list-item",
+    "cl-icon": "/node-modules/cl-uni/components/cl-icon/cl-icon",
+    "cl-loadmore": "/node-modules/cl-uni/components/cl-loadmore/cl-loadmore"
   }
 }
