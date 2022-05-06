@@ -1,4 +1,4 @@
-const mimeMap = require('./mimeMap.js')
+import mimeMap from './mimeMap.js'
 
 function FormData() {
 	let fileManager = wx.getFileSystemManager();

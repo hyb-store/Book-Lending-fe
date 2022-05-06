@@ -4,23 +4,16 @@
 			<uni-search-bar disabled :radius="100" placeholder="输入书籍名称"></uni-search-bar>
 		</navigator>
 		<view>
-			<scroll-view
-				show-scrollbar="true"
-				style="height: 100vh"
-				scroll-y="true"
-				:refresher-enabled="isOpenRefresh"
-				:refresher-triggered="triggered"
-				refresher-background="gray"
-				@refresherpulling="onPulling"
-				@refresherrefresh="onRefresh"
-				@scroll="onScroll"
-			>
+			<scroll-view show-scrollbar="true" style="height: 100vh" scroll-y="true" :refresher-enabled="isOpenRefresh"
+				:refresher-triggered="triggered" refresher-background="gray" @refresherpulling="onPulling"
+				@refresherrefresh="onRefresh" @scroll="onScroll">
 				<view v-if="!isOpenRefresh">别拉了，没有更多了~</view>
 				<view class="swiper-container">
-					<cl-swiper height="200px"  :list="list"></cl-swiper>
+					<cl-swiper height="200px" :list="list"></cl-swiper>
 				</view>
 				<view class="book_list">
-					<view class="book_row" @click="handleDetail(item)" v-for="(item, index) in bookInfo" :key="item._id">
+					<view class="book_row" @click="handleDetail(item)" v-for="(item, index) in bookInfo"
+						:key="item._id">
 						<image :src="item.bookImg" mode=""></image>
 						<!-- <view class="book_tag">{{ item.tag }}</view> -->
 						<view class="book_bottom">
@@ -28,22 +21,25 @@
 							<view class="book_author">{{ item.author }}</view>
 						</view>
 					</view>
-					
+
 					<!-- <uni-load-more :status="lodingStatus"></uni-load-more> -->
 				</view>
 			</scroll-view>
 		</view>
-		
-		
+
+
 		<view @click="backToTop" v-if="showBackTop" class="back_top">
 			<uni-icons size="20" color="#FFFFFF" type="arrowthinup"></uni-icons>
 		</view>
+		<cl-message ref="message"></cl-message>
 	</view>
 </template>
 
 <script>
- 	import { baseUrl } from '../../common/constant.js'
- 	var _self;
+	import {
+		baseUrl
+	} from '../../common/constant.js'
+	var _self;
 	export default {
 		data() {
 			return {
@@ -55,7 +51,8 @@
 				scrollTop: '',
 				list: [],
 				triggered: false,
-				isOpenRefresh: true // 是否开启下拉
+				isOpenRefresh: true, // 是否开启下拉
+				_freshing: false,
 			};
 		},
 		computed: {
@@ -101,17 +98,70 @@
 		methods: {
 			onPulling(e) {
 				console.log("onpulling", e);
-				if (e.detail.deltaY < 0) return  // 防止上滑页面也触发下拉
+				if (e.detail.deltaY < 0) return // 防止上滑页面也触发下拉
 				this.triggered = true;
 			},
 
 			onRefresh() {
 				console.log('sss')
+				if (this._freshing) {
+					return
+				}
+				this._freshing = true
+				uni.request({
+					url: `${baseUrl}/index/recommend?uid=3`,
+					data: {},
+					header: {},
+					success: (res) => {
+
+						let lists = res.data.data
+						let bookList = []
+						lists.filter(item => item).forEach((item) => {
+							const items = {
+								_id: item.bid,
+								bookImg: item.bookImg,
+								bookName: item.bookName,
+								author: item.author
+							}
+							bookList.push(items)
+						})
+
+						this.bookInfo = bookList.concat(this.bookInfo)
+						this.pageTotal = bookList.length
+						uni.request({
+							url: `${baseUrl}/index/getTop3`,
+							success: (res) => {
+								const {
+									data: resData
+								} = res;
+								if (resData) {
+									const {
+										data
+									} = resData;
+									this.list = data.map(item => {
+										return ({
+											_id: item.bid,
+											url: item.bookImg,
+											title: item.bookName,
+											author: item.author
+										})
+									})
+									this.triggered = false
+									this._freshing = false
+									this.$refs["message"].open({
+										message: "刷新成功",
+									});
+								}
+							}
+						})
+
+					}
+				})
 			},
-			onScroll(e) {  
-			  this.scrollTop = e.detail.scrollTop
+			onScroll(e) {
+				this.scrollTop = e.detail.scrollTop
 			},
-		
+
 			getSwiperData() {
 				uni.request({
 					url: `${baseUrl}/index/getTop3`,
@@ -253,7 +303,7 @@
 						text-overflow: ellipsis;
 						display: -webkit-box;
 						-webkit-line-clamp: 2; //多行在这里修改数字即可
-						overflow:hidden;
+						overflow: hidden;
 						/* autoprefixer: ignore next */
 						-webkit-box-orient: vertical;
 					}
