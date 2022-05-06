@@ -197,7 +197,7 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
 
 
 
@@ -230,7 +230,10 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 
 
 var _axios = _interopRequireDefault(__webpack_require__(/*! axios */ 78));
-var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
+var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);
+
+
+var _formdata = _interopRequireDefault(__webpack_require__(/*! ../../common/formdata.js */ 244));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
 {
   data: function data() {
     return {
@@ -242,7 +245,7 @@ var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function 
         press: '安岳北504',
         description: '这是描述,这是描述,这是描述,这是描述' },
 
-      bookImg: null,
+      bookImg: '',
       typeList: [{
         value: 1,
         label: "编程语言" },
@@ -277,26 +280,45 @@ var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function 
 
   methods: {
     onSubmit: function onSubmit() {
-      var formData = new FormData();
+      var formData = new _formdata.default();
       var book = JSON.stringify(_objectSpread({
         uid: 1 },
       this.form));
 
       formData.append('book', book);
-      formData.append('file', this.bookImg);
-      console.log('book', formData.get(book));
-      _axios.default.post("".concat(_constant.baseUrl, "/borrow/upload"), formData, {
-        header: {
-          "Content-Type": "application/x-www-form-urlencoded" } }).
+      console.log(this.bookImg);
+      var uri = uni.getStorage({
+        key: 'url',
+        success: function success(_ref)
 
-      then(function (res) {
-        comsole.log(res);
-      });
+        {var imgUrl = _ref.data;
+          console.log(imgUrl);
+          formData.appendFile('file', imgUrl);
+          var data = formData.getData();
+          uni.request({
+            method: 'post',
+            url: "".concat(_constant.baseUrl, "borrow/upload"),
+            data: data.buffer,
+            header: {
+              "content-type": data.contentType } }).
+
+          then(function (res) {
+            console.log(res);
+          });
+        } });
+
+
     },
     handleFile: function handleFile(file) {
-      console.log(file);
-      this.bookImg = file;
+      this.bookImg = file.path;
+      console.log(this.bookImg);
+      uni.setStorage({
+        key: 'url',
+        data: file.path });
+
+      return true;
     } } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ })
 

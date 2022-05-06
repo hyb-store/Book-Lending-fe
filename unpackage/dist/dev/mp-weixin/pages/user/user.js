@@ -196,10 +196,9 @@ var _default =
         icon: 'paperplane' }],
 
       [{
-        id: 11,
+        id: 3,
         name: '我要借出',
-        icon: 'personadd',
-        openType: 'feedback' },
+        icon: 'personadd' },
 
       {
         id: 12,
@@ -221,6 +220,7 @@ var _default =
     //用户点击列表项
     toPage: function toPage(id) {
       console.log(id);
+
       switch (id) {
         case 1:
           uni.navigateTo({
@@ -231,7 +231,7 @@ var _default =
             url: '../browsingHistory/browsingHistory' });
 
           break;
-        case 11:
+        case 3:
           uni.navigateTo({
             url: '../lend/lend' });
 

@@ -103,6 +103,9 @@ try {
     },
     uniIcons: function() {
       return Promise.all(/*! import() | uni_modules/uni-icons/components/uni-icons/uni-icons */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-icons/components/uni-icons/uni-icons")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-icons/components/uni-icons/uni-icons.vue */ 150))
+    },
+    clMessage: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-message/cl-message */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-message/cl-message")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-message/cl-message.vue */ 284))
     }
   }
 } catch (e) {
@@ -197,13 +200,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
-
-
-
-
-
 var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}
+
+
 var _self;var _default =
 {
   data: function data() {var _ref;
@@ -216,7 +215,8 @@ var _self;var _default =
     ''), _defineProperty(_ref, "list",
     []), _defineProperty(_ref, "triggered",
     false), _defineProperty(_ref, "isOpenRefresh",
-    true), _ref;
+    true), _defineProperty(_ref, "_freshing",
+    false), _ref;
 
   },
   computed: {
@@ -266,14 +266,67 @@ var _self;var _default =
       this.triggered = true;
     },
 
-    onRefresh: function onRefresh() {
+    onRefresh: function onRefresh() {var _this = this;
       console.log('sss');
+      if (this._freshing) {
+        return;
+      }
+      this._freshing = true;
+      uni.request({
+        url: "".concat(_constant.baseUrl, "/index/recommend?uid=3"),
+        data: {},
+        header: {},
+        success: function success(res) {
+
+          var lists = res.data.data;
+          var bookList = [];
+          lists.filter(function (item) {return item;}).forEach(function (item) {
+            var items = {
+              _id: item.bid,
+              bookImg: item.bookImg,
+              bookName: item.bookName,
+              author: item.author };
+
+            bookList.push(items);
+          });
+
+          _this.bookInfo = bookList.concat(_this.bookInfo);
+          _this.pageTotal = bookList.length;
+          uni.request({
+            url: "".concat(_constant.baseUrl, "/index/getTop3"),
+            success: function success(res) {var
+
+              resData =
+              res.data;
+              if (resData) {var
+
+                data =
+                resData.data;
+                _this.list = data.map(function (item) {
+                  return {
+                    _id: item.bid,
+                    url: item.bookImg,
+                    title: item.bookName,
+                    author: item.author };
+
+                });
+                _this.triggered = false;
+                _this._freshing = false;
+                _this.$refs["message"].open({
+                  message: "刷新成功" });
+
+              }
+            } });
+
+
+        } });
+
     },
     onScroll: function onScroll(e) {
       this.scrollTop = e.detail.scrollTop;
     },
 
-    getSwiperData: function getSwiperData() {var _this = this;
+    getSwiperData: function getSwiperData() {var _this2 = this;
       uni.request({
         url: "".concat(_constant.baseUrl, "/index/getTop3"),
         success: function success(res) {var
@@ -284,7 +337,7 @@ var _self;var _default =
 
             data =
             resData.data;
-            _this.list = data.map(function (item) {
+            _this2.list = data.map(function (item) {
               return {
                 _id: item.bid,
                 url: item.bookImg,
@@ -302,7 +355,7 @@ var _self;var _default =
         duration: 300 });
 
     },
-    getBookInfo: function getBookInfo() {var _this2 = this;
+    getBookInfo: function getBookInfo() {var _this3 = this;
       uni.request({
         url: "".concat(_constant.baseUrl, "/index/recommend?uid=3"),
         data: {},
@@ -321,8 +374,8 @@ var _self;var _default =
             bookList.push(items);
           });
 
-          _this2.bookInfo = bookList;
-          _this2.pageTotal = bookList.length;
+          _this3.bookInfo = bookList;
+          _this3.pageTotal = bookList.length;
         } });
 
     },

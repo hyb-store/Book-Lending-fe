@@ -16,7 +16,7 @@
 			<cl-form-item prop="pubTime" label="出版时间">
 				<cl-input v-model="form.pubTime"></cl-input>
 			</cl-form-item>
-			<cl-form-item prop="tid" label="出版时间">
+			<cl-form-item prop="tid" label="类型">
 				<cl-select v-model="form.tid" :options="typeList"></cl-select>
 			</cl-form-item>
 			<cl-form-item prop="img" label="封面">
@@ -31,7 +31,10 @@
 
 <script>
 	import axios from 'axios'
-	import {baseUrl} from '../../common/constant.js'
+	import {
+		baseUrl
+	} from '../../common/constant.js'
+	import FormData from '../../common/formdata.js'
 	export default {
 		data() {
 			return {
@@ -43,7 +46,7 @@
 					press: '安岳北504',
 					description: '这是描述,这是描述,这是描述,这是描述'
 				},
-				bookImg: null,
+				bookImg: '',
 				typeList: [{
 						value: 1,
 						label: "编程语言"
@@ -84,19 +87,37 @@
 					...this.form
 				})
 				formData.append('book', book)
-				formData.append('file', this.bookImg)
-				console.log('book', formData.get(book))
-				axios.post(`${baseUrl}/borrow/upload`, formData, {
-					header: {
-						"Content-Type": "application/x-www-form-urlencoded"
+				console.log(this.bookImg)
+				const uri = uni.getStorage({
+					key: 'url',
+					success: ({
+						data: imgUrl
+					}) => {
+						console.log(imgUrl)
+						formData.appendFile('file', imgUrl)
+						const data = formData.getData();
+						uni.request({
+							method: 'post',
+							url: `${baseUrl}borrow/upload`,
+							data: data.buffer,
+							header: {
+								"content-type": data.contentType,
+							}
+						}).then(res => {
+							console.log(res)
+						})
 					}
-				}).then(res => {
-					comsole.log(res)
 				})
+				
 			},
 			handleFile(file) {
-				console.log(file)
-				this.bookImg = file
+				this.bookImg = file.path
+				console.log(this.bookImg)
+				uni.setStorage({
+					key: 'url',
+					data: file.path
+				})
+				return true
 			}
 		}
 	};

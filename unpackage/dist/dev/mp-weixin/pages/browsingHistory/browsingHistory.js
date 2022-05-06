@@ -96,7 +96,7 @@ var components
 try {
   components = {
     clTabs: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-tabs/cl-tabs */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-tabs/cl-tabs")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tabs/cl-tabs.vue */ 244))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-tabs/cl-tabs */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-tabs/cl-tabs")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tabs/cl-tabs.vue */ 289))
     },
     clScroller: function() {
       return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-scroller/cl-scroller */ "node-modules/cl-uni/components/cl-scroller/cl-scroller").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-scroller/cl-scroller.vue */ 264))
