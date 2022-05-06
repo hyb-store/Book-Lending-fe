@@ -96,16 +96,16 @@ var components
 try {
   components = {
     uniSearchBar: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar */ "uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.vue */ 136))
+      return __webpack_require__.e(/*! import() | uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar */ "uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-search-bar/components/uni-search-bar/uni-search-bar.vue */ 138))
     },
     clSwiper: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-swiper/cl-swiper */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-swiper/cl-swiper")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-swiper/cl-swiper.vue */ 143))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-swiper/cl-swiper */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-swiper/cl-swiper")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-swiper/cl-swiper.vue */ 145))
     },
     uniIcons: function() {
-      return Promise.all(/*! import() | uni_modules/uni-icons/components/uni-icons/uni-icons */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-icons/components/uni-icons/uni-icons")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-icons/components/uni-icons/uni-icons.vue */ 150))
+      return Promise.all(/*! import() | uni_modules/uni-icons/components/uni-icons/uni-icons */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-icons/components/uni-icons/uni-icons")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-icons/components/uni-icons/uni-icons.vue */ 152))
     },
     clMessage: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-message/cl-message */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-message/cl-message")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-message/cl-message.vue */ 284))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-message/cl-message */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-message/cl-message")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-message/cl-message.vue */ 160))
     }
   }
 } catch (e) {
@@ -364,7 +364,7 @@ var _self;var _default =
 
           var lists = res.data.data;
           var bookList = [];
-          lists.forEach(function (item) {
+          lists.filter(function (item) {return item;}).forEach(function (item) {
             var items = {
               _id: item.bid,
               bookImg: item.bookImg,

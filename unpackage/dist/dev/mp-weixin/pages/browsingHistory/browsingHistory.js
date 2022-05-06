@@ -96,22 +96,22 @@ var components
 try {
   components = {
     clTabs: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-tabs/cl-tabs */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-tabs/cl-tabs")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tabs/cl-tabs.vue */ 289))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-tabs/cl-tabs */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-tabs/cl-tabs")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tabs/cl-tabs.vue */ 190))
     },
     clScroller: function() {
-      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-scroller/cl-scroller */ "node-modules/cl-uni/components/cl-scroller/cl-scroller").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-scroller/cl-scroller.vue */ 264))
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-scroller/cl-scroller */ "node-modules/cl-uni/components/cl-scroller/cl-scroller").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-scroller/cl-scroller.vue */ 195))
     },
     clLoadingMask: function() {
-      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask */ "node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loading-mask/cl-loading-mask.vue */ 222))
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask */ "node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loading-mask/cl-loading-mask.vue */ 200))
     },
     clListItem: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-list-item/cl-list-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-list-item/cl-list-item")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-list-item/cl-list-item.vue */ 259))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-list-item/cl-list-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-list-item/cl-list-item")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-list-item/cl-list-item.vue */ 205))
     },
     clIcon: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-icon/cl-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-icon/cl-icon")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-icon/cl-icon.vue */ 205))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-icon/cl-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-icon/cl-icon")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-icon/cl-icon.vue */ 211))
     },
     clLoadmore: function() {
-      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loadmore/cl-loadmore */ "node-modules/cl-uni/components/cl-loadmore/cl-loadmore").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loadmore/cl-loadmore.vue */ 249))
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loadmore/cl-loadmore */ "node-modules/cl-uni/components/cl-loadmore/cl-loadmore").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loadmore/cl-loadmore.vue */ 216))
     }
   }
 } catch (e) {
