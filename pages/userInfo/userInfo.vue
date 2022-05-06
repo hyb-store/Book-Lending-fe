@@ -156,7 +156,7 @@ export default {
 				data,
 				method: "POST",
 				success:(res)=> {
-					
+
 					if (res.data.status === 1) {
 						this.$refs["message"].open({
 							message: "提交成功！",
