@@ -26,53 +26,19 @@
 /* 透明度 */
 /* 文章场景相关 */
 .content .book_list.data-v-0e323aa2 {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  padding-top: 60rpx;
-}
-.content .book_list .book_row.data-v-0e323aa2 {
-  width: 335rpx;
-  box-shadow: 1rpx 4rpx 10rpx 2rpx #808080;
-  position: relative;
-  margin-bottom: 30rpx;
-}
-.content .book_list .book_row image.data-v-0e323aa2 {
-  width: 335rpx;
-  height: 400rpx;
-}
-.content .book_list .book_row .book_tag.data-v-0e323aa2 {
-  position: absolute;
-  left: 0;
-  top: 0;
-  background: rgba(0, 0, 0, 0.8);
-  width: 200rpx;
-  height: 50rpx;
-  color: #ffffff;
-  font-size: 26rpx;
-  font-weight: bold;
-  line-height: 50rpx;
-  text-align: center;
+  height: 100vh;
   overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
 }
-.content .book_list .book_row .book_bottom.data-v-0e323aa2 {
-  text-align: center;
-  padding: 0 10rpx;
-  box-sizing: border-box;
+.content .book_list .container.data-v-0e323aa2 {
+  height: 95%;
+  background-color: #f7f7f7;
 }
-.content .book_list .book_row .book_bottom .book_name.data-v-0e323aa2 {
-  font-size: 30rpx;
-  color: #333333;
-  border-bottom: 2rpx dashed #ccc;
-  font-weight: bold;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+.content .book_list .list.data-v-0e323aa2 {
+  padding: 20rpx;
 }
-.content .book_list .book_row .book_bottom .book_author.data-v-0e323aa2 {
-  color: #333333;
-  font-size: 28rpx;
+.content .book_list .list.data-v-0e323aa2 .cl-list-item {
+  height: 100rpx;
+  margin-bottom: 20rpx;
+  border-radius: 10rpx;
 }
 

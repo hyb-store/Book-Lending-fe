@@ -39,7 +39,7 @@
 		}, {
 			"path": "pages/browsingHistory/browsingHistory",
 			"style": {
-				"navigationBarTitleText": "浏览历史"
+				"navigationBarTitleText": "借书记录"
 			}
 		}, {
 			"path": "pages/lend/lend",

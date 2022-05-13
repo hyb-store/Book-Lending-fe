@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "添加书籍",
-  "usingComponents": {
-    "uni-icons": "/uni_modules/uni-icons/components/uni-icons/uni-icons"
-  }
-}

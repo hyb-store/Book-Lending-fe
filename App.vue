@@ -1,4 +1,5 @@
 <script>
+import { baseUrl } from "./common/constant.js"
 export default {
 	onLaunch: function() {
 		if (!uni.getStorageSync('userInfo')) {
@@ -8,13 +9,14 @@ export default {
 					const code = res.code
 					
 					uni.request({
-						url: this.baseUrl + 'user/login',
+						url: baseUrl + 'user/login',
 						method: "GET",
 						data: {
 							code: code
 						},
 
 						success: (res) => {
+							console.log(res)
 							let userInfo = res.data.data.user
 							
 							uni.setStorageSync("user_info", userInfo)
