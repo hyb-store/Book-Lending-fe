@@ -93,7 +93,8 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _default =
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+var _constant = __webpack_require__(/*! ./common/constant.js */ 9);var _default =
 {
   onLaunch: function onLaunch() {
     if (!uni.getStorageSync('userInfo')) {
@@ -103,13 +104,14 @@ __webpack_require__.r(__webpack_exports__);
           var code = res.code;
 
           uni.request({
-            url: this.baseUrl + 'user/login',
+            url: _constant.baseUrl + 'user/login',
             method: "GET",
             data: {
               code: code },
 
 
             success: function success(res) {
+              console.log(res);
               var userInfo = res.data.data.user;
 
               uni.setStorageSync("user_info", userInfo);

@@ -12,7 +12,7 @@
 					<cl-swiper height="200px" :list="list"></cl-swiper>
 				</view>
 				<view class="book_list">
-					<view class="book_row" @click="handleDetail(item)" v-for="(item, index) in bookInfo"
+					<view class="book_row" @click="handleDetail(item)" v-for="(item) in bookInfo"
 						:key="item._id">
 						<image :src="item.bookImg" mode=""></image>
 						<!-- <view class="book_tag">{{ item.tag }}</view> -->
@@ -109,7 +109,7 @@
 				}
 				this._freshing = true
 				uni.request({
-					url: `${baseUrl}/index/recommend?uid=3`,
+					url: `${baseUrl}index/recommend?uid=3`,
 					data: {},
 					header: {},
 					success: (res) => {
@@ -200,7 +200,7 @@
 
 						let lists = res.data.data
 						let bookList = []
-						lists.forEach((item) => {
+						lists.filter(item => item).forEach((item) => {
 							const items = {
 								_id: item.bid,
 								bookImg: item.bookImg,

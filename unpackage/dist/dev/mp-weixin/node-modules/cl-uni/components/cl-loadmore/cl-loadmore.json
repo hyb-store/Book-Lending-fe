@@ -1,0 +1,7 @@
+{
+  "usingComponents": {
+    "cl-divider": "/node-modules/cl-uni/components/cl-divider/cl-divider",
+    "cl-loading": "/node-modules/cl-uni/components/cl-loading/cl-loading"
+  },
+  "component": true
+}

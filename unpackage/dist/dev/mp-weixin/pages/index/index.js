@@ -273,7 +273,7 @@ var _self;var _default =
       }
       this._freshing = true;
       uni.request({
-        url: "".concat(_constant.baseUrl, "/index/recommend?uid=3"),
+        url: "".concat(_constant.baseUrl, "index/recommend?uid=3"),
         data: {},
         header: {},
         success: function success(res) {
@@ -364,7 +364,7 @@ var _self;var _default =
 
           var lists = res.data.data;
           var bookList = [];
-          lists.forEach(function (item) {
+          lists.filter(function (item) {return item;}).forEach(function (item) {
             var items = {
               _id: item.bid,
               bookImg: item.bookImg,

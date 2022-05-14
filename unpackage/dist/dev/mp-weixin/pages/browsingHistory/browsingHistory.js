@@ -95,8 +95,20 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
-    uniLoadMore: function() {
-      return __webpack_require__.e(/*! import() | uni_modules/uni-load-more/components/uni-load-more/uni-load-more */ "uni_modules/uni-load-more/components/uni-load-more/uni-load-more").then(__webpack_require__.bind(null, /*! @/uni_modules/uni-load-more/components/uni-load-more/uni-load-more.vue */ 183))
+    clTabs: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-tabs/cl-tabs */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-tabs/cl-tabs")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tabs/cl-tabs.vue */ 190))
+    },
+    clScroller: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-scroller/cl-scroller */ "node-modules/cl-uni/components/cl-scroller/cl-scroller").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-scroller/cl-scroller.vue */ 195))
+    },
+    clLoadingMask: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask */ "node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loading-mask/cl-loading-mask.vue */ 200))
+    },
+    clTag: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-tag/cl-tag */ "node-modules/cl-uni/components/cl-tag/cl-tag").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tag/cl-tag.vue */ 205))
+    },
+    clLoadmore: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loadmore/cl-loadmore */ "node-modules/cl-uni/components/cl-loadmore/cl-loadmore").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loadmore/cl-loadmore.vue */ 216))
     }
   }
 } catch (e) {
@@ -153,38 +165,206 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-var _default =
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
+
+
 {
   data: function data() {
+    var labels = [{
+      label: "借入记录",
+      value: 1,
+      loaded: true },
+
+    {
+      label: "借出记录",
+      value: 2 }];
+
+
+
+    var list = labels.map(function (e) {
+      return _objectSpread(_objectSpread({},
+      e), {}, {
+        status: e.value,
+        data: [],
+        finished: false,
+        loading: false,
+        pagination: {
+          page: 1,
+          size: 20 } });
+
+
+    });
     return {
-      bookInfo: [] };
+      current: 0,
+      labels: labels,
+      list: list,
+      loading: true,
+      returnTypeMapInfo: [{
+        tagType: 'error',
+        message: '未归还' },
+      {
+        tagType: 'success',
+        message: '准时归还' },
+      {
+        tagType: 'warning',
+        message: '超时归还' }] };
+
 
   },
   onLoad: function onLoad() {},
   onShow: function onShow() {
-    var array = uni.getStorageSync('bookHistory');
-    if (array.length > 50) {
-      array.splice(50);
-    }
-    this.bookInfo = array;
+
+  },
+  mounted: function mounted() {
+    this.refresh();
   },
   methods: {
+    // onDown() {
+    // 	this.refresh({
+    // 		page: 1
+    // 	}).done(() => {
+    // 		this.$refs[`scroller-${this.current}`][0].end();
+    // 	});
+    // },
+
+    // onUp() {
+    // 	const { pagination, finished } = this.list[this.current];
+
+    // 	if (!finished) {
+    // 		this.refresh({
+    // 			page: pagination.page + 1
+    // 		});
+    // 	}
+    // },
+    onChangeSwiper: function onChangeSwiper(e) {var _this = this;
+      //console.log(e);
+      this.current = e.detail.current;
+
+      if (!this.list[this.current].loaded) {
+        this.loading = true;
+        this.list[this.current].loaded = true;
+      }
+
+      setTimeout(function () {
+        _this.refresh({
+          page: 1 });
+
+      }, 500);
+    },
+
+    refresh: function refresh() {var _this2 = this;var params = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var item = this.list[this.current];
+      console.log(item);
+      var data = _objectSpread(_objectSpread({},
+      item.pagination), {}, {
+        status: item.status,
+        sort: "desc",
+        order: "createTime" },
+      params);
+
+
+      return new Promise(function (resolve) {
+        item.loading = true;
+
+        //console.log("Refresh");
+
+        setTimeout(function () {
+          // item.data = new Array(data.page == 1 ? 10 : data.page * 10).fill(1);
+          var book = [];
+          if (_this2.current == 0) {
+            var user_info = uni.getStorageSync('user_info');
+            console.log(user_info);
+            uni.request({
+              url: "".concat(_constant.baseUrl, "user/myLend?openId=").concat(user_info.openId),
+              data: {},
+              header: {},
+              success: function success(res) {
+                console.log(res);
+                //let bookdata = {bookName:"",book_url:"",book_return:""};
+                console.log(res.data.data.length);
+                res.data.data.forEach(function (item1) {
+                  var bookdata = {
+                    bookName: "",
+                    book_url: "",
+                    book_return: "" };
+
+                  bookdata.bookName = item1.book.bookName;
+                  bookdata.book_url = item1.book.bookImg;
+                  //console.log(bookdata.bookName);
+                  if (item1.realTime) {
+                    bookdata.book_return = item1.punctuality ==
+                    0 ? 1 : 2;
+                  } else {
+                    bookdata.book_return = 0;
+                  }
+                  console.log(bookdata);
+                  book.push(bookdata);
+                  console.log(book);
+                });
+                //item.data = {};
+                // item.pagination.page = data.page;
+                // item.finished = false;
+                // item.loading = false;
+                // this.loading = false;
+                // resolve();
+              } });
+
+          }
+          item.data = book;
+          console.log(item.data);
+          item.pagination.page = data.page;
+          item.finished = false;
+          item.loading = false;
+          _this2.loading = false;
+          resolve();
+        }, 500);
+      });
+    },
+
     handleDetail: function handleDetail(e) {
       uni.navigateTo({
         url: '../bookDetail/bookDetail?pageInfo=' + JSON.stringify(e) });

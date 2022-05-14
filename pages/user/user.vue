@@ -37,17 +37,17 @@
 						icon: 'compose'
 					}, {
 						id: 2,
-						name: '浏览历史',
+						name: '借书记录',
 						icon: 'paperplane'
 					}],
 					[{
 							id: 3,
-							name: '我要借出',
+							name: '图书借出',
 							icon: 'personadd'
 						},
 						{
 							id: 12,
-							name: '在线客服',
+							name: '退出登录',
 							icon: 'headphones',
 							openType: 'contact'
 						}

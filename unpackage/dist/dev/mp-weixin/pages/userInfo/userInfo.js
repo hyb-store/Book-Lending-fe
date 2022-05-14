@@ -100,6 +100,21 @@ try {
     },
     clInput: function() {
       return Promise.all(/*! import() | node-modules/cl-uni/components/cl-input/cl-input */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-input/cl-input")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-input/cl-input.vue */ 172))
+    },
+    clSelect: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-select/cl-select */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-select/cl-select")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-select/cl-select.vue */ 232))
+    },
+    clCheckboxGroup: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-checkbox-group/cl-checkbox-group */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-checkbox-group/cl-checkbox-group")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-checkbox-group/cl-checkbox-group.vue */ 242))
+    },
+    clCheckbox: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-checkbox/cl-checkbox */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-checkbox/cl-checkbox")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-checkbox/cl-checkbox.vue */ 247))
+    },
+    clMessage: function() {
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-message/cl-message */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-message/cl-message")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-message/cl-message.vue */ 160))
+    },
+    clButton: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-button/cl-button */ "node-modules/cl-uni/components/cl-button/cl-button").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-button/cl-button.vue */ 178))
     }
   }
 } catch (e) {
@@ -156,44 +171,180 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-var _default =
-{
-  data: function data() {
-    return {};
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
 
 
-  },
-  methods: {} };exports.default = _default;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var _constant = __webpack_require__(/*! ../../common/constant.js */ 9); //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var _default = { data: function data() {return { isDisabled: true, username: null, phone_num: null, email: null, gender: 2, address: null, role: 2, val2: [], list: [{ label: "保密", value: 2 }, { label: "男", value: 1 }, { label: "女", value: 0 }], list1: [{ label: "学生", value: 0 }, { label: "教师", value: 1 }, { label: "保密", value: 2 }] };}, computed: { listenChange: function listenChange() {var username = this.username,phone_num = this.phone_num;if (username !== null && phone_num !== null) {return true;} else {return false;}} }, watch: { listenChange: function listenChange(value) {value ? this.isDisabled = false : this.isDisabled = true;} }, methods: { initInfo: function initInfo() {var userInfo = uni.getStorageSync("user_info");userInfo.username !== null ? this.username = userInfo.username : '';userInfo.address !== null ? this.address = userInfo.address : '';userInfo.email !== null ? this.email = userInfo.email : '';userInfo.phoneNum !== null ? this.phone_num = userInfo.phoneNum : '';userInfo.gender !== 2 ? this.gender = userInfo.gender : '';userInfo.role !== 2 ? this.role = userInfo.role : '';}, handleSubmit: function handleSubmit() {var _this = this;var userId = uni.getStorageSync('user_info').openId;var data = { openId: userId, username: this.username, phoneNum: this.phone_num,
+        address: this.address,
+        email: this.email,
+        gender: this.gender,
+        role: this.role };
+
+      console.log(data);
+
+      uni.request({
+        url: _constant.baseUrl + 'user/perfect',
+        data: data,
+        method: "POST",
+        success: function success(res) {
+
+          if (res.data.status === 1) {
+            _this.$refs["message"].open({
+              message: "提交成功！" });
+
+            uni.setStorageSync('user_info', res.data.data);
+          }
+        } });
+
+
+    } },
+
+  onShow: function onShow() {
+    this.initInfo();
+  } };exports.default = _default;
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./node_modules/@dcloudio/uni-mp-weixin/dist/index.js */ 1)["default"]))
 
 /***/ }),
 

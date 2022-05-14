@@ -8662,7 +8662,7 @@ function resolveLocaleChain(locale) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.110:8080/';exports.baseUrl = baseUrl;
+Object.defineProperty(exports, "__esModule", { value: true });exports.baseUrl = void 0;var baseUrl = 'http://192.168.1.114:8080/';exports.baseUrl = baseUrl;
 
 /***/ }),
 /* 10 */,
