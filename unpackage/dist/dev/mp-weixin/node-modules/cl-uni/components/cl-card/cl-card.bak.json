@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "cl-text": "/node-modules/cl-uni/components/cl-text/cl-text"
+  },
+  "component": true
+}
