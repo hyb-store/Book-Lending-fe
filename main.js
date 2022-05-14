@@ -6,7 +6,7 @@ Vue.use(ClUni, {
 	homePage: "/"
 })
 Vue.config.productionTip = false
-Vue.prototype.baseUrl = 'http://192.168.1.110:8080/';  
+Vue.prototype.baseUrl = 'http://192.168.1.110:8080/'; 
 
 App.mpType = 'app'
 

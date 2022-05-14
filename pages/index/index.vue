@@ -109,7 +109,7 @@
 				}
 				this._freshing = true
 				uni.request({
-					url: `${baseUrl}/index/recommend?uid=3`,
+					url: `${baseUrl}index/recommend?uid=3`,
 					data: {},
 					header: {},
 					success: (res) => {
