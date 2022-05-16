@@ -95,6 +95,9 @@ __webpack_require__.r(__webpack_exports__);
 var components
 try {
   components = {
+    clConfirm: function() {
+      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-confirm/cl-confirm */ "node-modules/cl-uni/components/cl-confirm/cl-confirm").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-confirm/cl-confirm.vue */ 291))
+    },
     uniIcons: function() {
       return Promise.all(/*! import() | uni_modules/uni-icons/components/uni-icons/uni-icons */[__webpack_require__.e("common/vendor"), __webpack_require__.e("uni_modules/uni-icons/components/uni-icons/uni-icons")]).then(__webpack_require__.bind(null, /*! @/uni_modules/uni-icons/components/uni-icons/uni-icons.vue */ 152))
     }
@@ -153,70 +156,140 @@ __webpack_require__.r(__webpack_exports__);
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0; //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-var _default =
-{
-  data: function data() {
-    return {
-      userinfo: {},
-      severList: [
-      [{
-        id: 1,
-        name: '个人信息',
-        icon: 'compose' },
-      {
-        id: 2,
-        name: '借书记录',
-        icon: 'paperplane' }],
-
-      [{
-        id: 3,
-        name: '我要借出',
-        icon: 'personadd' },
-
-      {
-        id: 12,
-        name: '在线客服',
-        icon: 'headphones',
-        openType: 'contact' }],
-
-
-      [{
-        id: 21,
-        name: '管理',
-        icon: 'list' }]] };
+/* WEBPACK VAR INJECTION */(function(uni) {Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;
 
 
 
-  },
-  onLoad: function onLoad() {},
-  methods: {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+var _constant = __webpack_require__(/*! ../../common/constant.js */ 9); //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+var _default = { data: function data() {return { isLogin: true, userinfo: {}, severList: [[{ id: 1, name: '个人信息', icon: 'compose' }, { id: 2, name: '借书记录', icon: 'list' }], [{ id: 3, name: '我要借出', icon: 'paperplane' }, { id: 12, name: '我的图书', icon: 'shop' }]] };}, onLoad: function onLoad() {}, onShow: function onShow() {var userInfo = uni.getStorageSync('user_info');if (!userInfo) {this.isLogin = false;}}, methods: { handleLogin: function handleLogin() {var _this = this;this.$refs["confirm"].open({ title: "提示", message: "确认授权登录？" }).then(function () {_this.isLogin = true;
+        uni.login({
+          provider: 'weixin',
+          success: function success(res) {
+            var code = res.code;
+
+            uni.request({
+              url: _constant.baseUrl + 'user/login',
+              method: "GET",
+              data: {
+                code: code },
+
+
+              success: function success(res) {
+                console.log(res);
+                var userInfo = res.data.data.user;
+                uni.setStorageSync("user_info", userInfo);
+
+              } });
+
+          } });
+
+      }).
+      catch(function () {
+        // this.$refs.toast.open("已取消登录～");
+      });
+    },
+    handleLogout: function handleLogout() {var _this2 = this;
+      this.$refs["confirm"].open({
+        title: "提示",
+        message: "是否退出登录？" }).
+      then(function () {
+        uni.clearStorageSync();
+        console.log(_this2.isLogin);
+        _this2.isLogin = false;
+      }).catch(function () {
+        // this.$refs.toast.open("已取消退出登录～");
+      });
+    },
     //用户点击列表项
     toPage: function toPage(id) {
       console.log(id);
@@ -234,6 +307,11 @@ var _default =
         case 3:
           uni.navigateTo({
             url: '../lend/lend' });
+
+          break;
+        case 12:
+          uni.navigateTo({
+            url: '../myBook/myBook' });
 
           break;}
 
