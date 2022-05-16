@@ -125,19 +125,19 @@ var components
 try {
   components = {
     clForm: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-form/cl-form */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-form/cl-form")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-form/cl-form.vue */ 221))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-form/cl-form */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-form/cl-form")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-form/cl-form.vue */ 215))
     },
     clFormItem: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-form-item/cl-form-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-form-item/cl-form-item")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-form-item/cl-form-item.vue */ 227))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-form-item/cl-form-item */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-form-item/cl-form-item")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-form-item/cl-form-item.vue */ 221))
     },
     clInput: function() {
       return Promise.all(/*! import() | node-modules/cl-uni/components/cl-input/cl-input */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-input/cl-input")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-input/cl-input.vue */ 172))
     },
     clSelect: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-select/cl-select */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-select/cl-select")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-select/cl-select.vue */ 232))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-select/cl-select */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-select/cl-select")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-select/cl-select.vue */ 227))
     },
     clUpload: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-upload/cl-upload */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-upload/cl-upload")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-upload/cl-upload.vue */ 237))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-upload/cl-upload */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-upload/cl-upload")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-upload/cl-upload.vue */ 232))
     },
     clButton: function() {
       return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-button/cl-button */ "node-modules/cl-uni/components/cl-button/cl-button").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-button/cl-button.vue */ 178))

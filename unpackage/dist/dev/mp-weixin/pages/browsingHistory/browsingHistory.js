@@ -106,9 +106,6 @@ try {
     },
     clTag: function() {
       return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-tag/cl-tag */ "node-modules/cl-uni/components/cl-tag/cl-tag").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-tag/cl-tag.vue */ 205))
-    },
-    clLoadmore: function() {
-      return __webpack_require__.e(/*! import() | node-modules/cl-uni/components/cl-loadmore/cl-loadmore */ "node-modules/cl-uni/components/cl-loadmore/cl-loadmore").then(__webpack_require__.bind(null, /*! cl-uni/components/cl-loadmore/cl-loadmore.vue */ 216))
     }
   }
 } catch (e) {
@@ -209,9 +206,23 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
 
 
+
+
+
+
+
+
+
+
+
+
+
+var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);
+
+
+var _timeFormat = _interopRequireDefault(__webpack_require__(/*! ../../common/timeFormat.js */ 37));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };}function ownKeys(object, enumerableOnly) {var keys = Object.keys(object);if (Object.getOwnPropertySymbols) {var symbols = Object.getOwnPropertySymbols(object);if (enumerableOnly) symbols = symbols.filter(function (sym) {return Object.getOwnPropertyDescriptor(object, sym).enumerable;});keys.push.apply(keys, symbols);}return keys;}function _objectSpread(target) {for (var i = 1; i < arguments.length; i++) {var source = arguments[i] != null ? arguments[i] : {};if (i % 2) {ownKeys(Object(source), true).forEach(function (key) {_defineProperty(target, key, source[key]);});} else if (Object.getOwnPropertyDescriptors) {Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));} else {ownKeys(Object(source)).forEach(function (key) {Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));});}}return target;}function _defineProperty(obj, key, value) {if (key in obj) {Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true });} else {obj[key] = value;}return obj;}var _default =
 {
   data: function data() {
     var labels = [{
@@ -319,7 +330,7 @@ var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function 
             var user_info = uni.getStorageSync('user_info');
             console.log(user_info);
             uni.request({
-              url: "".concat(_constant.baseUrl, "user/myLend?openId=").concat(user_info.openId),
+              url: "".concat(_constant.baseUrl, "user/myBorrow?openId=").concat(user_info.openId),
               data: {},
               header: {},
               success: function success(res) {
@@ -328,18 +339,78 @@ var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);function 
                 console.log(res.data.data.length);
                 res.data.data.forEach(function (item1) {
                   var bookdata = {
+                    book_owner: "",
                     bookName: "",
                     book_url: "",
-                    book_return: "" };
+                    book_return: "",
+                    book_startTime: "",
+                    book_realTime: "",
+                    book_endTime: "" };
 
+                  bookdata.book_owner = item1.lUser.username;
                   bookdata.bookName = item1.book.bookName;
                   bookdata.book_url = item1.book.bookImg;
+                  bookdata.book_startTime = (0, _timeFormat.default)(item1.startTime);
+                  // bookdata.book_startTime = timeFormat(new Date(item1.startTime));
                   //console.log(bookdata.bookName);
-                  if (item1.realTime) {
+                  if (item1.realTime != null) {
                     bookdata.book_return = item1.punctuality ==
                     0 ? 1 : 2;
+                    bookdata.book_realTime = (0, _timeFormat.default)(item1.realTime);
+                    // bookdata.book_realTime = timeFormat(new Date(item1.realTime));
+
+                    //console.log(bookdata.book_startTime);
                   } else {
                     bookdata.book_return = 0;
+                    bookdata.book_endTime = (0, _timeFormat.default)(item1.endTime);
+                    // bookdata.book_endTime = timeFormat(new Date(item1.endTime));
+                  }
+                  console.log(bookdata);
+                  book.push(bookdata);
+                  console.log(book);
+                });
+                //item.data = {};
+                // item.pagination.page = data.page;
+                // item.finished = false;
+                // item.loading = false;
+                // this.loading = false;
+                // resolve();
+              } });
+
+          } else
+          {
+            var _user_info = uni.getStorageSync('user_info');
+            console.log(_user_info);
+            uni.request({
+              url: "".concat(_constant.baseUrl, "user/myLend?openId=").concat(_user_info.openId),
+              data: {},
+              header: {},
+              success: function success(res) {
+                console.log(res);
+                //let bookdata = {bookName:"",book_url:"",book_return:""};
+                console.log(res.data.data.length);
+                res.data.data.forEach(function (item1) {
+                  var bookdata = {
+                    book_owner: "",
+                    bookName: "",
+                    book_url: "",
+                    book_return: "",
+                    book_startTime: "",
+                    book_realTime: "",
+                    book_endTime: "" };
+
+                  bookdata.book_owner = item1.bUser.username;
+                  bookdata.bookName = item1.book.bookName;
+                  bookdata.book_url = item1.book.bookImg;
+                  bookdata.book_startTime = (0, _timeFormat.default)(item1.startTime);
+                  //console.log(bookdata.bookName);
+                  if (item1.realTime != null) {
+                    bookdata.book_return = item1.punctuality ==
+                    0 ? 1 : 2;
+                    bookdata.book_realTime = (0, _timeFormat.default)(item1.realTime);
+                  } else {
+                    bookdata.book_return = 0;
+                    bookdata.book_endTime = (0, _timeFormat.default)(item1.endTime);
                   }
                   console.log(bookdata);
                   book.push(bookdata);

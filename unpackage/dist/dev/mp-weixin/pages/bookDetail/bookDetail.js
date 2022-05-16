@@ -220,6 +220,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 var _constant = __webpack_require__(/*! ../../common/constant.js */ 9);
 var _timeFormat = _interopRequireDefault(__webpack_require__(/*! ../../common/timeFormat.js */ 37));function _interopRequireDefault(obj) {return obj && obj.__esModule ? obj : { default: obj };} //
 //
@@ -269,10 +270,10 @@ var _timeFormat = _interopRequireDefault(__webpack_require__(/*! ../../common/ti
 //
 //
 //
+//
 var _self;var _default = { data: function data() {return { detailInfo: null, authorBiref: '', //作者简介
       bookBiref: '', //书籍简介
-      commetList: [], val: '', bid: 0 };}, onShareTimeline: function onShareTimeline() {return { title: _self.detailInfo.bookName, imageUrl: _self.detailInfo.bookImg, path: '/pages/bookDetail/bookDetail?pageInfo=' + JSON.stringify(_self.detailInfo) };}, onShareAppMessage: function onShareAppMessage(res) {return { title: _self.detailInfo.bookName, imageUrl: _self.detailInfo.bookImg, path: '/pages/bookDetail/bookDetail?pageInfo=' + JSON.stringify(_self.detailInfo) };}, onLoad: function onLoad(options) {var bId = options.bId;this.bid = Number(bId);this.getBookInfo(Number(bId));}, methods: { getBookInfo: function getBookInfo(bid) {var _this = this;uni.request({ url: "".concat(_constant.baseUrl, "/book/detail?bid=").concat(bid), success: function success(res) {console.log(res);var data = res.data.data;if (data) {_this.detailInfo = data;_this.commetList = data.comments.map(function (item) {return { username: item.user.username, pubTime: (0, _timeFormat.default)(item.commentTime, 'yyyy-mm-dd'), content: item.content };});}
-        } });
+      commetList: [], val: '', bid: 0 };}, onShareTimeline: function onShareTimeline() {return { title: _self.detailInfo.bookName, imageUrl: _self.detailInfo.bookImg, path: '/pages/bookDetail/bookDetail?pageInfo=' + JSON.stringify(_self.detailInfo) };}, onShareAppMessage: function onShareAppMessage(res) {return { title: _self.detailInfo.bookName, imageUrl: _self.detailInfo.bookImg, path: '/pages/bookDetail/bookDetail?pageInfo=' + JSON.stringify(_self.detailInfo) };}, onLoad: function onLoad(options) {var bId = options.bId;this.bid = Number(bId);this.getBookInfo(Number(bId));}, methods: { getBookInfo: function getBookInfo(bid) {var _this = this;uni.request({ url: "".concat(_constant.baseUrl, "/book/detail?bid=").concat(bid), success: function success(res) {console.log(res);var data = res.data.data;if (data) {_this.detailInfo = data;_this.commetList = data.comments.map(function (item) {return { username: item.user.username, pubTime: (0, _timeFormat.default)(item.commentTime, 'yyyy-mm-dd'), content: item.content };});}} });
 
     },
     handleSend: function handleSend() {var _this2 = this;
