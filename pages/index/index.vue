@@ -252,7 +252,7 @@
 
 			.book_row {
 				display: inline-block;
-				margin-left: 30rpx;
+				margin-left: 6rpx;
 				width: 335rpx;
 				box-shadow: 1rpx 4rpx 10rpx 2rpx #808080;
 				position: relative;
