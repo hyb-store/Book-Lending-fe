@@ -30,12 +30,13 @@
 		</view>
 		<uni-section title="书籍简介" type="line"></uni-section>
 		<view class="biref_box">{{ detailInfo.description  }}</view>
+		<button style="width: 80%; margin: 10px auto;" type="primary">我要借阅</button>
 		<uni-section title="评论" type="line"></uni-section>
 		<view class="comment">
 			<cl-input placeholder="点此输入评论" v-model="val" clearable>主要</cl-input>
 			<cl-button type="primary" v-on:click="handleSend">发送</cl-button>
 		</view>
-		<view class="comment-item" v-for="(item, index) in commetList" key="index">
+		<view class="comment-item" v-for="(item, index) in commetList" :key="index">
 			<view>
 				<span class="username">{{item.username}}</span>
 				<span class="pubTime">{{item.pubTime}}</span>
