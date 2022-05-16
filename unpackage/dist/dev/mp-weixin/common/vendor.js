@@ -10056,32 +10056,26 @@ if (!String.prototype.padStart) {
   };
 }
 
+var formatNumber = function formatNumber(n) {
+  n = n.toString();
+  return n[1] ? n : "0".concat(n);
+};
+
 // 其他更多是格式化有如下:
 // yyyy:mm:dd|yyyy:mm|yyyy年mm月dd日|yyyy年mm月dd日 hh时MM分等,可自定义组合
-function timeFormat() {var dateTime = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;var fmt = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'yyyy-mm-dd';
-  // 如果为null,则格式化当前时间
-  if (!dateTime) dateTime = Number(new Date());
-  // 如果dateTime长度为10或者13，则为秒和毫秒的时间戳，如果超过13位，则为其他的时间格式
-  if (dateTime.toString().length == 10) dateTime *= 1000;
-  var date = new Date(dateTime);
-  var ret;
-  var opt = {
-    "y+": date.getFullYear().toString(), // 年
-    "m+": (date.getMonth() + 1).toString(), // 月
-    "d+": date.getDate().toString(), // 日
-    "h+": date.getHours().toString(), // 时
-    "M+": date.getMinutes().toString(), // 分
-    "s+": date.getSeconds().toString() // 秒
-    // 有其他格式化字符需求可以继续添加，必须转化成字符串
-  };
-  for (var k in opt) {
-    ret = new RegExp("(" + k + ")").exec(fmt);
-    if (ret) {
-      fmt = fmt.replace(ret[1], ret[1].length == 1 ? opt[k] : opt[k].padStart(ret[1].length, "0"));
-    };
-  };
-  return fmt;
-}var _default =
+var timeFormat = function timeFormat(date) {
+  var arr1 = date.split("T");
+  var arr2 = arr1[1].split(".");
+  var times = arr1[0] + " " + arr2[0];
+  return times;
+  // const year = date.getFullYear();
+  // const month = date.getMonth() + 1;
+  // const day = date.getDate();
+  // const hour = date.getHours();
+  // const minute = date.getMinutes();
+
+  // return `${[year, month, day].map(formatNumber).join('/')} ${[hour, minute].map(formatNumber).join(':')}`
+};var _default =
 
 timeFormat;exports.default = _default;
 
@@ -13399,47 +13393,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 /* 207 */,
 /* 208 */,
 /* 209 */,
-/* 210 */
-/*!**************************************************************************!*\
-  !*** D:/WebProject/Book-Lending-fe/node_modules/cl-uni/mixins/parent.js ***!
-  \**************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 16);var _default =
-
-{
-  data: function data() {
-    return {
-      Parent: null };
-
-  },
-
-  computed: {
-    parent: function parent() {
-      return this.getParent() || this.Parent || {};
-    },
-
-    hasParent: function hasParent() {
-      return !(0, _utils.isEmpty)(this.parent);
-    } },
-
-
-  mounted: function mounted() {
-    this.Parent = this.getParent();
-  },
-
-  methods: {
-    getParent: function getParent() {
-      if (!this.ComponentName) {
-        return null;
-      }
-
-      return _utils.getParent.call(this, this.ComponentName, this.Keys);
-    } } };exports.default = _default;
-
-/***/ }),
+/* 210 */,
 /* 211 */,
 /* 212 */,
 /* 213 */,
@@ -13449,13 +13403,7 @@ Object.defineProperty(exports, "__esModule", { value: true });exports.default = 
 /* 217 */,
 /* 218 */,
 /* 219 */,
-/* 220 */,
-/* 221 */,
-/* 222 */,
-/* 223 */,
-/* 224 */,
-/* 225 */,
-/* 226 */
+/* 220 */
 /*!**********************************************************************************!*\
   !*** D:/WebProject/Book-Lending-fe/node_modules/cl-uni/utils/async-validator.js ***!
   \**********************************************************************************/
@@ -14871,6 +14819,52 @@ Schema.messages = messages;var _default =
 
 Schema;exports.default = _default;
 /* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../../HBuilderX/plugins/uniapp-cli/node_modules/node-libs-browser/mock/process.js */ 88)))
+
+/***/ }),
+/* 221 */,
+/* 222 */,
+/* 223 */,
+/* 224 */,
+/* 225 */,
+/* 226 */
+/*!**************************************************************************!*\
+  !*** D:/WebProject/Book-Lending-fe/node_modules/cl-uni/mixins/parent.js ***!
+  \**************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });exports.default = void 0;var _utils = __webpack_require__(/*! ../utils */ 16);var _default =
+
+{
+  data: function data() {
+    return {
+      Parent: null };
+
+  },
+
+  computed: {
+    parent: function parent() {
+      return this.getParent() || this.Parent || {};
+    },
+
+    hasParent: function hasParent() {
+      return !(0, _utils.isEmpty)(this.parent);
+    } },
+
+
+  mounted: function mounted() {
+    this.Parent = this.getParent();
+  },
+
+  methods: {
+    getParent: function getParent() {
+      if (!this.ComponentName) {
+        return null;
+      }
+
+      return _utils.getParent.call(this, this.ComponentName, this.Keys);
+    } } };exports.default = _default;
 
 /***/ })
 ]]);

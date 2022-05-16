@@ -84,7 +84,7 @@ try {
       return Promise.all(/*! import() | node-modules/cl-uni/components/cl-text/cl-text */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-text/cl-text")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-text/cl-text.vue */ 264))
     },
     clIcon: function() {
-      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-icon/cl-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-icon/cl-icon")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-icon/cl-icon.vue */ 211))
+      return Promise.all(/*! import() | node-modules/cl-uni/components/cl-icon/cl-icon */[__webpack_require__.e("common/vendor"), __webpack_require__.e("node-modules/cl-uni/components/cl-icon/cl-icon")]).then(__webpack_require__.bind(null, /*! cl-uni/components/cl-icon/cl-icon.vue */ 237))
     }
   }
 } catch (e) {

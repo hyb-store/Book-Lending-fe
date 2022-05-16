@@ -30,6 +30,7 @@
 		</view>
 		<uni-section title="书籍简介" type="line"></uni-section>
 		<view class="biref_box">{{ detailInfo.description  }}</view>
+		<button style="width: 80%; margin: 10px auto;" type="primary">我要借阅</button>
 		<uni-section title="评论" type="line"></uni-section>
 		<view class="comment">
 			<cl-input placeholder="点此输入评论" v-model="val" clearable>主要</cl-input>
