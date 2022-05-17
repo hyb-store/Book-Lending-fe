@@ -1,9 +1,0 @@
-{
-  "navigationBarTitleText": "借书记录",
-  "usingComponents": {
-    "cl-tabs": "/node-modules/cl-uni/components/cl-tabs/cl-tabs",
-    "cl-scroller": "/node-modules/cl-uni/components/cl-scroller/cl-scroller",
-    "cl-loading-mask": "/node-modules/cl-uni/components/cl-loading-mask/cl-loading-mask",
-    "cl-tag": "/node-modules/cl-uni/components/cl-tag/cl-tag"
-  }
-}

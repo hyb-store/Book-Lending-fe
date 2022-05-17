@@ -52,7 +52,16 @@
             "path" : "pages/userInfo/userInfo",
             "style" :                                                                                    
             {
-                "navigationBarTitleText": "",
+                "navigationBarTitleText": "个人信息",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/myBook/myBook",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "我的图书",
                 "enablePullDownRefresh": false
             }
             

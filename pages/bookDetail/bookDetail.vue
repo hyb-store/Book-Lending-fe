@@ -36,7 +36,7 @@
 			<cl-input placeholder="点此输入评论" v-model="val" clearable>主要</cl-input>
 			<cl-button type="primary" v-on:click="handleSend">发送</cl-button>
 		</view>
-		<view class="comment-item" v-for="(item, index) in commetList" key="index">
+		<view class="comment-item" v-for="(item, index) in commetList" :key="index">
 			<view>
 				<span class="username">{{item.username}}</span>
 				<span class="pubTime">{{item.pubTime}}</span>

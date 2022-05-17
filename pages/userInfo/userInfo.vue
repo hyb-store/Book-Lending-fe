@@ -71,7 +71,7 @@
 </template>
 
 <script>
-	import { baseUrl } from '../../common/constant.js'
+import { baseUrl } from '../../common/constant.js'
 export default {
 	data () {
 		return {
