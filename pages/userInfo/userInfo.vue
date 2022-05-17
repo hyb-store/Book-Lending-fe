@@ -149,7 +149,6 @@ export default {
 				gender: this.gender,
 				role: this.role,
 			}
-			console.log(data)
 			
 			uni.request({
 				url: baseUrl + 'user/perfect',

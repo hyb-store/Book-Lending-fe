@@ -1,5 +1,3 @@
-// padStart 的 polyfill，因为某些机型或情况，还无法支持es7的padStart，比如电脑版的微信小程序
-// 所以这里做一个兼容polyfill的兼容处理
 if (!String.prototype.padStart) {
 	// 为了方便表示这里 fillString 用了ES6 的默认参数，不影响理解
 	String.prototype.padStart = function(maxLength, fillString = ' ') {
@@ -28,18 +26,17 @@ const formatNumber = n => {
 
 // 其他更多是格式化有如下:
 // yyyy:mm:dd|yyyy:mm|yyyy年mm月dd日|yyyy年mm月dd日 hh时MM分等,可自定义组合
-const timeFormat = date => {
+const timeFormat = (date, type = 1) => {
 	const arr1 = date.split("T");
 	const arr2 = arr1[1].split(".");
-	let times = arr1[0] + " "+ arr2[0];
-	return times;
-  // const year = date.getFullYear();
-  // const month = date.getMonth() + 1;
-  // const day = date.getDate();
-  // const hour = date.getHours();
-  // const minute = date.getMinutes();
-
-  // return `${[year, month, day].map(formatNumber).join('/')} ${[hour, minute].map(formatNumber).join(':')}`
+	let time1 = arr1[0] + " "+ arr2[0],
+			time2 = arr1[0]
+	
+	if (type === 1) {
+		return time1
+	} else if (type === 2) {
+		return time2
+	}
 }
 
-export default timeFormat
+export { timeFormat }
