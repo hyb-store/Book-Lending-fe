@@ -15,14 +15,11 @@
 					<view class="book_row" @click="handleDetail(item)" v-for="(item) in bookInfo"
 						:key="item._id">
 						<image :src="item.bookImg" mode=""></image>
-						<!-- <view class="book_tag">{{ item.tag }}</view> -->
 						<view class="book_bottom">
 							<view class="book_name">{{ item.bookName }}</view>
 							<view class="book_author">{{ item.author }}</view>
 						</view>
 					</view>
-
-					<!-- <uni-load-more :status="lodingStatus"></uni-load-more> -->
 				</view>
 			</scroll-view>
 		</view>

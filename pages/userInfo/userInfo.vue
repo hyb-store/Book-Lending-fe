@@ -137,7 +137,8 @@ export default {
 			userInfo.phoneNum !== null ? this.phone_num = userInfo.phoneNum : ''
 			userInfo.gender !== 2 ? this.gender = userInfo.gender : ''
 			userInfo.role !== 2 ? this.role = userInfo.role : ''
- 		},
+ 	  },
+  
 		handleSubmit () {
 			const userId = uni.getStorageSync('user_info').openId
 			const data = {
@@ -149,7 +150,6 @@ export default {
 				gender: this.gender,
 				role: this.role,
 			}
-			console.log(data)
 			
 			uni.request({
 				url: baseUrl + 'user/perfect',

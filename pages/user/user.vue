@@ -9,7 +9,7 @@
 					<view class="username">
 						<open-data type="userNickName"></open-data>
 					</view>
-					<view class="integral">积分:0</view>
+					<view class="integral">积分: {{scores}}</view>
 				</view>
 			</view>
 			<view class="userinfo" v-else>
@@ -20,10 +20,8 @@
 					<view class="username" @click="handleLogin">
 						立即登录
 					</view>
-					<cl-confirm ref="confirm"> </cl-confirm>
 				</view>
 			</view>
-			<!-- <uni-icons @click="" type="gear" size="20" color="#FFFFFF"></uni-icons> -->
 		</view>
 		<view v-if="isLogin">
 			<view class="list" v-for="(list, list_i) in severList" :key="list_i">
@@ -40,9 +38,11 @@
 					<view class="text">退出登录</view>
 					<uni-icons type="arrowright" size="18" color="#999999"></uni-icons>
 				</view>
-				<cl-confirm ref="confirm"> </cl-confirm>
+				
 			</view>
 		</view>
+		<cl-confirm ref="confirm"> </cl-confirm>
+		<cl-toast ref="toast"></cl-toast>
 	</view>
 </template>
 <script>
@@ -51,7 +51,7 @@
 		data() {
 			return {
 				isLogin: true,
-				userinfo: {},
+				scores: 0,
 				severList: [
 					[{
 						id: 1,
@@ -81,6 +81,7 @@
 		},
 		onShow() {
 			const userInfo = uni.getStorageSync('user_info')
+			this.scores = userInfo.scores
 				
 			if (!userInfo) {
 				this.isLogin = false
@@ -115,9 +116,20 @@
 							})
 						}
 					})
+					this.$refs["toast"].open({
+						message: "登录成功～",
+						icon: "success",
+						position: "middle",
+						duration: 1000,
+					});
 				})
 				.catch(() => {
-					// this.$refs.toast.open("已取消登录～");
+					this.$refs["toast"].open({
+						message: "已取消登录～",
+						icon: "warning",
+						position: "middle",
+						duration: 1000,
+					});
 				});
 			},
 			handleLogout() {
@@ -128,9 +140,13 @@
 					uni.clearStorageSync()
 					console.log(this.isLogin)
 					this.isLogin = false
-				}).catch(() => {
-					// this.$refs.toast.open("已取消退出登录～");
-				});
+					this.$refs["toast"].open({
+						message: "已退出登录～",
+						icon: "success",
+						position: "middle",
+						duration: 1000,
+					});
+				}).catch(() => {});
 			},
 			//用户点击列表项
 			toPage(id) {

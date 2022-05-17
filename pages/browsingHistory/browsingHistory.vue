@@ -38,21 +38,12 @@
 													<view v-else>借取人：{{item2.book_owner}}</view>
 												</view>
 												<view>
-
-													<!-- <view style="display: flex;justify-content: center;flex-direction: column;justify-content: space-around;"> -->
 												</view>
 												<cl-button @click="commit(item2)"
 													v-if="item2.book_realTime == '' ? true : false"
 													style="align-self: center;" type="primary">我要还书</cl-button>
 											</view>
-											<!-- <cl-icon name="cl-icon-arrow-right">
-												
-											</cl-icon> -->
 										</view>
-
-										<!-- 加载更多 -->
-										<!-- <cl-loadmore v-if="item.data.length > 0" :loading="item.loading"
-											:finish="item.finished" :divider="false"></cl-loadmore> -->
 									</view>
 								</cl-loading-mask>
 							</cl-scroller>
@@ -61,7 +52,6 @@
 				</swiper>
 			</cl-tabs>
 		</view>
-		<!-- <uni-load-more status="noMore"></uni-load-more> -->
 	</view>
 </template>
 
@@ -69,7 +59,7 @@
 	import {
 		baseUrl
 	} from '../../common/constant.js';
-	import timeFormat from '../../common/timeFormat.js';
+	import { timeFormat } from '../../common/timeFormat.js';
 	export default {
 		data() {
 			const labels = [{
@@ -121,23 +111,6 @@
 			this.refresh()
 		},
 		methods: {
-			// onDown() {
-			// 	this.refresh({
-			// 		page: 1
-			// 	}).done(() => {
-			// 		this.$refs[`scroller-${this.current}`][0].end();
-			// 	});
-			// },
-
-			// onUp() {
-			// 	const { pagination, finished } = this.list[this.current];
-
-			// 	if (!finished) {
-			// 		this.refresh({
-			// 			page: pagination.page + 1
-			// 		});
-			// 	}
-			// },
 			commit(event) {
 				console.log(event);
 				uni.request({
@@ -147,14 +120,12 @@
 					success: (res) => {
 						console.log(res);
 						if (res.data.msg == "确定还书成功") {
-							//console.log("return");
 							this.refresh();
 						}
 					}
 				})
 			},
 			onChangeSwiper(e) {
-				//console.log(e);
 				this.current = e.detail.current;
 
 				if (!this.list[this.current].loaded) {
@@ -183,22 +154,17 @@
 				return new Promise(resolve => {
 					item.loading = true;
 
-					//console.log("Refresh");
-
 					setTimeout(() => {
-						// item.data = new Array(data.page == 1 ? 10 : data.page * 10).fill(1);
 						let book = [];
 						if (this.current == 0) {
 							let user_info = uni.getStorageSync('user_info');
-							console.log(user_info);
+
 							uni.request({
 								url: `${baseUrl}user/myBorrow?openId=${user_info.openId}`,
 								data: {},
 								header: {},
 								success: function(res) {
-									console.log(res);
-									//let bookdata = {bookName:"",book_url:"",book_return:""};
-									console.log(res.data.data.length);
+
 									res.data.data.forEach(item1 => {
 										let bookdata = {
 											book_owner: "",
@@ -212,35 +178,20 @@
 										bookdata.book_owner = item1.lUser.username;
 										bookdata.bookName = item1.book.bookName;
 										bookdata.book_url = item1.book.bookImg;
-										bookdata.book_startTime = timeFormat(item1
-											.startTime);
-										// bookdata.book_startTime = timeFormat(new Date(item1.startTime));
-										//console.log(bookdata.bookName);
-										if (item1.realTime != null) {
-											bookdata.book_return = item1.punctuality ==
-												0 ? 1 : 2;
-											bookdata.book_realTime = timeFormat(item1
-												.realTime);
-											// bookdata.book_realTime = timeFormat(new Date(item1.realTime));
+										bookdata.book_startTime = timeFormat(item1.startTime);
 
-											//console.log(bookdata.book_startTime);
+										if (item1.realTime != null) {
+											bookdata.book_return = item1.punctuality == 0 ? 1 : 2;
+											bookdata.book_realTime = timeFormat(item1.realTime);
 										} else {
 											bookdata.book_return = 0;
-											bookdata.book_endTime = timeFormat(item1
-												.endTime);
+											bookdata.book_endTime = timeFormat(item1.endTime);
 											bookdata.hid = item1.hid;
-											// bookdata.book_endTime = timeFormat(new Date(item1.endTime));
+
 										}
-										console.log(bookdata);
+
 										book.push(bookdata);
-										console.log(book);
 									})
-									//item.data = {};
-									// item.pagination.page = data.page;
-									// item.finished = false;
-									// item.loading = false;
-									// this.loading = false;
-									// resolve();
 								}
 							})
 						} else {
@@ -251,9 +202,6 @@
 								data: {},
 								header: {},
 								success: function(res) {
-									console.log(res);
-									//let bookdata = {bookName:"",book_url:"",book_return:""};
-									console.log(res.data.data.length);
 									res.data.data.forEach(item1 => {
 										let bookdata = {
 											book_owner: "",
@@ -267,30 +215,18 @@
 										bookdata.book_owner = item1.bUser.username;
 										bookdata.bookName = item1.book.bookName;
 										bookdata.book_url = item1.book.bookImg;
-										bookdata.book_startTime = timeFormat(item1
-											.startTime);
-										//console.log(bookdata.bookName);
+										bookdata.book_startTime = timeFormat(item1.startTime);
+
 										if (item1.realTime != null) {
-											bookdata.book_return = item1.punctuality ==
-												0 ? 1 : 2;
-											bookdata.book_realTime = timeFormat(item1
-												.realTime);
+											bookdata.book_return = item1.punctuality == 0 ? 1 : 2;
+											bookdata.book_realTime = timeFormat(item1.realTime);
 										} else {
 											bookdata.book_return = 0;
-											bookdata.book_endTime = timeFormat(item1
-												.endTime);
+											bookdata.book_endTime = timeFormat(item1.endTime);
 											bookdata.hid = item1.hid;
 										}
-										console.log(bookdata);
 										book.push(bookdata);
-										console.log(book);
 									})
-									//item.data = {};
-									// item.pagination.page = data.page;
-									// item.finished = false;
-									// item.loading = false;
-									// this.loading = false;
-									// resolve();
 								}
 							})
 						}
