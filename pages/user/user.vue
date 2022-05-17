@@ -22,7 +22,6 @@
 					</view>
 				</view>
 			</view>
-			<!-- <uni-icons @click="" type="gear" size="20" color="#FFFFFF"></uni-icons> -->
 		</view>
 		<view v-if="isLogin">
 			<view class="list" v-for="(list, list_i) in severList" :key="list_i">

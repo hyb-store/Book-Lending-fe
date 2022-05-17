@@ -49,7 +49,7 @@
 
 <script>
 	import { baseUrl } from '../../common/constant.js'
-	import timeFormat from '../../common/timeFormat.js'
+	import { timeFormat } from '../../common/timeFormat.js'
 	var _self;
 	export default {
 		data() {
