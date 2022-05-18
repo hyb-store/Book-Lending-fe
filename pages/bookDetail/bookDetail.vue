@@ -30,7 +30,7 @@
 		</view>
 		<uni-section title="书籍简介" type="line"></uni-section>
 		<view class="biref_box">{{ detailInfo.description  }}</view>
-		<button style="width: 80%; margin: 10px auto;" type="primary">我要借阅</button>
+		<button @click="Borrowbook" style="width: 80%; margin: 10px auto;" type="primary">我要借阅</button>
 		<uni-section title="评论" type="line"></uni-section>
 		<view class="comment">
 			<cl-input placeholder="点此输入评论" v-model="val" clearable>主要</cl-input>
@@ -44,6 +44,8 @@
 
 			<view class="content">{{item.content}}</view>
 		</view>
+		<cl-confirm ref="confirm"> </cl-confirm>
+		<cl-toast ref="toast"></cl-toast>
 	</view>
 </template>
 
@@ -54,6 +56,7 @@
 	export default {
 		data() {
 			return {
+				isLogin:true,
 				detailInfo: null,
 				authorBiref: '', //作者简介
 				bookBiref: '', //书籍简介
@@ -84,6 +87,70 @@
 			this.getBookInfo(Number(bId));
 		},
 		methods: {
+			Borrowbook() {
+				let username = uni.getStorageSync('user_Info.username');
+				let phoneNum = uni.getStorageSync('user_Info.phoneNum');
+				//console.log(username);
+				//console.log(phoneNum);
+				if(!(uni.getStorageSync('user_info'))) {
+					//console.log("hdj");
+					this.$refs["confirm"].open({
+						title: "提示",
+						message: "尚未登录，确认是否授权登录？",
+					})
+					.then(() => {
+						this.isLogin = true
+						uni.login({
+							provider: 'weixin',
+							success(res) {
+								const code = res.code
+								
+								uni.request({
+									url: baseUrl + 'user/login',
+									method: "GET",
+									data: {
+										code: code
+									},
+									
+									success: (res) => {
+										//console.log(res)
+										let userInfo = res.data.data.user
+										//console.log(userInfo);
+										uni.setStorageSync("user_info", userInfo)
+					
+									}
+								})
+							}
+						})
+						if(!phoneNum && !username) {
+							
+						}
+						this.$refs["toast"].open({
+							message: "登录成功～",
+							icon: "success",
+							position: "middle",
+							duration: 1000,
+						});
+					})
+					.catch(() => {
+						this.$refs["toast"].open({
+							message: "已取消登录～",
+							icon: "warning",
+							position: "middle",
+							duration: 1000,
+						});
+					});
+				} else if(!phoneNum && !username) {
+					this.$refs["toast"].open({
+						message: "请先完善个人信息～",
+						icon: "success",
+						position: "middle",
+						duration: 1000,
+					});
+				} else {
+					
+				}
+			},
 			getBookInfo(bid) {
 				uni.request({
 					url: `${baseUrl}/book/detail?bid=${bid}`,

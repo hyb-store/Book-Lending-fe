@@ -85,6 +85,8 @@
 				
 			if (!userInfo) {
 				this.isLogin = false
+			} else {
+				this.isLogin = true;
 			}
 		},
 		methods: {
