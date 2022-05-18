@@ -110,9 +110,9 @@
 		mounted() {
 			this.refresh()
 		},
+
 		methods: {
 			commit(event) {
-				console.log(event);
 				uni.request({
 					url: `${baseUrl}borrow/returnOk?hid=${event.hid}`,
 					data: {},
@@ -125,6 +125,7 @@
 					}
 				})
 			},
+
 			onChangeSwiper(e) {
 				this.current = e.detail.current;
 
@@ -187,7 +188,6 @@
 											bookdata.book_return = 0;
 											bookdata.book_endTime = timeFormat(item1.endTime);
 											bookdata.hid = item1.hid;
-
 										}
 
 										book.push(bookdata);
@@ -196,7 +196,7 @@
 							})
 						} else {
 							let user_info = uni.getStorageSync('user_info');
-							console.log(user_info);
+
 							uni.request({
 								url: `${baseUrl}user/myLend?openId=${user_info.openId}`,
 								data: {},
@@ -231,7 +231,6 @@
 							})
 						}
 						item.data = book;
-						console.log(item.data);
 						item.pagination.page = data.page;
 						item.finished = false;
 						item.loading = false;
