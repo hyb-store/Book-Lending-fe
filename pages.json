@@ -66,6 +66,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/bookEdit/bookEdit",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "编辑图书信息",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"subPackages": [{
 		"root": "pages/admin",
