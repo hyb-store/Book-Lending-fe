@@ -39,9 +39,12 @@
 												</view>
 												<view>
 												</view>
+												<cl-button @click="commitreturn(item2)"
+													v-if="item2.book_status == 1 ? true : false"
+													style="align-self: center;" type="primary">确认借出</cl-button>
 												<cl-button @click="commit(item2)"
-													v-if="item2.book_realTime == '' ? true : false"
-													style="align-self: center;" type="primary">我要还书</cl-button>
+													v-if="(item2.book_realTime == '' && item2.book_status == 2) ? true : false"
+													style="align-self: center;" type="primary">确认还书</cl-button>
 											</view>
 										</view>
 									</view>
@@ -112,13 +115,22 @@
 		},
 
 		methods: {
+			commitreturn(event) {
+				console.log(event);
+				uni.request({
+					url:`${baseUrl}borrow/borrowOk?bid=${event.book_bid}`,
+					method:'GET',
+					success: (res) => {
+						this.refresh()
+					}
+				})
+			},
 			commit(event) {
 				uni.request({
 					url: `${baseUrl}borrow/returnOk?hid=${event.hid}`,
 					data: {},
 					header: {},
 					success: (res) => {
-						console.log(res);
 						if (res.data.msg == "确定还书成功") {
 							this.refresh();
 						}
@@ -143,7 +155,6 @@
 
 			refresh(params = {}) {
 				const item = this.list[this.current];
-				console.log(item);
 				let data = {
 					...item.pagination,
 					status: item.status,
@@ -202,6 +213,7 @@
 								data: {},
 								header: {},
 								success: function(res) {
+									console.log(res);
 									res.data.data.forEach(item1 => {
 										let bookdata = {
 											book_owner: "",
@@ -210,7 +222,9 @@
 											book_return: "",
 											book_startTime: "",
 											book_realTime: "",
-											book_endTime: ""
+											book_endTime: "",
+											book_status:0,
+											book_bid:0,
 										};
 										bookdata.book_owner = item1.bUser.username;
 										bookdata.bookName = item1.book.bookName;
@@ -224,6 +238,8 @@
 											bookdata.book_return = 0;
 											bookdata.book_endTime = timeFormat(item1.endTime);
 											bookdata.hid = item1.hid;
+											bookdata.book_status = item1.book.status;
+											bookdata.book_bid = item1.bid;
 										}
 										book.push(bookdata);
 									})

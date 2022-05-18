@@ -46,8 +46,20 @@
 		</view>
 		<cl-confirm ref="confirm"> </cl-confirm>
 		<cl-toast ref="toast"></cl-toast>
+		<cl-popup :visible.sync="visible" size="300rpx" direction="bottom">
+			<view class="example-body">
+				还书时间<uni-datetime-picker type="datetime" v-model="datetimesingle" @change="changeLog" />
+			</view>
+			<view class="commit">
+				<cl-button @click="cancel" type="primary">取消</cl-button>
+				<cl-button @click="commit" type="primary">确认</cl-button>
+			</view>
+		</cl-popup>
 	</view>
+	
 </template>
+
+
 
 <script>
 	import { baseUrl } from '../../common/constant.js'
@@ -56,6 +68,8 @@
 	export default {
 		data() {
 			return {
+				single:'',
+				datetimesingle:'',
 				isLogin:true,
 				detailInfo: null,
 				authorBiref: '', //作者简介
@@ -63,6 +77,8 @@
 				commetList: [],
 				val: '',
 				bid: 0,
+				visible:false,
+				uid:0,
 			};
 		},
 		onShareTimeline() {
@@ -86,14 +102,45 @@
 			this.bid = Number(bId);
 			this.getBookInfo(Number(bId));
 		},
+		watch: {
+			datetimesingle(newval) {
+				
+			},
+		},
 		methods: {
+			changeLog(e) {
+				
+			},
+			commit() {
+				console.log("jhdsbjs");
+				this.visible = false;
+				let userinfo = uni.getStorageSync('user_info');
+				let endTime = this.datetimesingle.replace(/-/g,'/');
+				let time = new Date(endTime);
+				time = time.getTime();
+				uni.request({
+					url:`${baseUrl}borrow/borrow`,
+					method:'POST',
+					data: {
+						bid:this.bid,
+						lUid:this.detailInfo.user.id,
+						bUid:userinfo.id,
+						endTime:time,
+					},
+					success: (res) => {
+						
+					}
+				})
+			},
+			cancel() {
+				console.log(this.detailInfo.user.id);
+				console.log(this.time);
+				console.log("hyb");
+				this.visible = false;
+			},
 			Borrowbook() {
-				let username = uni.getStorageSync('user_Info.username');
-				let phoneNum = uni.getStorageSync('user_Info.phoneNum');
-				//console.log(username);
-				//console.log(phoneNum);
+				let userinfo = uni.getStorageSync('user_info');
 				if(!(uni.getStorageSync('user_info'))) {
-					//console.log("hdj");
 					this.$refs["confirm"].open({
 						title: "提示",
 						message: "尚未登录，确认是否授权登录？",
@@ -113,18 +160,13 @@
 									},
 									
 									success: (res) => {
-										//console.log(res)
 										let userInfo = res.data.data.user
-										//console.log(userInfo);
 										uni.setStorageSync("user_info", userInfo)
 					
 									}
 								})
 							}
 						})
-						if(!phoneNum && !username) {
-							
-						}
 						this.$refs["toast"].open({
 							message: "登录成功～",
 							icon: "success",
@@ -140,22 +182,35 @@
 							duration: 1000,
 						});
 					});
-				} else if(!phoneNum && !username) {
+				} else if(!(userinfo.phoneNum && userinfo.username)) {
 					this.$refs["toast"].open({
 						message: "请先完善个人信息～",
 						icon: "success",
 						position: "middle",
 						duration: 1000,
 					});
+				} else if(this.detailInfo.uid == userinfo.id) {
+					this.$refs["toast"].open({
+						message: "这是你上传的图书",
+						icon: "success",
+						position: "middle",
+						duration: 1000,
+					});
+				} else if(this.detailInfo.status != 0) {
+					this.$refs["toast"].open({
+						message: "图书已被借走",
+						icon: "success",
+						position: "middle",
+						duration: 1000,
+					});
 				} else {
-					
+					this.visible = true;
 				}
 			},
 			getBookInfo(bid) {
 				uni.request({
 					url: `${baseUrl}/book/detail?bid=${bid}`,
 					success: (res) => {
-						console.log(res)
 						const data = res.data.data;
 						if (data) {
 							this.detailInfo = data;
@@ -171,7 +226,6 @@
 				})
 			},
 			handleSend() {
-				console.log(this.val)
 				uni.request({
 					url: `${baseUrl}/comment/add`,
 					method: 'POST',
@@ -182,7 +236,6 @@
 					},
 					success: (res) => {
 						this.val = ''
-						console.log(res)
 						this.getBookInfo(this.bid)
 					}
 				})
@@ -216,7 +269,6 @@
 									openid: uni.getStorageSync('userInfo').openid
 								},
 								success(res1) {
-									console.log(res1);
 									uni.setStorageSync('userInfo', res1.result);
 									uni.setClipboardData({
 										data: _self.detailInfo.bookUrl,
@@ -322,4 +374,14 @@
 			margin: 10px 0;
 		}
 	}
+	.example-body {
+		background-color: #fff;
+		padding: 10px;
+	}
+	.commit {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+	}
+
 </style>
