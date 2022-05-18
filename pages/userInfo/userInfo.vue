@@ -65,6 +65,7 @@
 			<view class="btn-wrap">
 				<cl-button type="primary" size="default" :disabled="isDisabled" @tap="handleSubmit">提交修改</cl-button>
 			</view>
+			<cl-toast ref="toast"></cl-toast>
 		</view>
 	</view>
 	
@@ -76,11 +77,11 @@ export default {
 	data () {
 		return {
 			isDisabled: true,
-			username: null,
-			phone_num: null,
-			email: null,
+			username: "",
+			phone_num: "",
+			email: "",
 			gender: 2,
-			address: null,
+			address: "",
 			role: 2,
 			val2: [],
 			list: [
@@ -116,18 +117,20 @@ export default {
 	computed: {
 		listenChange () {
 			const { username, phone_num } = this
-			if(username !== null && phone_num !== null) {
+			if(username !== "" && phone_num !== "") {
 				return true
 			} else {
 				return false
 			}
 		}
 	},
+
 	watch: {
 		listenChange (value) {
 			value ? this.isDisabled = false : this.isDisabled = true
 		}
 	},
+
 	methods: {
 		initInfo () {
 			const userInfo = uni.getStorageSync("user_info")
@@ -140,6 +143,7 @@ export default {
  	  },
   
 		handleSubmit () {
+			this.isDisabled = true
 			const userId = uni.getStorageSync('user_info').openId
 			const data = {
 				openId: userId,
@@ -158,10 +162,14 @@ export default {
 				success:(res)=> {
 
 					if (res.data.status === 1) {
-						this.$refs["message"].open({
-							message: "提交成功！",
+						this.$refs["toast"].open({
+							message: "修改成功～",
+							icon: "success",
+							position: "middle",
+							duration: 1000,
 						});
 						uni.setStorageSync('user_info', res.data.data)
+						this.isDisabled = false
 					}
 				}
 			})

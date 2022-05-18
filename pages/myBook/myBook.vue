@@ -50,6 +50,7 @@
 				</view>
 			</cl-card>
 		</view>
+
 		<cl-confirm ref="confirm"> </cl-confirm>
 		<cl-toast ref="toast"></cl-toast>
 	</view>
@@ -78,7 +79,6 @@
 				uni.request({
 					url: `${baseUrl}user/myBook?openId=${userId}`,
 					success: (res) => {
-						console.log(res.data.data)
 						const dataList = res.data.data 
 						dataList.map((item) => {
 							item.pubTime = timeFormat(item.pubTime, 2)
@@ -92,12 +92,11 @@
 	
 			handleToDetails(id) {
 				uni.navigateTo({
-					url: '../bookDetail/bookDetail?bId=' + JSON.stringify(id)
+					url: '../bookDetail/bookDetail?bid=' + JSON.stringify(id)
 				});
 			},
 			
 			handleDelete(id) {
-				console.log(id)
 				this.$refs["confirm"].open({
 					title: "提示",
 					message: "确认删除此书？",
@@ -120,8 +119,12 @@
 			},
 			
 			handleEdit(id) {
-				console.log(id)
-			}
+				
+				uni.navigateTo({
+					url: '../bookEdit/bookEdit?bid=' + JSON.stringify(id)
+				})
+			},
+			
 		}
 	}
 </script>

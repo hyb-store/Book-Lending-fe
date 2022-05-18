@@ -150,7 +150,6 @@
 			},
 			//用户点击列表项
 			toPage(id) {
-				console.log(id)
 				
 				switch (id) {
 					case 1:
