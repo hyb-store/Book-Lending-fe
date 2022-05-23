@@ -28,17 +28,27 @@
 												<view v-if="item2.book_realTime == '' ? true : false">
 													<view>借书时间：{{item2.book_startTime}}</view>
 													<view>预还时间：{{item2.book_endTime}}</view>
-													<view v-if="current == 0">书主：{{item2.book_owner}}</view>
+													<view v-if="current == 0">
+														<view>
+															书主：{{item2.book_owner}}
+														</view>
+														<cl-button @click="showbookower(item2)" style="margin-left: 325rpx;">书主信息</cl-button>
+													</view>
 													<view v-else>借取人：{{item2.book_owner}}</view>
 												</view>
 												<view v-else>
 													<view>借书时间：{{item2.book_startTime}}</view>
 													<view>还书时间：{{item2.book_realTime}}</view>
-													<view v-if="current == 0">书主：{{item2.book_owner}}</view>
+													<view v-if="current == 0">
+														<view>
+															书主：{{item2.book_owner}}
+														</view>
+														<cl-button @click="showbookower(item2)" style="margin-left: 325rpx;">书主信息</cl-button>
+													</view>
 													<view v-else>借取人：{{item2.book_owner}}</view>
 												</view>
-												<view>
-												</view>
+												<!-- <view>
+												</view> -->
 												<cl-button @click="commitreturn(item2)"
 													v-if="item2.book_status == 1 ? true : false"
 													style="align-self: center;" type="primary">确认借出</cl-button>
@@ -55,6 +65,15 @@
 				</swiper>
 			</cl-tabs>
 		</view>
+		<cl-dialog title="书主信息" :visible.sync="visible">
+			<view style="display: flex;flex-direction:column;justify-content: center;align-items: flex-start;">
+				<view>书主：{{bookownerinfo.username}}</view>
+				<view>性别：{{bookownerinfo.gender}}</view>
+				<view>电话：{{bookownerinfo.phoneNum}}</view>
+				<view>邮箱：{{bookownerinfo.email == "" ? "暂未填写" : bookownerinfo.email}}</view>
+				<view>地址：{{bookownerinfo.address == "" ? "暂未填写" : bookownerinfo.address}}</view>
+			</view>
+		</cl-dialog>
 	</view>
 </template>
 
@@ -93,6 +112,8 @@
 				current: 0,
 				labels,
 				list,
+				visible:false,
+				bookownerinfo:{},
 				loading: true,
 				returnTypeMapInfo: [{
 					tagType: 'error',
@@ -115,6 +136,17 @@
 		},
 
 		methods: {
+			showbookower(event) { 
+				this.visible = true;
+				if(event.book_Bookownerinfo.gender === 0) {
+					event.book_Bookownerinfo.gender = "女";
+				} else if(event.book_Bookownerinfo.gender === 1) {
+					event.book_Bookownerinfo.gender = "男";
+				} else {
+					event.book_Bookownerinfo.gender = "保密"
+				}
+				this.bookownerinfo = event.book_Bookownerinfo;
+			},
 			commitreturn(event) {
 				console.log(event);
 				uni.request({
@@ -176,7 +208,7 @@
 								data: {},
 								header: {},
 								success: function(res) {
-
+									console.log(res);
 									res.data.data.forEach(item1 => {
 										let bookdata = {
 											book_owner: "",
@@ -185,8 +217,10 @@
 											book_return: "",
 											book_startTime: "",
 											book_realTime: "",
-											book_endTime: ""
+											book_endTime: "",
+											book_Bookownerinfo:[]
 										};
+										bookdata.book_Bookownerinfo = item1.lUser;
 										bookdata.book_owner = item1.lUser.username;
 										bookdata.bookName = item1.book.bookName;
 										bookdata.book_url = item1.book.bookImg;
