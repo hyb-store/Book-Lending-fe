@@ -40,9 +40,16 @@
 			<view>
 				<span class="username">{{item.username}}</span>
 				<span class="pubTime">{{item.pubTime}}</span>
+				<span
+					class="delete"
+					v-if="uid === item.uid"
+					@click="handleDeleteComment(item.cid)"
+				>
+					<icon type="clear" size="20"/>
+				</span>
 			</view>
-
 			<view class="content">{{item.content}}</view>
+			
 		</view>
 		<cl-confirm ref="confirm"> </cl-confirm>
 		<cl-toast ref="toast"></cl-toast>
@@ -78,7 +85,7 @@
 				val: '',
 				bid: 0,
 				visible:false,
-				uid:0,
+				uid: 0,
 			};
 		},
 		onShareTimeline() {
@@ -101,6 +108,9 @@
 			} = options;
 			this.bid = Number(bId);
 			this.getBookInfo(Number(bId));
+			
+			const userId = uni.getStorageSync('user_info').id;
+			this.uid = Number(userId)
 		},
 		watch: {
 			datetimesingle(newval) {
@@ -217,20 +227,47 @@
 							this.commetList = data.comments.map(item => {
 								return {
 									username: item.user.username,
-									pubTime: timeFormat(item.commentTime, 'yyyy-mm-dd'),
-									content: item.content
+									pubTime: timeFormat(item.commentTime, 2),
+									content: item.content,
+									uid: item.uid,
+									cid: item.cid
 								}
 							})
 						}
 					}
 				})
 			},
+			
+			handleDeleteComment(cid) {
+				this.$refs["confirm"].open({
+					title: "提示",
+					message: "确认删除此条评论？",
+					callback: ({ action }) => {
+						uni.request({
+							url: `${baseUrl}comment/deleteComment?cid=${cid}`,
+							success: (res) => {
+								if (res.data.status === 1) {
+									this.$refs["toast"].open({
+										message: "删除成功～",
+										icon: "success",
+										position: "middle",
+										duration: 1000,
+									});
+									this.getBookInfo(this.bid)
+								}
+							}
+						})
+					}
+				});
+				
+			},
 			handleSend() {
+
 				uni.request({
-					url: `${baseUrl}/comment/add`,
+					url: `${baseUrl}comment/add`,
 					method: 'POST',
 					data: {
-						uid: 1,
+						uid: this.uid,
 						bid: this.bid,
 						content: this.val
 					},
@@ -361,7 +398,16 @@
 			}
 
 			.pubTime {
+				color: #555555;
 				margin-left: 20px;
+			}
+			
+			.delete {
+				display: inline-block;
+				width: 40rpx;
+				height: 60rpx;
+				line-height: 60rpx;
+				margin-left: 280rpx;
 			}
 
 			.content {
