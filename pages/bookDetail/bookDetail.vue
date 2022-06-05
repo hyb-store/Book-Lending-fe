@@ -172,7 +172,6 @@
 									success: (res) => {
 										let userInfo = res.data.data.user
 										uni.setStorageSync("user_info", userInfo)
-					
 									}
 								})
 							}

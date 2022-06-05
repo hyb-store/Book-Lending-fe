@@ -208,7 +208,6 @@
 								data: {},
 								header: {},
 								success: function(res) {
-									console.log(res);
 									res.data.data.forEach(item1 => {
 										let bookdata = {
 											book_owner: "",
