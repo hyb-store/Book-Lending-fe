@@ -75,6 +75,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/ocrLend/ocrLend",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"subPackages": [{
 		"root": "pages/admin",

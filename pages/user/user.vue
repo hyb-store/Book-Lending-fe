@@ -38,7 +38,7 @@
 					<view class="text">退出登录</view>
 					<uni-icons type="arrowright" size="18" color="#999999"></uni-icons>
 				</view>
-				
+
 			</view>
 		</view>
 		<cl-confirm ref="confirm"> </cl-confirm>
@@ -46,7 +46,9 @@
 	</view>
 </template>
 <script>
-	import { baseUrl } from '../../common/constant.js'
+	import {
+		baseUrl
+	} from '../../common/constant.js'
 	export default {
 		data() {
 			return {
@@ -68,6 +70,11 @@
 							icon: 'paperplane'
 						},
 						{
+							id: 4,
+							name: 'ocr借出',
+							icon: 'scan'
+						},
+						{
 							id: 12,
 							name: '我的图书',
 							icon: 'shop',
@@ -77,12 +84,12 @@
 			};
 		},
 		onLoad() {
-			
+
 		},
 		onShow() {
 			const userInfo = uni.getStorageSync('user_info')
 			this.scores = userInfo.scores
-				
+
 			if (!userInfo) {
 				this.isLogin = false
 			} else {
@@ -92,47 +99,47 @@
 		methods: {
 			handleLogin() {
 				this.$refs["confirm"].open({
-					title: "提示",
-					message: "确认授权登录？",
-				})
-				.then(() => {
-					this.isLogin = true
-					uni.login({
-						provider: 'weixin',
-						success(res) {
-							const code = res.code
-							
-							uni.request({
-								url: baseUrl + 'user/login',
-								method: "GET",
-								data: {
-									code: code
-								},
-								
-								success: (res) => {
-									console.log(res)
-									let userInfo = res.data.data.user
-									uni.setStorageSync("user_info", userInfo)
-
-								}
-							})
-						}
+						title: "提示",
+						message: "确认授权登录？",
 					})
-					this.$refs["toast"].open({
-						message: "登录成功～",
-						icon: "success",
-						position: "middle",
-						duration: 1000,
+					.then(() => {
+						this.isLogin = true
+						uni.login({
+							provider: 'weixin',
+							success(res) {
+								const code = res.code
+
+								uni.request({
+									url: baseUrl + 'user/login',
+									method: "GET",
+									data: {
+										code: code
+									},
+
+									success: (res) => {
+										console.log(res)
+										let userInfo = res.data.data.user
+										uni.setStorageSync("user_info", userInfo)
+
+									}
+								})
+							}
+						})
+						this.$refs["toast"].open({
+							message: "登录成功～",
+							icon: "success",
+							position: "middle",
+							duration: 1000,
+						});
+					})
+					.catch(() => {
+						this.$refs["toast"].open({
+							message: "已取消登录～",
+							icon: "warning",
+							position: "middle",
+							duration: 1000,
+						});
 					});
-				})
-				.catch(() => {
-					this.$refs["toast"].open({
-						message: "已取消登录～",
-						icon: "warning",
-						position: "middle",
-						duration: 1000,
-					});
-				});
 			},
 			handleLogout() {
 				this.$refs["confirm"].open({
@@ -152,7 +159,7 @@
 			},
 			//用户点击列表项
 			toPage(id) {
-				
+			console.log(id)
 				switch (id) {
 					case 1:
 						uni.navigateTo({
@@ -166,6 +173,11 @@
 					case 3:
 						uni.navigateTo({
 							url: '../lend/lend'
+						});
+						break;
+					case 4:
+						uni.navigateTo({
+							url: '../ocrLend/ocrLend'
 						});
 						break;
 					case 12:
@@ -204,7 +216,7 @@
 						border-radius: 100%;
 					}
 				}
-				
+
 				.login-btn {
 					display: flex;
 					justify-content: flex-start;
@@ -263,10 +275,11 @@
 				border-bottom: solid 1rpx #e7e7e7;
 				display: flex;
 				align-items: center;
-				
+
 				&.noborder {
 					border-bottom: 0;
 				}
+
 				.text {
 					padding-left: 20rpx;
 					width: 100%;
