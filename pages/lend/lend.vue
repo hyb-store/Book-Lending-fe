@@ -1,52 +1,80 @@
 <template>
-	<view>
-		<cl-form ref="form" :model.sync="form" label-width="120rpx">
-			<cl-form-item prop="bookName" label="书名">
-				<cl-input v-model="form.bookName"></cl-input>
-			</cl-form-item>
-			<cl-form-item prop="author" label="作者">
-				<cl-input v-model="form.author"></cl-input>
-			</cl-form-item>
-			<cl-form-item prop="press" label="出版社">
-				<cl-input v-model="form.press"></cl-input>
-			</cl-form-item>
-			<cl-form-item prop="description" label="描述">
-				<cl-input v-model="form.description"></cl-input>
-			</cl-form-item>
-			<cl-form-item prop="pubTime" label="出版时间">
-				<cl-input v-model="form.pubTime"></cl-input>
-			</cl-form-item>
-			<cl-form-item prop="tid" label="类型">
-				<cl-select v-model="form.tid" :options="typeList"></cl-select>
-			</cl-form-item>
-			<cl-form-item prop="img" label="封面">
-				<cl-upload :beforeUpload="handleFile"></cl-upload>
-			</cl-form-item>
-		</cl-form>
-		<view class="oper">
-			<cl-button type="success" @tap="onSubmit">提交</cl-button>
-		</view>
+	<view class="lend-wrap">
+		<cl-tabs v-model="active">
+			<cl-tab-pane label="借出" name="lend">
+				<cl-form ref="form" :model.sync="form" label-width="120rpx">
+					<cl-form-item prop="bookName" label="书名">
+						<cl-input v-model="form.bookName" style="width: 600rpx;"></cl-input>
+					</cl-form-item>
+					<cl-form-item prop="author" label="作者">
+						<cl-input v-model="form.author" style="width: 600rpx;"></cl-input>
+					</cl-form-item>
+					<cl-form-item prop="press" label="出版社">
+						<cl-input v-model="form.press" style="width: 600rpx;"></cl-input>
+					</cl-form-item>
+					<cl-form-item prop="description" label="描述">
+						<cl-input v-model="form.description" style="width: 600rpx;"></cl-input>
+					</cl-form-item>
+					<cl-form-item prop="pubTime" label="出版时间">
+						<cl-select :border="true" v-model="form.pubTime" mode="date" style="width: 600rpx;"></cl-select>
+					</cl-form-item>
+					<cl-form-item prop="tid" label="类型">
+						<cl-select v-model="form.tid" :options="typeList" style="width: 600rpx;"></cl-select>
+					</cl-form-item>
+					<cl-form-item prop="img" label="封面">
+						<uni-file-picker
+							ref="files"
+							@success="success"
+							@select="select" 
+							v-model="imageValue" 
+							fileMediatype="image" 
+							:limit="1"
+							:auto-upload="false"
+							:image-styles="imageStyles"/>
+					</cl-form-item>
+				</cl-form>
+				<view class="oper">
+					<cl-button type="success" @tap="onSubmit" :disabled="isDisabled">提交</cl-button>
+				</view>
+			</cl-tab-pane>
+			<cl-tab-pane label="OCR" name="ocr">
+				<view class="">
+					occc
+				</view>
+			</cl-tab-pane>
+		</cl-tabs>
+		<cl-toast ref="toast"></cl-toast>
 	</view>
 </template>
 
 <script>
 	import axios from 'axios'
-	import {
-		baseUrl
-	} from '../../common/constant.js'
+	import { baseUrl } from '../../common/constant.js'
 	import FormData from '../../common/formdata.js'
 	export default {
 		data() {
 			return {
-				form: {
-					bookName: "严凯治",
-					author: "严凯治",
-					pubTime: new Date(),
-					tid: 1,
-					press: '安岳北504',
-					description: '这是描述,这是描述,这是描述,这是描述'
+				active: "ocr",
+				isDisabled: false,
+				imageStyles:{
+					width: 100,
+					height: 100,
+					border:{
+						color:"#ff5a5f",
+						width:2,
+						style:'dashed',
+						radius:'2px'
+					}
 				},
-				bookImg: '',
+				form: {
+					bookName: "",
+					author: "",
+					pubTime: "",
+					tid: 1,
+					press: '',
+					description: ''
+				},
+				imageValue: [],
 				typeList: [{
 						value: 1,
 						label: "编程语言"
@@ -82,18 +110,18 @@
 		methods: {
 			onSubmit() {
 				let formData = new FormData()
+				const uid = uni.getStorageSync('user_info').id
 				const book = JSON.stringify({
-					uid: 1,
+					uid,
 					...this.form
 				})
+				console.log(book)
 				formData.append('book', book)
-				console.log(this.bookImg)
 				const uri = uni.getStorage({
 					key: 'url',
 					success: ({
 						data: imgUrl
 					}) => {
-						console.log(imgUrl)
 						formData.appendFile('file', imgUrl)
 						const data = formData.getData();
 						uni.request({
@@ -104,25 +132,39 @@
 								"content-type": data.contentType,
 							}
 						}).then(res => {
-							console.log(res)
+							if (res[1].data.status === 1) {
+								this.$refs["toast"].open({
+									message: "借出成功～",
+									icon: "success",
+									position: "middle",
+									duration: 1000,
+								});
+							}
 						})
 					}
 				})
 				
 			},
-			handleFile(file) {
-				this.bookImg = file.path
-				console.log(this.bookImg)
+			success(e) {
+				console.log(e)
+			},
+			select(e){
+				console.log('选择文件：',e)
 				uni.setStorage({
 					key: 'url',
-					data: file.path
+					data: e.tempFilePaths[0]
 				})
-				return true
-			}
+			},
 		}
 	};
 </script>
-<style>
+<style lang="scss" scoped>
+	.lend-wrap {
+		height: 100vh;
+		.item-lend {
+			height: 100vh;
+		}
+	}
 	.oper {
 		margin-left: 2rem;
 	}
