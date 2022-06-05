@@ -1,13 +1,13 @@
 {
-    "id": "nanfeng-radish",
-    "name": "萝卜书房项目",
-    "version": "1.0.1",
-    "description": "萝卜书房，分享书籍资源，",
-    "keywords": [
-        "uni云端一体项目"
-    ],
-    "dependencies": {
-        "axios": "^0.26.1",
-        "cl-uni": "^1.8.20"
-    }
+	"id": "nanfeng-radish",
+	"name": "萝卜书房项目",
+	"version": "1.0.1",
+	"description": "萝卜书房，分享书籍资源",
+	"keywords": [
+		"ocr", "java"
+	],
+	"dependencies": {
+		"axios": "^0.26.1",
+		"cl-uni": "^1.8.20"
+	}
 }

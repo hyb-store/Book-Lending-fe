@@ -1,69 +1,60 @@
 <template>
 	<view class="lend-wrap">
-		<cl-tabs v-model="active">
-			<cl-tab-pane label="借出" name="lend">
-				<cl-form ref="form" :model.sync="form" label-width="120rpx">
-					<cl-form-item prop="bookName" label="书名">
-						<cl-input v-model="form.bookName" style="width: 600rpx;"></cl-input>
-					</cl-form-item>
-					<cl-form-item prop="author" label="作者">
-						<cl-input v-model="form.author" style="width: 600rpx;"></cl-input>
-					</cl-form-item>
-					<cl-form-item prop="press" label="出版社">
-						<cl-input v-model="form.press" style="width: 600rpx;"></cl-input>
-					</cl-form-item>
-					<cl-form-item prop="description" label="描述">
-						<cl-input v-model="form.description" style="width: 600rpx;"></cl-input>
-					</cl-form-item>
-					<cl-form-item prop="pubTime" label="出版时间">
-						<cl-select :border="true" v-model="form.pubTime" mode="date" style="width: 600rpx;"></cl-select>
-					</cl-form-item>
-					<cl-form-item prop="tid" label="类型">
-						<cl-select v-model="form.tid" :options="typeList" style="width: 600rpx;"></cl-select>
-					</cl-form-item>
-					<cl-form-item prop="img" label="封面">
-						<uni-file-picker
-							ref="files"
-							@success="success"
-							@select="select" 
-							v-model="imageValue" 
-							fileMediatype="image" 
-							:limit="1"
-							:auto-upload="false"
-							:image-styles="imageStyles"/>
-					</cl-form-item>
-				</cl-form>
-				<view class="oper">
-					<cl-button type="success" @tap="onSubmit" :disabled="isDisabled">提交</cl-button>
-				</view>
-			</cl-tab-pane>
-			<cl-tab-pane label="OCR" name="ocr">
-				<view class="">
-					occc
-				</view>
-			</cl-tab-pane>
-		</cl-tabs>
+		<view>
+			<cl-form ref="form" :model.sync="form" label-width="120rpx">
+				<cl-form-item prop="bookName" label="书名">
+					<cl-input v-model="form.bookName" style="width: 600rpx;"></cl-input>
+				</cl-form-item>
+				<cl-form-item prop="author" label="作者">
+					<cl-input v-model="form.author" style="width: 600rpx;"></cl-input>
+				</cl-form-item>
+				<cl-form-item prop="press" label="出版社">
+					<cl-input v-model="form.press" style="width: 600rpx;"></cl-input>
+				</cl-form-item>
+				<cl-form-item prop="description" label="描述">
+					<cl-input v-model="form.description" style="width: 600rpx;"></cl-input>
+				</cl-form-item>
+				<cl-form-item prop="pubTime" label="出版时间">
+					<cl-select :border="true" v-model="form.pubTime" mode="date" style="width: 600rpx;">
+					</cl-select>
+				</cl-form-item>
+				<cl-form-item prop="tid" label="类型">
+					<cl-select v-model="form.tid" :options="typeList" style="width: 600rpx;"></cl-select>
+				</cl-form-item>
+				<cl-form-item prop="img" label="封面">
+					<uni-file-picker ref="files" @success="success" @select="select" v-model="imageValue"
+						fileMediatype="image" :limit="1" :auto-upload="false" :image-styles="imageStyles" />
+				</cl-form-item>
+			</cl-form>
+			<view class="oper">
+				<cl-button type="success" @tap="onSubmit" :disabled="isDisabled">提交</cl-button>
+			</view>
+
+		</view>
 		<cl-toast ref="toast"></cl-toast>
 	</view>
+
 </template>
 
 <script>
 	import axios from 'axios'
-	import { baseUrl } from '../../common/constant.js'
+	import {
+		baseUrl
+	} from '../../common/constant.js'
 	import FormData from '../../common/formdata.js'
 	export default {
 		data() {
 			return {
 				active: "ocr",
 				isDisabled: false,
-				imageStyles:{
+				imageStyles: {
 					width: 100,
 					height: 100,
-					border:{
-						color:"#ff5a5f",
-						width:2,
-						style:'dashed',
-						radius:'2px'
+					border: {
+						color: "gray",
+						width: 2,
+						style: 'dashed',
+						radius: '2px'
 					}
 				},
 				form: {
@@ -143,13 +134,13 @@
 						})
 					}
 				})
-				
+
 			},
 			success(e) {
 				console.log(e)
 			},
-			select(e){
-				console.log('选择文件：',e)
+			select(e) {
+				console.log('选择文件：', e)
 				uni.setStorage({
 					key: 'url',
 					data: e.tempFilePaths[0]
@@ -161,10 +152,12 @@
 <style lang="scss" scoped>
 	.lend-wrap {
 		height: 100vh;
+
 		.item-lend {
 			height: 100vh;
 		}
 	}
+
 	.oper {
 		margin-left: 2rem;
 	}
